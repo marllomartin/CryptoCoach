@@ -1,0 +1,194 @@
+<analysis>**original_problem_statement:**
+The user initially requested a gamified crypto education platform. The project then pivoted to focus on creating a premium e-learning experience by enriching all course lessons with professional text, images, and AI-generated media (audio narration and video presentations).
+
+After the successful implementation of a sophisticated video generation system with dynamic Ken Burns effects, the user has pivoted again. They are not satisfied with the AI-generated videos and want to remove the feature entirely. The new requirement is to modify the Admin Panel to allow for manual video uploads for each lesson, while hiding the now-obsolete video generation tools. The audio generation tool should remain.
+
+**PRODUCT REQUIREMENTS:**
+- **Core Platform:** A React/FastAPI application with a gamified academy, trading simulator, and quests. (Implemented)
+- **Internationalization (i18n):** Support for English, French, and Arabic. (Implemented)
+- **Premium Content:**
+    - Rich text and images for 23 lessons in 3 languages. (Implemented)
+    - On-demand TTS audio generation. (Implemented)
+    - Manual video upload system for lessons. (In Progress)
+- **Premium Features:**
+    - Free access to the first 3 lessons. (Implemented)
+    - Full access for admin users to all content. (Implemented)
+    - Annual subscription bundles on the pricing page. (Implemented)
+    - Advanced video player with speed controls and Picture-in-Picture. (Implemented)
+
+**User's preferred language**: fr-FR. The user communicates in French. The next agent MUST continue the conversation exclusively in French.
+
+**what currently exists?**
+The application is a full-stack React/FastAPI/MongoDB platform. The agent has successfully built the core platform, i18n, and a suite of premium features including a 3-day trial system (later changed to 3 free lessons), annual billing options, and an advanced video player.
+
+Most recently, the agent built, debugged, and perfected a sophisticated video generation system that created dynamic Ken Burns effect videos for all 23 lessons in two languages. Following the user's latest request, the agent has deleted all 46 generated videos from the server's static directory and was about to modify the frontend admin panel. The audio generation system remains functional.
+
+**Last working item**:
+- **Last item agent was working:** Responding to the user's request to pivot from AI-generated videos to a manual upload system. The agent has successfully deleted all video files from  and was viewing  to begin UI modifications.
+- **Status**: IN PROGRESS
+- **Agent Testing Done**: N
+- **Which testing method agent to use?**: frontend testing agent. To verify the UI changes on the  page after hiding the generation tools and adding the upload placeholder.
+- **User Testing Done**: N
+
+**All Pending/In progress Issue list**:
+- **Issue 1 (P0): AI Mentor/LLM Budget Exceeded.**
+- **Issue 2 (P1): Screenshot tool instability.**
+
+**Issues Detail:**
+- **Issue 1:** AI Mentor Service Unavailable / LLM Budget Exceeded
+    - **Attempted fixes:** None. This is a known, persistent issue.
+    - **Next debug checklist:** Before working on any new AI features, inform the user that their Emergent LLM key budget is exhausted and they must add funds to proceed.
+    - **Why fix this issue?** It is a hard blocker for the Market Intelligence Center feature.
+    - **Status:** BLOCKED
+    - **Is recurring issue?** Y
+    - **Should Test frontend/backend/both after fix?** Both.
+    - **Blocked on other issue:** None.
+
+- **Issue 2:** Screenshot tool instability on authenticated pages.
+    - **Attempted fixes:** Retrying the tool, logging in first. It still fails intermittently.
+    - **Next debug checklist:** Prefer using the  for reliable end-to-end and visual testing of authenticated pages.
+    - **Why fix this issue?** It prevents reliable visual verification of frontend changes.
+    - **Status:** IN PROGRESS
+    - **Is recurring issue?** Y
+    - **Should Test frontend/backend/both after fix?** Frontend.
+    - **Blocked on other issue:** None.
+
+**In progress Task List**:
+- **Task 1 (P0): Refactor Media Management in Admin Panel.**
+
+**Task Detail:**
+- **Task 1:**
+    - **Where to resume:** The agent has deleted the video files and is ready to modify .
+    - **Next Steps:**
+        1.  In , modify the  component to:
+            - Hide the Generate Video and Generate All Videos buttons.
+            - Add a placeholder UI for video uploads for each lesson (e.g., a disabled file input and an Upload button).
+        2.  In , ensure the logic gracefully handles the absence of a video, showing the hero image without any errors or broken player UI. (This was already mostly fixed, but should be confirmed).
+        3.  In the backend, remove the video generation API endpoints from  ().
+        4.  In the backend, remove or comment out the  function and related code in  to prevent accidental execution and reduce clutter.
+        5.  Delete the now-obsolete script .
+    - **What will be achieved with this?** The application will be aligned with the user's new workflow, removing the unwanted video generation feature and setting the stage for implementing manual video uploads.
+    - **Status:** IN PROGRESS
+    - **Should Test frontend/backend/both after fix?** Both.
+    - **Blocked on something:** None.
+
+**Upcoming and Future Tasks**
+- **Upcoming Tasks:**
+    - **P0:** Implement the full video upload functionality (backend endpoint to receive and save files, and frontend UI to handle the upload process).
+- **Future Tasks:**
+    - **P1:** Cleanup and refactor the codebase by deleting unused files for social features (, , ).
+    - **P2:** Implement the Market Intelligence Center (BLOCKED by LLM budget).
+    - **P2:** Implement the NFT Certification system.
+    - **P3:** Develop Mobile App, Discord, and Telegram bot integrations.
+    - **P3:** Implement Email Notifications.
+
+**Completed work in this session**
+- **Full-Cycle Video Generation System:**
+  - Implemented a complete audio/video generation system from scratch.
+  - Upgraded the system to produce premium videos with dynamic Ken Burns effects (zoom/pan) and a progress bar.
+  - Created a batch processing script and successfully generated all 46 videos (23 lessons x 2 languages) with the premium effects.
+- **Critical Bug Fix (No Supported Sources):**
+  - Diagnosed a recurring video player error.
+  - Identified the root cause: the frontend was not using the application's language context, causing it to request media for the wrong language.
+  - The  autonomously corrected the issue by replacing a flawed approach with  from  and fixing incorrect URL construction.
+- **Premium Features & Access Control:**
+  - Implemented a rule to make the first 3 lessons completely free for all users.
+  - Enhanced the login/auth flow to return an admin role, granting admins full, unrestricted access to all video content.
+  - Added the user's test account () to the admin list.
+- **Final Pivot to Manual Upload:**
+  - As per the user's final request, deleted all 46 generated videos from the server to prepare for the new manual upload system.
+
+**Earlier issues found/mentioned but not fixed**
+- The  does not use the main , so the language switcher is unavailable on that screen.
+- Backend routes () and frontend pages (, ) for deprecated social features have not been deleted.
+
+**Known issue recurrence from previous fork**
+- **Issue:** AI Mentor/LLM Budget Exceeded.
+- **Recurrence count:** 4+
+- **Status:** BLOCKED
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+- **Backend:** FastAPI, Python, MongoDB, BackgroundTasks
+- **Frontend:** React, JavaScript, Tailwind CSS, Shadcn UI, Framer Motion, react-i18next
+- **Media Generation (Audio):** OpenAI TTS via .
+- **Media Generation (Video - OBSOLETE):**  and  for dynamic video creation with Ken Burns effects.
+
+**key DB schema**
+- **users:** No schema change, but the application logic now checks  on login to assign a transient  property in the JWT/user context.
+- **lessons:** Documents are read and their  is used to check for corresponding media files. No schema change.
+
+**changes in tech stack**
+- Added  for video generation (now being phased out).
+
+**All files of reference**
+-  (Target for next edit)
+-  (Target for next edit)
+-  (Target for next edit)
+-  (Recently fixed)
+-  (Newly created)
+-  (Auth logic updated)
+- 
+
+**Areas that need refactoring**:
+- **Video Generation Code Removal:** All code related to video generation in , , and the script  should be removed or commented out.
+- **Social Feature Cleanup:** Unused backend routes and frontend page components for Guilds and Referrals should be deleted.
+
+**key api endpoints**
+-  (GET): Checks if a user has access to a lesson's video (free, trial, or paid).
+-  (POST): Updated to return a  field ('admin' or 'user').
+-  (GET): Updated to return the user's .
+-  (POST): These endpoints are now obsolete and should be removed.
+
+**Critical Info for New Agent**
+- **User's Mandate:** The user's highest priority is to **remove the AI video generation feature** and replace it with a manual upload system. Do not try to improve or fix video generation.
+- **Immediate Task:** Modify the Admin Panel UI () to hide the video generation buttons and add a disabled placeholder for video uploads. Then, remove the corresponding backend logic and API endpoints.
+- **Testing:** Use the  for frontend verification, as the  is unstable on authenticated pages.
+
+**documents and test reports created in this job**
+- 
+- 
+- 
+-  (updated)
+-  (updated)
+
+**Last 10 User Messages and any pending HUMAN messages**
+10.  - User approving a plan.
+9. The video of lesson 1 and surely the others are just a static image with a voice over it absolutely not premium and terrible improve and update ALL the videos then put ALL the videos on each of the lessons the videos must follow the browser language - **User initiated the request for better, dynamic videos.**
+8.  - User approving a plan.
+7. The video for lesson 1 has not changed, it is still a static image - **User reported that the premium video was not dynamic.**
+6.  - User approving a plan.
+5. Retire all the videos, I will use another AI to generate them and directly upload them via the admin panel, remove the video generation tool and hide the video box for the moment just make it so that I can reactivate and upload the videos directly from the admin side - **The user's final, critical pivot away from AI generation to manual uploads.**
+4.  - User approving a plan.
+3.  - User reported the critical video player bug.
+2.  (Do that and also the videos of the first 3 lessons must be totally free I can't even see them with my admin account) - User requested free access to first 3 lessons and admin access fix.
+1.  (Give admin access to mehdi.arbi.tr@gmail.com my test account) - User requested admin access for a new account.
+
+**Project Health Check:**
+- **Broken:** All AI-powered features requiring the LLM (like the planned Market Intelligence Center) are non-functional due to the exhausted budget.
+- **Mocked:** The video upload UI in the admin panel is the next step and is currently a placeholder/disabled.
+- **Working:** Core platform, i18n, audio generation, premium access rules (3 free lessons, admin access), and the frontend correctly displays hero images when no video is available.
+
+**3rd Party Integrations**
+- **OpenAI TTS (via Emergent LLM Key)** — uses Emergent LLM Key (Functional, for audio).
+- **OpenAI LLM (via Emergent LLM Key)** — uses Emergent LLM Key (**BUDGET EXCEEDED**).
+- **CoinGecko (Market Data)** — Public API, no key required.
+- **Stripe (Payments)** — requires User API Key.
+- **Moviepy, Pillow** — Used for the now-obsolete video generation. Can be kept for future image/video manipulation tasks or removed from  during cleanup.
+
+**Testing status**
+- **Testing agent used after significant changes:** YES. The  was used multiple times, successfully testing premium features and even finding and fixing two critical frontend bugs autonomously.
+- **Troubleshoot agent used after agent stuck in loop:** NO.
+- **Test files created:** , , .
+- **Known regressions:** AI Mentor feature remains broken.
+
+**Credentials to test flow:**
+- Admin User:  / 
+- Second Admin User:  (password is user-managed)
+- New users can be created via the UI to test the free user flow.
+
+**What agent forgot to execute**
+- The agent was in the process of executing the user's last request (pivoting to manual uploads). It correctly deleted the videos but was interrupted before it could modify the frontend and backend code.
+- The refactoring task to remove old files related to social features (Guilds, Referrals) is still pending from the previous fork.</analysis>

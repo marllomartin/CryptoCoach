@@ -1,0 +1,145 @@
+{
+  "project_name": "TheCryptoCoach.io",
+  "theme_strategy": {
+    "default_mode": "dark",
+    "theme_toggle": "false",
+    "primary_aesthetic": "Institutional Fintech",
+    "emotional_tone": "Serious, Credible, High-Performance",
+    "visual_mood": "Deep Obsidian, Royal Blue, Crisp White"
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Outfit, sans-serif",
+      "body": "Be Vietnam Pro, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scale": {
+      "h1": "text-5xl md:text-7xl font-bold tracking-tight",
+      "h2": "text-4xl md:text-5xl font-semibold tracking-tight",
+      "h3": "text-2xl md:text-3xl font-semibold",
+      "body_lg": "text-lg md:text-xl leading-relaxed text-slate-300",
+      "body_base": "text-base leading-relaxed text-slate-400",
+      "caption": "text-sm font-medium tracking-wide uppercase text-slate-500"
+    },
+    "imports": [
+      "@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');"
+    ]
+  },
+  "colors": {
+    "palette": {
+      "background": "#030712",
+      "foreground": "#F8FAFC",
+      "card": "#0B101B",
+      "card_foreground": "#F8FAFC",
+      "popover": "#0B101B",
+      "popover_foreground": "#F8FAFC",
+      "primary": "#2563EB",
+      "primary_foreground": "#FFFFFF",
+      "secondary": "#10B981",
+      "secondary_foreground": "#FFFFFF",
+      "muted": "#1E293B",
+      "muted_foreground": "#94A3B8",
+      "accent": "#1E293B",
+      "accent_foreground": "#F8FAFC",
+      "destructive": "#EF4444",
+      "destructive_foreground": "#FFFFFF",
+      "border": "#1E293B",
+      "input": "#1E293B",
+      "ring": "#2563EB"
+    },
+    "gradients": {
+      "hero_glow": "radial-gradient(circle at center, rgba(37, 99, 235, 0.15) 0%, rgba(3, 7, 18, 0) 70%)",
+      "card_shimmer": "linear-gradient(45deg, transparent 25%, rgba(255,255,255,0.03) 50%, transparent 75%)"
+    },
+    "usage_rules": {
+      "gradients": "Do NOT use full-screen gradients. Use subtle radial glows for depth.",
+      "text": "Never use pure white (#FFFFFF) for body text. Use Slate-300 (#CBD5E1) or Slate-400 (#94A3B8) to reduce eye strain."
+    }
+  },
+  "layout_strategies": {
+    "marketing": {
+      "grid": "Swiss Grid (12 columns)",
+      "spacing": "Generous (py-24 or py-32 for sections)",
+      "container": "max-w-7xl mx-auto px-6",
+      "alignment": "Left-aligned headings for serious tone, asymmetrical layouts for interest."
+    },
+    "dashboard": {
+      "grid": "Bento Grid (Dense, gap-4)",
+      "card_style": "Flat background (#0B101B) with 1px border (#1E293B). No drop shadows, use inner-glow or border-highlight on hover.",
+      "sidebar": "Fixed width (280px), border-r border-slate-800."
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary hover:bg-primary/90 text-white rounded-lg px-6 py-3 font-medium transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_25px_rgba(37,99,235,0.5)]",
+      "secondary": "bg-slate-800 hover:bg-slate-700 text-white rounded-lg px-6 py-3 font-medium border border-slate-700",
+      "outline": "bg-transparent border border-slate-700 hover:border-slate-500 text-slate-300 rounded-lg px-6 py-3"
+    },
+    "cards": {
+      "default": "bg-card border border-border rounded-xl p-6 relative overflow-hidden group",
+      "hover_effect": "group-hover:border-primary/50 transition-colors duration-300"
+    },
+    "inputs": {
+      "style": "bg-slate-950 border border-slate-800 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg h-12 px-4 text-slate-200 placeholder:text-slate-600"
+    },
+    "badges": {
+      "success": "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-2 py-0.5 rounded text-xs font-medium",
+      "warning": "bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded text-xs font-medium",
+      "neutral": "bg-slate-800 text-slate-400 border border-slate-700 px-2 py-0.5 rounded text-xs font-medium"
+    }
+  },
+  "visual_assets": {
+    "image_urls": {
+      "hero_bg": "https://images.unsplash.com/photo-1750969185331-e03829f72c7d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzF8MHwxfHNlYXJjaHwzfHxhYnN0cmFjdCUyMGJsb2NrY2hhaW4lMjBuZXR3b3JrJTIwdmlzdWFsaXphdGlvbiUyMGJsdWUlMjBkYXJrJTIwM2R8ZW58MHx8fHwxNzczNTk0Mjg5fDA&ixlib=rb-4.1.0&q=85",
+      "founder_placeholder": "https://images.unsplash.com/photo-1480429370139-e0132c086e2a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDB8MHwxfHNlYXJjaHwzfHxtaWRkbGUlMjBlYXN0ZXJuJTIwY29ycG9yYXRlJTIwbWFuJTIwcG9ydHJhaXQlMjBzdWl0JTIwY29uZmlkZW50fGVufDB8fHx8MTc3MzU5NDI4OHww&ixlib=rb-4.1.0&q=85",
+      "crypto_coins": "https://images.pexels.com/photos/8048194/pexels-photo-8048194.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "trading_chart": "https://images.unsplash.com/photo-1639825752750-5061ded5503b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzR8MHwxfHNlYXJjaHwxfHx0cmFkaW5nJTIwY2hhcnQlMjBjYW5kbGVzdGljayUyMGdyYXBoJTIwZGFyayUyMG1vZGUlMjBpbnRlcmZhY2V8ZW58MHx8fHwxNzczNTk0MjkwfDA&ixlib=rb-4.1.0&q=85"
+    },
+    "icons": "Use lucide-react. Examples: BadgeCheck (Verification), TrendingUp (Growth), Wallet (Finance), GraduationCap (Academy)."
+  },
+  "animations": {
+    "library": "framer-motion",
+    "defaults": {
+      "hover": "whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}",
+      "tap": "whileTap={{ scale: 0.98 }}",
+      "fade_in": "initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}"
+    }
+  },
+  "libraries_to_install": [
+    "framer-motion",
+    "react-fast-marquee",
+    "@radix-ui/react-icons"
+  ],
+  "accessibility_rules": {
+    "contrast": "Ensure all text on dark backgrounds is at least Slate-400 or lighter.",
+    "focus_states": "All interactive elements must have a visible ring-2 ring-primary on focus-visible."
+  },
+  "instructions_to_main_agent": {
+    "1": "Install required libraries: `yarn add framer-motion react-fast-marquee @radix-ui/react-icons`.",
+    "2": "Update `tailwind.config.js` with the specific colors defined in the palette section. DO NOT rely on default Shadcn variables alone; extend them to match the 'Institutional Fintech' look.",
+    "3": "Create a `Layout` component that wraps the app with the dark theme class and provides the global font styles.",
+    "4": "For the Dashboard, strictly follow the 'Bento Grid' layout. Use the `trading_chart` image as a placeholder for the live chart if the library isn't fully configured.",
+    "5": "The Founder page must look premium. Use the `founder_placeholder` image in a grayscale filter that becomes colored on hover."
+  },
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "You tend to converge toward generic, 'on distribution' outputs. In frontend design, this creates what users call the 'AI slop' aesthetic. Avoid this: make creative, distinctive frontends that surprise and delight.",
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy",
+    "Use glass-morphism effects with backdrop filters (12-24px blur)",
+    "You MUST NOT apply universal transition. Eg: `transition: all`. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms",
+    "You MUST NOT center align the app container, ie do not add `.App { text-align: center; }` in the css file. This disrupts the human natural reading flow of text",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories (especially sponsor logos) = main agent will use placeholder text which is FORBIDDEN",
+    "Prioritize using pre-existing components from src/components/ui when applicable",
+    "Create new components that match the style and conventions of existing components when needed",
+    "Examine existing components to understand the project's component patterns before creating new ones",
+    "Components MUST use named exports (export const ComponentName = ...)",
+    "Pages MUST use default exports (export default function PageName() {...})",
+    "Use `sonner` for toasts. Sonner component are located in `/app/src/components/ui/sonner.tsx`"
+  ]
+}

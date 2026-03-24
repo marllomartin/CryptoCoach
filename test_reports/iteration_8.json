@@ -1,0 +1,90 @@
+{
+  "summary": "Comprehensive testing of retention and engagement features (Shop, Guild, Referral, Profile, NotFoundPage, NotificationBell). Fixed critical route ordering bug in guild API. All 14 backend tests passed (100%), all frontend pages working correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "bugs_fixed": [
+    {
+      "file": "/app/backend/routes/community.py",
+      "issue": "Guild API route ordering bug - /{guild_id} route was catching /search and /leaderboard paths",
+      "fix": "Moved static routes (/search, /leaderboard) before dynamic route (/{guild_id})",
+      "severity": "HIGH"
+    }
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_retention_features.py",
+    "/app/test_reports/pytest/pytest_retention_features.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/routes/community.py",
+    "/app/backend/tests/test_retention_features.py"
+  ],
+  "success_rate": {
+    "backend": "100% (14/14 passed)",
+    "frontend": "100% (all pages working)"
+  },
+  "test_credentials": {
+    "email": "retention_test@test.com",
+    "password": "TestPass123!"
+  },
+  "seed_data_creation": "Test user created during testing, guild created via API test",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All retention features working correctly. Shop page shows items with categories (Boosters, Quiz Power-ups, Cosmetics, Special). Guild page shows user's guild with members and chat. Referral page shows referral link, stats, milestones, and leaderboard. Profile page shows user info, level, XP, streak, achievements, and stats. 404 page has crypto theme. NotificationBell component visible in navbar for logged-in users.",
+  "features_tested": {
+    "shop_page": {
+      "status": "PASS",
+      "details": "Items displayed with prices, categories (Boosters, Quiz Power-ups, Cosmetics, Special), user coin balance shown"
+    },
+    "guild_page": {
+      "status": "PASS",
+      "details": "Search guilds, Create guild modal, Guild leaderboard, Guild chat, Members list, Leave guild button"
+    },
+    "referral_page": {
+      "status": "PASS",
+      "details": "Referral link and code displayed, stats (Friends Invited, XP Earned, Coins Earned), milestones with rewards, leaderboard"
+    },
+    "profile_page": {
+      "status": "PASS",
+      "details": "User info, level, XP progress, streak, achievements (0/12), statistics (Lessons, Quizzes, Exams, Trades, Certificates)"
+    },
+    "not_found_page": {
+      "status": "PASS",
+      "details": "Custom 404 page with crypto theme, Go Home/Go Back buttons, fun crypto fact"
+    },
+    "notification_bell": {
+      "status": "PASS",
+      "details": "Visible in navbar for logged-in users, dropdown opens on click, shows notifications or 'No notifications yet'"
+    },
+    "api_shop_items": {
+      "status": "PASS",
+      "details": "GET /api/v2/shop/items returns all shop items by category"
+    },
+    "api_referral_stats": {
+      "status": "PASS",
+      "details": "GET /api/v2/referral/stats/{user_id} returns referral stats with code, link, count, milestones"
+    },
+    "api_guild_leaderboard": {
+      "status": "PASS",
+      "details": "GET /api/v2/guild/leaderboard returns guild leaderboard (fixed route ordering bug)"
+    },
+    "api_notifications": {
+      "status": "PASS",
+      "details": "GET /api/v2/notifications/{user_id} returns user notifications and unread count"
+    }
+  },
+  "rca_of_issue": {
+    "issue": "Guild API /search and /leaderboard endpoints returning 'Guild not found' error",
+    "root_cause": "FastAPI route ordering - the dynamic route /{guild_id} was defined before static routes /search and /leaderboard, causing 'search' and 'leaderboard' to be matched as guild_id values",
+    "fix_applied": "Reordered routes in /app/backend/routes/community.py to place static routes (/search, /leaderboard) before the dynamic route (/{guild_id})",
+    "verification": "All guild API tests now pass"
+  }
+}

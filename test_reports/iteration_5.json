@@ -1,0 +1,87 @@
+{
+  "summary": "Comprehensive testing of Admin Panel and Enhanced Lesson Page features. 18 backend API tests passed (100%), 53 frontend E2E tests passed (100%, 1 skipped). Found 1 SECURITY BUG: password_hash exposed in /api/admin/users response. CDN issue: static audio files return HTML instead of audio content through CDN (works locally).",
+  "mode": "generate",
+  "baseline_commit": "71bbeda8a12212b8e6bb51f869803a4e954e976a",
+  "head_commit": "c77d1f03e35f9404124415694cd39a76e1a81ec5",
+  "specs_created": [
+    "/app/tests/e2e/admin-panel.spec.ts",
+    "/app/tests/e2e/lesson-page.spec.ts",
+    "/app/backend/tests/test_admin.py"
+  ],
+  "specs_updated": [],
+  "quarantined_tests": [],
+  "test_report_links": [
+    "/app/backend/tests/test_admin.py",
+    "/app/test_reports/pytest/pytest_results_admin.xml",
+    "/app/tests/e2e/admin-panel.spec.ts",
+    "/app/tests/e2e/lesson-page.spec.ts"
+  ],
+  "regression_results": {
+    "total_specs": 54,
+    "passed": 53,
+    "failed": 0,
+    "skipped": 1
+  },
+  "issues": [
+    {
+      "id": "BUG-001",
+      "issue_type": "bug",
+      "severity": "HIGH",
+      "description": "SECURITY: Admin users endpoint /api/admin/users exposes password_hash field in response. This is a security vulnerability - hashed passwords should never be exposed in API responses.",
+      "endpoint_or_component": "/app/backend/server.py - line 3432 get_admin_users function",
+      "surfaces": ["backend"],
+      "reproduction": "1. Login as admin (admin@thecryptocoach.io)\n2. Call GET /api/admin/users\n3. Observe password_hash field in user objects",
+      "affected_test": "test_admin.py - TestAdminUsers.test_users_have_required_fields documents the bug",
+      "fix_suggestion": "Add password_hash to projection exclusion: await db.users.find(query, {'_id': 0, 'hashed_password': 0, 'password_hash': 0})"
+    },
+    {
+      "id": "IMP-001",
+      "issue_type": "improvement",
+      "severity": "MEDIUM",
+      "description": "CDN routing issue: Static audio files served at /static/audio/*.mp3 return HTML content-type through CDN instead of audio/mpeg. Files work correctly via direct backend access (localhost:8001). This may affect audio playback in production.",
+      "endpoint_or_component": "/static/audio/ route through CDN proxy",
+      "surfaces": ["infrastructure"],
+      "reproduction": "curl -I https://broker-briefing.preview.emergentagent.com/static/audio/course-foundations-lesson-1_full.mp3 - returns text/html content-type"
+    },
+    {
+      "id": "IMP-002",
+      "issue_type": "improvement",
+      "severity": "LOW",
+      "description": "AdminPage.jsx and LessonPage.jsx have no data-testid attributes. Adding data-testids would make tests more robust and maintainable.",
+      "endpoint_or_component": "/app/frontend/src/pages/AdminPage.jsx, /app/frontend/src/pages/LessonPage.jsx"
+    }
+  ],
+  "action_items": [
+    "FIX: SECURITY - Exclude password_hash from /api/admin/users response (HIGH priority)",
+    "INVESTIGATE: CDN configuration for static file MIME types",
+    "IMPROVE: Add data-testid attributes to AdminPage.jsx and LessonPage.jsx"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_admin.py",
+    "/app/backend/tests/conftest.py",
+    "/app/tests/e2e/admin-panel.spec.ts",
+    "/app/tests/e2e/lesson-page.spec.ts"
+  ],
+  "test_results": {
+    "backend": "100% (18/18 passed)",
+    "frontend": "98% (53/54 - 1 skipped)"
+  },
+  "features_tested": {
+    "admin_dashboard_stats": "PASS - Shows users, courses, lessons, subscription breakdown",
+    "admin_courses_tab": "PASS - Lists courses, shows lessons with audio status",
+    "admin_users_tab": "PASS - Lists users, search functionality works",
+    "admin_media_tab": "PASS - Audio/image generation buttons visible",
+    "admin_access_control": "PASS - Non-admin users redirected away",
+    "lesson_page_audio_mode": "PASS - Mode Audio toggle shows audio player",
+    "lesson_page_audio_controls": "PASS - Intro/Complet/Résumé buttons, play/pause, speed selector",
+    "lesson_page_content_sections": "PASS - Objectives, content, examples, summary all displayed",
+    "lesson_page_navigation": "PASS - Progress sidebar, next/prev buttons, back to course link",
+    "lesson_page_reading_progress": "PASS - Progress bar visible at top",
+    "static_audio_files_local": "PASS - Audio files accessible via localhost:8001"
+  },
+  "seed_data_creation": "Used existing admin user: admin@thecryptocoach.io / Admin123! and test user: test_subscription@example.com / Test123!",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Admin panel and lesson page audio features are fully functional. Security bug needs fixing (password_hash exposure). CDN static file issue may need infrastructure investigation. 4 lessons have audio generated (course-foundations-lesson-1 to 4). All other features work correctly.",
+  "rca_of_issue": "BUG-001: The get_admin_users function excludes 'hashed_password' but not 'password_hash' - the actual field name used in user documents. Fix: Change line 3432 to exclude both field names."
+}

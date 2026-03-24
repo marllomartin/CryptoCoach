@@ -1,0 +1,98 @@
+{
+  "summary": "Tested EN/FR/AR translations across all pages, Exit Intent Popup, and Arabic audio generation. Most translations working correctly. Found critical issue: HomePage.jsx does NOT use i18n translations - text is hardcoded in English.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/v2/notifications/{user_id}/count", "issue": "Returns 404 - notification count endpoint not found (cosmetic)"}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Homepage translations",
+        "issue": "HomePage.jsx does NOT use i18n translations - all text is hardcoded in English. Language switcher works but homepage content doesn't change.",
+        "affected_selectors": ["h1", ".hero-section"],
+        "priority": "HIGH"
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/test_reports/iteration_14.json"
+  ],
+  "action_items": [
+    "CRITICAL: Update HomePage.jsx to use useTranslation() hook and t() function for all text content",
+    "The i18n.js file already has all translations defined (homepage.title, homepage.subtitle, etc.) but HomePage.jsx doesn't use them"
+  ],
+  "critical_code_review_comments": [
+    "HomePage.jsx (lines 132-192) has hardcoded English text instead of using t('homepage.title'), t('homepage.subtitle'), etc.",
+    "All other pages (PricingPage, HubPage, TradingArenaPage, LessonPage) correctly use i18n translations"
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (Audio API returns 23 AR audios)",
+    "frontend": "90% (All features work except HomePage translations)"
+  },
+  "test_credentials": {
+    "admin_email": "admin@thecryptocoach.io",
+    "admin_password": "adminpassword"
+  },
+  "seed_data_creation": "None",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "HomePage.jsx needs to be updated to use i18n translations. All other translation features are working correctly.",
+  "features_tested": {
+    "language_switcher": {
+      "status": "PASS",
+      "details": "Language switcher exists in navbar, switches between EN/FR/AR correctly, RTL direction applied for Arabic"
+    },
+    "homepage_translations": {
+      "status": "FAIL",
+      "details": "HomePage.jsx does NOT use i18n - text stays in English regardless of language selection. Navbar translates but hero content doesn't."
+    },
+    "pricing_page_translations": {
+      "status": "PASS",
+      "details": "Title 'Choisissez votre parcours' (FR), urgency badge, social proof, testimonials, coupon input all translate correctly"
+    },
+    "register_page_captcha": {
+      "status": "PASS",
+      "details": "CAPTCHA displays math question, verifies answer, enables submit button. Labels translate (Security Check / Vérification de sécurité / فحص أمني)"
+    },
+    "lesson_page_coach_tip": {
+      "status": "PASS",
+      "details": "Coach's Tip section displays with translations: 'Coach's Tip' (EN), 'Conseil du Coach' (FR), 'نصيحة المدرب' (AR)"
+    },
+    "hub_page_translations": {
+      "status": "PASS",
+      "details": "All labels translate: Daily Quests/Quêtes Quotidiennes, Quick Actions/Actions Rapides, Live Market/Marché en Direct"
+    },
+    "trading_arena_translations": {
+      "status": "PASS",
+      "details": "All labels translate: Passer un Ordre, Prix du Marché, Historique des Trades, Acheter/Vendre"
+    },
+    "exit_intent_popup": {
+      "status": "PASS",
+      "details": "Popup appears when mouse leaves top of page after 5 seconds. Shows 50% OFF offer with urgency timer."
+    },
+    "discount_popup_translations": {
+      "status": "PASS",
+      "details": "Discount popup translates: 'Wait! Get 15% OFF' (EN), 'Attendez ! -15%' (FR), 'انتظر! خصم 15%' (AR)"
+    },
+    "arabic_audio_generation": {
+      "status": "PASS",
+      "details": "API /api/media/status returns 23 Arabic audios generated for all lessons (course-foundations-lesson-1 through course-strategist-lesson-7)"
+    },
+    "rtl_support": {
+      "status": "PASS",
+      "details": "Arabic pages display RTL correctly - document.dir='rtl' applied, layout mirrors appropriately"
+    }
+  },
+  "audio_status": {
+    "total_lessons": 23,
+    "english_audios": 23,
+    "french_audios": 23,
+    "arabic_audios": 23,
+    "total_audios": 69
+  }
+}
