@@ -341,6 +341,10 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 # ==================== AUTH ROUTES ====================
 
+@api_router.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
 @api_router.post("/auth/register", response_model=TokenResponse)
 @limiter.limit(RATE_LIMITS["register"])
 async def register(request: Request, user_data: UserCreate):
