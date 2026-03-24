@@ -2,7 +2,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://broker-briefing.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://cryptocoach-production.up.railway.app').rstrip('/')
 
 @pytest.fixture
 def api_client():

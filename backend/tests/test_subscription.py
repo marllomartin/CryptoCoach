@@ -2,7 +2,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://broker-briefing.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://cryptocoach-production.up.railway.app').rstrip('/')
 
 
 class TestSubscriptionTiers:
@@ -93,7 +93,7 @@ class TestSubscriptionCheckout:
             f"{BASE_URL}/api/subscription/create-checkout",
             json={
                 "tier": "starter",
-                "origin_url": "https://broker-briefing.preview.emergentagent.com"
+                "origin_url": "https://cryptocoach-production.up.railway.app"
             }
         )
         
@@ -110,7 +110,7 @@ class TestSubscriptionCheckout:
             f"{BASE_URL}/api/subscription/create-checkout",
             json={
                 "tier": "pro",
-                "origin_url": "https://broker-briefing.preview.emergentagent.com"
+                "origin_url": "https://cryptocoach-production.up.railway.app"
             }
         )
         
@@ -126,7 +126,7 @@ class TestSubscriptionCheckout:
             f"{BASE_URL}/api/subscription/create-checkout",
             json={
                 "tier": "elite",
-                "origin_url": "https://broker-briefing.preview.emergentagent.com"
+                "origin_url": "https://cryptocoach-production.up.railway.app"
             }
         )
         
@@ -142,7 +142,7 @@ class TestSubscriptionCheckout:
             f"{BASE_URL}/api/subscription/create-checkout",
             json={
                 "tier": "invalid_tier",
-                "origin_url": "https://broker-briefing.preview.emergentagent.com"
+                "origin_url": "https://cryptocoach-production.up.railway.app"
             }
         )
         
@@ -155,7 +155,7 @@ class TestSubscriptionCheckout:
             f"{BASE_URL}/api/subscription/create-checkout",
             json={
                 "tier": "starter",
-                "origin_url": "https://broker-briefing.preview.emergentagent.com"
+                "origin_url": "https://cryptocoach-production.up.railway.app"
             }
         )
         

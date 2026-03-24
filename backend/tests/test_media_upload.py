@@ -7,7 +7,7 @@ import requests
 import os
 import tempfile
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://broker-briefing.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://cryptocoach-production.up.railway.app')
 
 class TestMediaUploadAPI:
     """Tests for the video upload endpoint and media management"""
