@@ -13,13 +13,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Check if emergentintegrations is available
+# Check if openai is available
 try:
-    from emergentintegrations.llm.openai import OpenAITextToSpeech
+    from openai import AsyncOpenAI
     TTS_AVAILABLE = True
 except ImportError:
     TTS_AVAILABLE = False
-    print("Warning: emergentintegrations not available for TTS")
+    print("Warning: openai not available for TTS")
 
 # Check if moviepy is available
 try:
@@ -45,10 +45,10 @@ class LessonMediaGenerator:
     """Generates audio narration and video presentations for lessons"""
     
     def __init__(self):
-        self.api_key = os.getenv("EMERGENT_LLM_KEY")
+        self.api_key = os.getenv("OPENAI_API_KEY")
         self.tts = None
         if TTS_AVAILABLE and self.api_key:
-            self.tts = OpenAITextToSpeech(api_key=self.api_key)
+            self.tts = AsyncOpenAI(api_key=self.api_key)
     
     def _split_text_into_chunks(self, text: str, max_chars: int = 4000) -> List[str]:
         """Split text into chunks respecting sentence boundaries"""
@@ -176,7 +176,7 @@ class LessonMediaGenerator:
         if not self.tts:
             return {
                 "success": False,
-                "error": "TTS not available. Check EMERGENT_LLM_KEY configuration."
+                "error": "TTS not available. Check OPENAI_API_KEY configuration."
             }
         
         # Get lesson content
@@ -198,13 +198,13 @@ class LessonMediaGenerator:
             audio_parts = []
             for i, chunk in enumerate(chunks):
                 print(f"Generating audio chunk {i+1}/{len(chunks)} for {lesson_id}...")
-                audio_bytes = await self.tts.generate_speech(
-                    text=chunk,
+                response = await self.tts.audio.speech.create(
+                    input=chunk,
                     model=model,
                     voice=voice,
                     response_format="mp3"
                 )
-                audio_parts.append(audio_bytes)
+                audio_parts.append(response.read())
             
             # Combine audio parts
             combined_audio = b''.join(audio_parts)

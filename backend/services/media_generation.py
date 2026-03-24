@@ -34,15 +34,15 @@ class MediaGenerationService:
     @property
     def tts(self):
         if self._tts is None:
-            from emergentintegrations.llm.openai import OpenAITextToSpeech
-            self._tts = OpenAITextToSpeech(api_key=self.api_key)
+            from openai import AsyncOpenAI
+            self._tts = AsyncOpenAI(api_key=self.api_key)
         return self._tts
-    
+
     @property
     def image_gen(self):
         if self._image_gen is None:
-            from emergentintegrations.llm.openai.image_generation import OpenAIImageGeneration
-            self._image_gen = OpenAIImageGeneration(api_key=self.api_key)
+            from openai import AsyncOpenAI
+            self._image_gen = AsyncOpenAI(api_key=self.api_key)
         return self._image_gen
     
     def _get_cache_key(self, text: str, voice: str) -> str:
@@ -144,12 +144,13 @@ class MediaGenerationService:
             first_para = clean_content.split('\n\n')[0] if '\n\n' in clean_content else clean_content[:500]
             intro_text += first_para
             
-            intro_audio = await self.tts.generate_speech(
-                text=intro_text[:4000],
+            intro_response = await self.tts.audio.speech.create(
+                input=intro_text[:4000],
                 model=TTS_MODEL,
                 voice=voice,
                 speed=TTS_SPEED
             )
+            intro_audio = intro_response.read()
             
             intro_filename = f"{lesson_id}_intro.mp3"
             intro_path = os.path.join(AUDIO_STORAGE_PATH, intro_filename)
@@ -162,13 +163,13 @@ class MediaGenerationService:
             full_audio_parts = []
             
             for i, chunk in enumerate(chunks):
-                chunk_audio = await self.tts.generate_speech(
-                    text=chunk,
+                chunk_response = await self.tts.audio.speech.create(
+                    input=chunk,
                     model=TTS_MODEL,
                     voice=voice,
                     speed=TTS_SPEED
                 )
-                full_audio_parts.append(chunk_audio)
+                full_audio_parts.append(chunk_response.read())
                 await asyncio.sleep(0.5)  # Rate limiting
             
             # Combine audio parts
@@ -182,12 +183,13 @@ class MediaGenerationService:
             # Generate summary audio
             if clean_summary:
                 summary_intro = "Voici le résumé de cette leçon. "
-                summary_audio = await self.tts.generate_speech(
-                    text=summary_intro + clean_summary[:3500],
+                summary_response = await self.tts.audio.speech.create(
+                    input=summary_intro + clean_summary[:3500],
                     model=TTS_MODEL,
                     voice=voice,
                     speed=TTS_SPEED
                 )
+                summary_audio = summary_response.read()
                 
                 summary_filename = f"{lesson_id}_summary.mp3"
                 summary_path = os.path.join(AUDIO_STORAGE_PATH, summary_filename)
@@ -222,20 +224,22 @@ class MediaGenerationService:
             High quality, professional educational content."""
             
             # Use OpenAI image generation
-            images = await self.image_gen.generate_images(
+            import base64
+            response = await self.image_gen.images.generate(
                 prompt=prompt,
-                model="gpt-image-1",
-                number_of_images=1
+                model="dall-e-3",
+                n=1,
+                size="1024x1024",
+                response_format="b64_json"
             )
-            
-            if images and len(images) > 0:
-                # Save image to file
-                import base64
+
+            if response.data and len(response.data) > 0:
                 image_filename = f"{lesson_id}_hero.png"
                 image_path = os.path.join(IMAGE_STORAGE_PATH, image_filename)
-                
+                image_bytes = base64.b64decode(response.data[0].b64_json)
+
                 with open(image_path, "wb") as f:
-                    f.write(images[0])
+                    f.write(image_bytes)
                 
                 return {
                     "lesson_id": lesson_id,
@@ -286,13 +290,14 @@ class MediaGenerationService:
 # Singleton instance
 _media_service = None
 
-def get_media_service() -> MediaGenerationService:
+def get_media_service() -> Optional[MediaGenerationService]:
     global _media_service
     if _media_service is None:
         from dotenv import load_dotenv
         load_dotenv()
-        api_key = os.getenv("EMERGENT_LLM_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            raise ValueError("EMERGENT_LLM_KEY not found in environment")
+            logger.warning("OPENAI_API_KEY not found — media generation disabled")
+            return None
         _media_service = MediaGenerationService(api_key)
     return _media_service

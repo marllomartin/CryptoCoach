@@ -23,7 +23,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.colors import HexColor
 import qrcode
 from PIL import Image
-from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
+import stripe as stripe_lib
 
 # Import security module
 from security import (
@@ -904,28 +904,30 @@ async def get_blog_post(slug: str):
 @api_router.post("/ai/chat")
 async def ai_chat(message: ChatMessage, current_user: dict = Depends(get_current_user)):
     try:
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
-        
-        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        from openai import AsyncOpenAI
+
+        api_key = os.environ.get('OPENAI_API_KEY')
         if not api_key:
             raise HTTPException(status_code=500, detail="AI service not configured")
-        
+
         session_id = message.session_id or f"crypto_coach_{current_user['id']}"
-        
-        chat = LlmChat(
-            api_key=api_key,
-            session_id=session_id,
-            system_message="""You are CryptoCoach AI, an expert cryptocurrency educator at TheCryptoCoach.io. 
+
+        client = AsyncOpenAI(api_key=api_key)
+        completion = await client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are CryptoCoach AI, an expert cryptocurrency educator at TheCryptoCoach.io.
             You help students learn about blockchain, cryptocurrencies, DeFi, NFTs, and trading strategies.
             Be educational, clear, and professional. Avoid financial advice - focus on education.
             Keep responses concise but thorough. Use examples when helpful."""
+                },
+                {"role": "user", "content": message.message}
+            ]
         )
-        chat.with_model("openai", "gpt-5.2")
-        
-        user_msg = UserMessage(text=message.message)
-        response = await chat.send_message(user_msg)
-        
-        return {"response": response, "session_id": session_id}
+
+        return {"response": completion.choices[0].message.content, "session_id": session_id}
     except Exception as e:
         logger.error(f"AI chat error: {e}")
         raise HTTPException(status_code=500, detail="AI service temporarily unavailable")
@@ -3412,35 +3414,38 @@ async def create_subscription_checkout(
     
     try:
         host_url = request.origin_url.rstrip('/')
-        webhook_url = f"{str(http_request.base_url).rstrip('/')}/api/webhook/stripe"
-        
-        stripe_checkout = StripeCheckout(
-            api_key=STRIPE_API_KEY,
-            webhook_url=webhook_url
-        )
-        
+
         success_url = f"{host_url}/subscription/success?session_id={{CHECKOUT_SESSION_ID}}"
         cancel_url = f"{host_url}/pricing"
-        
-        checkout_request = CheckoutSessionRequest(
-            amount=amount,
-            currency="usd",
-            success_url=success_url,
-            cancel_url=cancel_url,
-            metadata={
-                "user_id": current_user["id"],
-                "user_email": current_user["email"],
-                "tier": tier,
-                "tier_name": tier_info["name"]
-            }
+
+        session = await asyncio.to_thread(
+            lambda: stripe_lib.checkout.Session.create(
+                api_key=STRIPE_API_KEY,
+                payment_method_types=["card"],
+                line_items=[{
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {"name": tier_info["name"]},
+                        "unit_amount": int(amount * 100),
+                    },
+                    "quantity": 1,
+                }],
+                mode="payment",
+                success_url=success_url,
+                cancel_url=cancel_url,
+                metadata={
+                    "user_id": current_user["id"],
+                    "user_email": current_user["email"],
+                    "tier": tier,
+                    "tier_name": tier_info["name"]
+                }
+            )
         )
-        
-        session: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(checkout_request)
-        
+
         # Create payment transaction record
         await db.payment_transactions.insert_one({
             "id": str(uuid.uuid4()),
-            "session_id": session.session_id,
+            "session_id": session.id,
             "user_id": current_user["id"],
             "user_email": current_user["email"],
             "tier": tier,
@@ -3449,8 +3454,8 @@ async def create_subscription_checkout(
             "payment_status": "pending",
             "created_at": datetime.now(timezone.utc).isoformat()
         })
-        
-        return {"url": session.url, "session_id": session.session_id}
+
+        return {"url": session.url, "session_id": session.id}
         
     except Exception as e:
         logger.error(f"Checkout error: {e}")
@@ -3472,13 +3477,10 @@ async def get_checkout_status(session_id: str, current_user: dict = Depends(get_
                 "message": "Payment already processed"
             }
         
-        stripe_checkout = StripeCheckout(
-            api_key=STRIPE_API_KEY,
-            webhook_url=""
+        status = await asyncio.to_thread(
+            lambda: stripe_lib.checkout.Session.retrieve(session_id, api_key=STRIPE_API_KEY)
         )
-        
-        status: CheckoutStatusResponse = await stripe_checkout.get_checkout_status(session_id)
-        
+
         if status.payment_status == "paid":
             # Update transaction
             await db.payment_transactions.update_one(
@@ -3526,16 +3528,21 @@ async def stripe_webhook(request: Request):
         body = await request.body()
         signature = request.headers.get("Stripe-Signature", "")
         
-        stripe_checkout = StripeCheckout(
-            api_key=STRIPE_API_KEY,
-            webhook_url=""
+        stripe_webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+        event = await asyncio.to_thread(
+            lambda: stripe_lib.Webhook.construct_event(body, signature, stripe_webhook_secret)
+            if stripe_webhook_secret
+            else stripe_lib.Event.construct_from(
+                stripe_lib.util.convert_to_stripe_object({"type": "unknown", "data": {"object": {}}}),
+                STRIPE_API_KEY
+            )
         )
-        
-        webhook_response = await stripe_checkout.handle_webhook(body, signature)
-        
-        if webhook_response.payment_status == "paid":
-            session_id = webhook_response.session_id
-            metadata = webhook_response.metadata
+
+        webhook_response = event.data.object if hasattr(event, "data") else None
+
+        if event.type == "checkout.session.completed" and webhook_response and webhook_response.get("payment_status") == "paid":
+            session_id = webhook_response.get("id")
+            metadata = webhook_response.get("metadata", {})
             
             # Check if already processed
             transaction = await db.payment_transactions.find_one(
@@ -3567,7 +3574,7 @@ async def stripe_webhook(request: Request):
                     }}
                 )
         
-        return {"status": "received", "event_type": webhook_response.event_type}
+        return {"status": "received", "event_type": event.type}
         
     except Exception as e:
         logger.error(f"Webhook error: {e}")
