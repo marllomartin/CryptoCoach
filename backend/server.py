@@ -88,8 +88,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 # Admin emails configuration
-ADMIN_EMAILS = ["admin@thecryptocoach.io", "mehdi@thecryptocoach.io", "mehdi.arbi.tr@gmail.com"]
-MODERATOR_EMAILS = []
+ADMIN_EMAILS = [e.strip() for e in os.environ.get('ADMIN_EMAILS', '').split(',') if e.strip()]
+MODERATOR_EMAILS = [e.strip() for e in os.environ.get('MODERATOR_EMAILS', '').split(',') if e.strip()]
 
 # ==================== SUBSCRIPTION TIERS ====================
 
