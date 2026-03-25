@@ -32,24 +32,21 @@ import {
 import { AnalyticsDashboard } from '../components/AnalyticsDashboard';
 import NewsletterAdminTab from '../components/NewsletterAdminTab';
 
-// Admin emails (should match backend)
-const ADMIN_EMAILS = ['admin@thecryptocoach.io', 'mehdi@thecryptocoach.io'];
-
 export default function AdminPage() {
   const navigate = useNavigate();
   const { user, token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
-  
+
   // Check admin access
   useEffect(() => {
     if (!user) {
       navigate('/login');
       return;
     }
-    
-    if (!ADMIN_EMAILS.includes(user.email)) {
+
+    if (!['admin', 'moderator'].includes(user.role)) {
       toast.error('Accès administrateur requis');
       navigate('/');
       return;
