@@ -15,6 +15,7 @@ import {
   Users,
   Star
 } from 'lucide-react';
+import founderImg from '../assets/founder.jpeg';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { NewsletterSignup } from '../components/NewsletterSignup';
@@ -183,7 +184,7 @@ export default function HomePage() {
 
             <motion.div 
               variants={fadeInUp}
-              className="mt-12 flex items-center gap-8 text-sm text-slate-400"
+              className="mt-12 flex flex-wrap items-center gap-4 md:gap-8 text-sm text-slate-400"
             >
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-primary" />
@@ -294,7 +295,7 @@ export default function HomePage() {
       </section>
 
       {/* Founder Section */}
-      <section className="py-24">
+      <section className="py-24 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -302,15 +303,15 @@ export default function HomePage() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <div className="relative">
-                <div className="w-full aspect-square max-w-md mx-auto rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20 p-1">
+              <div className="relative pb-8">
+                <div className="w-full aspect-square max-w-[260px] mx-auto rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20 p-1">
                   <img 
-                    src="https://images.unsplash.com/photo-1480429370139-e0132c086e2a?w=600" 
+                    src={founderImg} 
                     alt="Mehdi Arbi - Founder"
                     className="w-full h-full object-cover rounded-xl grayscale hover:grayscale-0 transition-all duration-500"
                   />
                 </div>
-                <div className="absolute -bottom-6 -right-6 bg-card border border-border rounded-xl p-4 shadow-xl">
+                <div className="absolute -bottom-6 right-0 sm:-right-6 bg-card border border-border rounded-xl p-4 shadow-xl">
                   <div className="text-3xl font-heading font-bold text-primary">10+</div>
                   <div className="text-sm text-slate-400">{t('homepage.founder.yearsInCrypto')}</div>
                 </div>

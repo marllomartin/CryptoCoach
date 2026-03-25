@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { 
+import {
   GraduationCap,
   Mail,
   Lock,
@@ -11,13 +11,37 @@ import {
   Eye,
   EyeOff,
   Loader2,
-  CheckCircle
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { SimpleCaptcha } from '../components/SimpleCaptcha';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
+
+const COMMON_PASSWORDS = new Set([
+  'password','123456','12345678','qwerty','abc123',
+  'monkey','master','dragon','letmein','login',
+  'admin','welcome','password1','bitcoin','crypto'
+]);
+
+function getPasswordRules(password) {
+  return {
+    minLength:   password.length >= 8,
+    maxLength:   password.length <= 128,
+    notCommon:   !COMMON_PASSWORDS.has(password.toLowerCase()),
+    hasUpper:    /[A-Z]/.test(password),
+    hasLower:    /[a-z]/.test(password),
+    hasDigit:    /\d/.test(password),
+    hasSpecial:  /[!@#$%^&*(),.?":{}|<>]/.test(password),
+  };
+}
+
+function isPasswordValid(rules) {
+  const complexity = [rules.hasUpper, rules.hasLower, rules.hasDigit, rules.hasSpecial].filter(Boolean).length;
+  return rules.minLength && rules.maxLength && rules.notCommon && complexity >= 3;
+}
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -30,7 +54,8 @@ export default function RegisterPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
+  const captchaRef = useRef(null);
 
   // Redirect if already logged in
   if (user) {
@@ -50,8 +75,9 @@ export default function RegisterPage() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+    const rules = getPasswordRules(formData.password);
+    if (!isPasswordValid(rules)) {
+      toast.error('Password does not meet the requirements');
       return;
     }
 
@@ -63,6 +89,8 @@ export default function RegisterPage() {
       navigate('/dashboard');
     } catch (e) {
       toast.error(e.response?.data?.detail || 'Registration failed');
+      captchaRef.current?.resetCaptcha();
+      setCaptchaToken(null);
     } finally {
       setLoading(false);
     }
@@ -161,7 +189,6 @@ export default function RegisterPage() {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    minLength={6}
                     className="pl-10 pr-10 bg-muted border-border h-12"
                     data-testid="register-password-input"
                   />
@@ -173,6 +200,33 @@ export default function RegisterPage() {
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
+                {formData.password && (() => {
+                  const r = getPasswordRules(formData.password);
+                  const complexity = [r.hasUpper, r.hasLower, r.hasDigit, r.hasSpecial].filter(Boolean).length;
+                  const rules = [
+                    { label: 'At least 8 characters', ok: r.minLength },
+                    { label: 'Uppercase letter (A–Z)', ok: r.hasUpper },
+                    { label: 'Lowercase letter (a–z)', ok: r.hasLower },
+                    { label: 'Number (0–9)', ok: r.hasDigit },
+                    { label: 'Special character (!@#$...)', ok: r.hasSpecial },
+                    { label: 'Not a common password', ok: r.notCommon },
+                  ];
+                  return (
+                    <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
+                      <p className="text-xs text-slate-400 mb-2">
+                        Complexity: <span className={complexity >= 3 ? 'text-green-400' : 'text-amber-400'}>{complexity}/4</span> (need 3+)
+                      </p>
+                      {rules.map(({ label, ok }) => (
+                        <div key={label} className="flex items-center gap-2">
+                          {ok
+                            ? <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                            : <XCircle className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />}
+                          <span className={`text-xs ${ok ? 'text-green-400' : 'text-slate-500'}`}>{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className="space-y-2">
@@ -187,19 +241,37 @@ export default function RegisterPage() {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     required
-                    className="pl-10 bg-muted border-border h-12"
+                    className={`pl-10 bg-muted border-border h-12 ${
+                      formData.confirmPassword && formData.password !== formData.confirmPassword
+                        ? 'border-red-500 focus-visible:ring-red-500'
+                        : formData.confirmPassword && formData.password === formData.confirmPassword
+                        ? 'border-green-500 focus-visible:ring-green-500'
+                        : ''
+                    }`}
                     data-testid="register-confirm-password-input"
                   />
                 </div>
+                {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                  <div className="flex items-center gap-1.5 text-red-400 text-xs">
+                    <XCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    Passwords do not match
+                  </div>
+                )}
               </div>
 
               {/* CAPTCHA */}
-              <SimpleCaptcha onVerify={setCaptchaVerified} language="en" />
+              <HCaptcha
+                sitekey={process.env.REACT_APP_HCAPTCHA_SITE_KEY}
+                onVerify={(token) => setCaptchaToken(token)}
+                onExpire={() => setCaptchaToken(null)}
+                ref={captchaRef}
+                theme="dark"
+              />
 
               <Button 
                 type="submit" 
                 className="w-full h-12 bg-primary hover:bg-primary/90 text-lg mt-6"
-                disabled={loading || !captchaVerified}
+                disabled={loading || !captchaToken || !isPasswordValid(getPasswordRules(formData.password)) || formData.password !== formData.confirmPassword}
                 data-testid="register-submit-btn"
               >
                 {loading ? (

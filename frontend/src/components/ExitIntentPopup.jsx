@@ -80,23 +80,21 @@ export function ExitIntentPopup({ language = 'en' }) {
   return (
     <AnimatePresence>
       {isVisible && (
-        <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-hidden"
             onClick={handleClose}
-          />
-          
+          >
           {/* Popup */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8, y: -50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: -50 }}
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] w-full max-w-lg p-4"
+            className="w-full max-w-lg"
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="relative bg-gradient-to-br from-card via-card to-red-500/10 border-2 border-red-500/30 rounded-2xl p-8 shadow-2xl shadow-red-500/20">
               {/* Close button */}
@@ -167,7 +165,7 @@ export function ExitIntentPopup({ language = 'en' }) {
               </div>
             </div>
           </motion.div>
-        </>
+          </motion.div>
       )}
     </AnimatePresence>
   );
