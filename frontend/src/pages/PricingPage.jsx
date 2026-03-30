@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Check, Zap, Crown, Rocket, Star, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import Layout from '../components/Layout';
 import { Button } from '../components/ui/button';
 import { useAuth, API } from '../App';
@@ -12,22 +13,13 @@ import { CouponInput } from '../components/CouponInput';
 import { UrgencyBadge } from '../components/UrgencyBadge';
 import { SocialProof, SocialProofMini } from '../components/SocialProof';
 
-const tiers = [
+const TIER_META = [
   {
     id: 'free',
     name: 'Free',
     monthlyPrice: 0,
     annualPrice: 0,
-    description: 'Commencez votre voyage crypto',
     icon: Star,
-    features: [
-      'Niveau 1: Fondamentaux Crypto (8 leçons)',
-      'Accès au Glossaire Crypto',
-      'Blog & Insights',
-      'Classement basique',
-      '3 jours d\'essai vidéo (Leçon 1)'
-    ],
-    cta: 'Commencer gratuitement',
     popular: false
   },
   {
@@ -35,17 +27,7 @@ const tiers = [
     name: 'Starter',
     monthlyPrice: 9.99,
     annualPrice: 79.99,
-    description: 'Pour les investisseurs débutants',
     icon: Zap,
-    features: [
-      'Tout dans Free +',
-      'Niveau 2: Crypto Investor (8 leçons)',
-      'Quiz interactifs',
-      'Simulateur de Trading',
-      'Suivi de progression',
-      'Audio & Vidéo Premium'
-    ],
-    cta: 'Commencer',
     popular: true
   },
   {
@@ -53,34 +35,15 @@ const tiers = [
     name: 'Pro',
     monthlyPrice: 19.99,
     annualPrice: 159.99,
-    description: 'Pour les investisseurs sérieux',
     icon: Rocket,
-    features: [
-      'Tout dans Starter +',
-      'Niveau 3: Stratège Avancé (7 leçons)',
-      'Examens de certification',
-      'Certificats PDF avec QR',
-      'Accès complet au classement',
-      'Présentations Vidéo'
-    ],
-    cta: 'Devenir Pro',
-    popular: false
+    popular: false,
   },
   {
     id: 'elite',
     name: 'Elite',
     monthlyPrice: 25.00,
     annualPrice: 199.99,
-    description: 'Accès illimité et AI Mentor',
     icon: Crown,
-    features: [
-      'Tout dans Pro +',
-      'AI Crypto Mentor (CryptoCoach AI)',
-      'Stratégies avancées exclusives',
-      'Support prioritaire',
-      'Accès anticipé au nouveau contenu'
-    ],
-    cta: 'Rejoindre l\'Elite',
     popular: false,
     bestValue: true
   }
@@ -90,10 +53,25 @@ const PricingPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, token, refreshUser } = useAuth();
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
   const [isAnnual, setIsAnnual] = useState(true);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
+
+  const tiers = TIER_META.map(meta => {
+    const featuresCount = { free: 5, starter: 6, pro: 6, elite: 5 };
+    const count = featuresCount[meta.id];
+    const features = Array.from({ length: count }, (_, i) =>
+      t(`pricing.tiers.${meta.id}.feature${i + 1}`)
+    );
+    return {
+      ...meta,
+      description: t(`pricing.tiers.${meta.id}.description`),
+      features,
+      cta: t(`pricing.tiers.${meta.id}.cta`)
+    };
+  });
 
   // Check for payment success
   useEffect(() => {
@@ -108,7 +86,7 @@ const PricingPage = () => {
     const pollInterval = 2000;
 
     if (attempts >= maxAttempts) {
-      toast.error('Vérification du paiement expirée. Veuillez vérifier votre email.');
+      toast.error(t('pricing.checkingPayment'));
       setCheckingPayment(false);
       return;
     }
@@ -122,14 +100,14 @@ const PricingPage = () => {
       );
 
       if (response.data.payment_status === 'paid') {
-        toast.success('Paiement réussi! Votre abonnement est activé.');
+        toast.success(t('pricing.paymentSuccess'));
         await refreshUser();
         setCheckingPayment(false);
         // Clear URL params
         navigate('/pricing', { replace: true });
         return;
       } else if (response.data.status === 'expired') {
-        toast.error('Session de paiement expirée. Veuillez réessayer.');
+        toast.error(t('pricing.paymentExpired'));
         setCheckingPayment(false);
         return;
       }
@@ -153,7 +131,7 @@ const PricingPage = () => {
     }
 
     if (!user) {
-      toast.info('Veuillez vous connecter pour vous abonner');
+      toast.info(t('pricing.signInToSubscribe'));
       navigate('/login', { state: { from: '/pricing' } });
       return;
     }
@@ -174,7 +152,7 @@ const PricingPage = () => {
       window.location.href = response.data.url;
     } catch (error) {
       console.error('Checkout error:', error);
-      toast.error('Erreur lors de la création de la session de paiement');
+      toast.error(t('pricing.paymentError'));
       setLoading(null);
     }
   };
@@ -194,20 +172,19 @@ const PricingPage = () => {
           >
             {/* Urgency Badge */}
             <div className="flex justify-center mb-6">
-              <UrgencyBadge language="fr" type="countdown" />
+              <UrgencyBadge language={i18n.language} type="countdown" />
             </div>
-            
+
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
-              Choisissez votre{' '}
-              <span className="text-primary">parcours</span>
+              {t('pricing.title')}
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Des plans flexibles pour tous les niveaux. Commencez gratuitement et évoluez à votre rythme.
+              {t('pricing.subtitle')}
             </p>
-            
+
             {/* Social Proof Mini */}
             <div className="mt-4 flex justify-center">
-              <SocialProofMini language="fr" />
+              <SocialProofMini language={i18n.language} />
             </div>
             
             {/* Billing Toggle */}
@@ -218,7 +195,7 @@ const PricingPage = () => {
                   !isAnnual ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                Mensuel
+                {t('pricing.monthly')}
               </button>
               <button
                 onClick={() => setIsAnnual(true)}
@@ -226,17 +203,17 @@ const PricingPage = () => {
                   isAnnual ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                Annuel
+                {t('pricing.annual')}
                 <span className="px-2 py-0.5 bg-green-500 text-white rounded-full text-xs">
                   -33%
                 </span>
               </button>
             </div>
-            
+
             {/* Trial info */}
             <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full">
               <Star className="w-4 h-4 text-green-400" />
-              <span className="text-sm text-green-400">3 premières leçons gratuites avec vidéo premium</span>
+              <span className="text-sm text-green-400">{t('pricing.freeTrialBadge')}</span>
             </div>
           </motion.div>
 
@@ -245,7 +222,7 @@ const PricingPage = () => {
             <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
               <div className="bg-card border border-border rounded-xl p-8 text-center">
                 <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-                <p className="text-lg text-foreground">Vérification du paiement...</p>
+                <p className="text-lg text-foreground">{t('pricing.checkingPayment')}</p>
               </div>
             </div>
           )}
@@ -273,15 +250,15 @@ const PricingPage = () => {
                   {tier.popular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                       <span className="bg-primary text-primary-foreground text-sm font-medium px-4 py-1 rounded-full">
-                        Populaire
+                        {t('pricing.popular')}
                       </span>
                     </div>
                   )}
-                  
+
                   {tier.bestValue && !tier.popular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                       <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium px-4 py-1 rounded-full">
-                        Meilleur Rapport
+                        {t('pricing.bestValue')}
                       </span>
                     </div>
                   )}
@@ -289,7 +266,7 @@ const PricingPage = () => {
                   {isCurrentTier && (
                     <div className="absolute -top-4 right-4">
                       <span className="bg-green-500 text-white text-sm font-medium px-3 py-1 rounded-full">
-                        Actuel
+                        {t('pricing.currentPlanBadge')}
                       </span>
                     </div>
                   )}
@@ -318,20 +295,20 @@ const PricingPage = () => {
                             </span>
                             {price > 0 && (
                               <span className="text-muted-foreground ml-2">
-                                {isAnnual ? '/an' : '/mois'}
+                                {isAnnual ? t('pricing.perYear') : t('pricing.perMonth')}
                               </span>
                             )}
                           </div>
                           {isAnnual && savings > 0 && (
                             <div className="mt-1">
                               <span className="text-sm text-green-400">
-                                Économisez €{savings}/an
+                                {t('pricing.savePerYear', { savings })}
                               </span>
                             </div>
                           )}
                           {isAnnual && price > 0 && (
                             <p className="text-xs text-muted-foreground mt-1">
-                              soit €{(price / 12).toFixed(2)}/mois
+                              {t('pricing.perMonthBilled', { price: (price / 12).toFixed(2) })}
                             </p>
                           )}
                         </>
@@ -353,9 +330,9 @@ const PricingPage = () => {
                   {/* Coupon Input for paid tiers */}
                   {tier.monthlyPrice > 0 && (
                     <div className="mb-4">
-                      <CouponInput 
+                      <CouponInput
                         onApply={setAppliedCoupon}
-                        language="fr"
+                        language={i18n.language}
                         originalPrice={isAnnual ? tier.annualPrice : tier.monthlyPrice}
                       />
                     </div>
@@ -364,8 +341,8 @@ const PricingPage = () => {
                   <Button
                     data-testid={`subscribe-${tier.id}-btn`}
                     className={`w-full ${
-                      tier.popular 
-                        ? 'bg-primary hover:bg-primary/90' 
+                      tier.popular
+                        ? 'bg-primary hover:bg-primary/90'
                         : 'bg-muted hover:bg-muted/80 text-foreground'
                     }`}
                     onClick={() => handleSubscribe(tier.id)}
@@ -374,12 +351,12 @@ const PricingPage = () => {
                     {loading === tier.id ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        Chargement...
+                        {t('pricing.loading')}
                       </>
                     ) : isCurrentTier ? (
-                      'Plan actuel'
+                      t('pricing.currentPlan')
                     ) : isUpgrade ? (
-                      `Passer à ${tier.name}`
+                      t('pricing.upgradeTo', { tier: tier.name })
                     ) : (
                       tier.cta
                     )}
@@ -397,31 +374,31 @@ const PricingPage = () => {
             transition={{ duration: 0.6, delay: 0.5 }}
           >
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              Questions fréquentes
+              {t('pricing.faq.title')}
             </h2>
             <div className="max-w-2xl mx-auto space-y-4 text-left">
               <div className="bg-card border border-border rounded-xl p-4">
                 <h3 className="font-semibold text-foreground mb-2">
-                  Puis-je annuler à tout moment ?
+                  {t('pricing.faq.cancelQ')}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Oui, vous pouvez annuler votre abonnement à tout moment. Vous conserverez l'accès jusqu'à la fin de votre période de facturation.
+                  {t('pricing.faq.cancelA')}
                 </p>
               </div>
               <div className="bg-card border border-border rounded-xl p-4">
                 <h3 className="font-semibold text-foreground mb-2">
-                  Comment fonctionne le certificat ?
+                  {t('pricing.faq.certQ')}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Après avoir réussi l'examen de certification (80% minimum), vous recevez un certificat PDF téléchargeable avec un QR code de vérification.
+                  {t('pricing.faq.certA')}
                 </p>
               </div>
               <div className="bg-card border border-border rounded-xl p-4">
                 <h3 className="font-semibold text-foreground mb-2">
-                  Qu'est-ce que l'AI Crypto Mentor ?
+                  {t('pricing.faq.mentorQ')}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  CryptoCoach AI est un assistant IA alimenté par GPT qui répond à vos questions sur la crypto, vous aide à comprendre les concepts et vous guide dans votre apprentissage.
+                  {t('pricing.faq.mentorA')}
                 </p>
               </div>
             </div>
@@ -429,11 +406,11 @@ const PricingPage = () => {
 
           {/* Social Proof Stats */}
           <div className="mt-16">
-            <SocialProof language="fr" />
+            <SocialProof language={i18n.language} />
           </div>
 
           {/* Testimonials */}
-          <Testimonials language="fr" />
+          <Testimonials language={i18n.language} />
         </div>
       </div>
     </Layout>

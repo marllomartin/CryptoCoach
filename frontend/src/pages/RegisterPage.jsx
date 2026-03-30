@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import {
@@ -44,6 +45,7 @@ function isPasswordValid(rules) {
 }
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { register, user } = useAuth();
   const [formData, setFormData] = useState({
@@ -71,13 +73,13 @@ export default function RegisterPage() {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('register.passwordsMismatch'));
       return;
     }
 
     const rules = getPasswordRules(formData.password);
     if (!isPasswordValid(rules)) {
-      toast.error('Password does not meet the requirements');
+      toast.error(t('register.toastPasswordInvalid'));
       return;
     }
 
@@ -85,10 +87,10 @@ export default function RegisterPage() {
 
     try {
       await register(formData.email, formData.password, formData.full_name);
-      toast.success('Account created! Welcome to TheCryptoCoach!');
+      toast.success(t('register.toastSuccess'));
       navigate('/dashboard');
     } catch (e) {
-      toast.error(e.response?.data?.detail || 'Registration failed');
+      toast.error(e.response?.data?.detail || t('register.toastFailed'));
       captchaRef.current?.resetCaptcha();
       setCaptchaToken(null);
     } finally {
@@ -97,10 +99,10 @@ export default function RegisterPage() {
   };
 
   const benefits = [
-    "Access to all free courses",
-    "Track your learning progress",
-    "Earn certificates",
-    "AI-powered mentorship"
+    t('register.benefit1'),
+    t('register.benefit2'),
+    t('register.benefit3'),
+    t('register.benefit4')
   ];
 
   return (
@@ -123,13 +125,13 @@ export default function RegisterPage() {
 
         <Card className="bg-card border-border">
           <CardHeader className="text-center">
-            <CardTitle className="font-heading text-2xl">Create Account</CardTitle>
-            <CardDescription>Start your crypto education journey today</CardDescription>
+            <CardTitle className="font-heading text-2xl">{t('register.title')}</CardTitle>
+            <CardDescription>{t('register.subtitle')}</CardDescription>
           </CardHeader>
           <CardContent>
             {/* Benefits */}
             <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
-              <p className="text-sm font-medium mb-2">What you'll get:</p>
+              <p className="text-sm font-medium mb-2">{t('register.whatYouGet')}</p>
               <ul className="space-y-1">
                 {benefits.map(benefit => (
                   <li key={benefit} className="text-sm text-slate-400 flex items-center gap-2">
@@ -142,14 +144,14 @@ export default function RegisterPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="full_name">Full Name</Label>
+                <Label htmlFor="full_name">{t('auth.fullName')}</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <Input
                     id="full_name"
                     name="full_name"
                     type="text"
-                    placeholder="John Doe"
+                    placeholder={t('register.fullNamePlaceholder')}
                     value={formData.full_name}
                     onChange={handleChange}
                     required
@@ -160,7 +162,7 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth.email')}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <Input
@@ -178,7 +180,7 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('auth.password')}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <Input
@@ -204,17 +206,17 @@ export default function RegisterPage() {
                   const r = getPasswordRules(formData.password);
                   const complexity = [r.hasUpper, r.hasLower, r.hasDigit, r.hasSpecial].filter(Boolean).length;
                   const rules = [
-                    { label: 'At least 8 characters', ok: r.minLength },
-                    { label: 'Uppercase letter (A–Z)', ok: r.hasUpper },
-                    { label: 'Lowercase letter (a–z)', ok: r.hasLower },
-                    { label: 'Number (0–9)', ok: r.hasDigit },
-                    { label: 'Special character (!@#$...)', ok: r.hasSpecial },
-                    { label: 'Not a common password', ok: r.notCommon },
+                    { label: t('register.rule_minLength'), ok: r.minLength },
+                    { label: t('register.rule_hasUpper'), ok: r.hasUpper },
+                    { label: t('register.rule_hasLower'), ok: r.hasLower },
+                    { label: t('register.rule_hasDigit'), ok: r.hasDigit },
+                    { label: t('register.rule_hasSpecial'), ok: r.hasSpecial },
+                    { label: t('register.rule_notCommon'), ok: r.notCommon },
                   ];
                   return (
                     <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
                       <p className="text-xs text-slate-400 mb-2">
-                        Complexity: <span className={complexity >= 3 ? 'text-green-400' : 'text-amber-400'}>{complexity}/4</span> (need 3+)
+                        {t('register.complexity', { score: complexity })}
                       </p>
                       {rules.map(({ label, ok }) => (
                         <div key={label} className="flex items-center gap-2">
@@ -230,7 +232,7 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">{t('auth.confirmPassword')}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <Input
@@ -254,7 +256,7 @@ export default function RegisterPage() {
                 {formData.confirmPassword && formData.password !== formData.confirmPassword && (
                   <div className="flex items-center gap-1.5 text-red-400 text-xs">
                     <XCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                    Passwords do not match
+                    {t('register.passwordsMismatch')}
                   </div>
                 )}
               </div>
@@ -277,19 +279,19 @@ export default function RegisterPage() {
                 {loading ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Creating account...
+                    {t('register.creatingAccount')}
                   </>
                 ) : (
-                  'Create Free Account'
+                  t('register.createFreeAccount')
                 )}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-slate-400">
-                Already have an account?{' '}
+                {t('register.alreadyHaveAccount')}{' '}
                 <Link to="/login" className="text-primary hover:underline font-medium">
-                  Sign in
+                  {t('register.signIn')}
                 </Link>
               </p>
             </div>

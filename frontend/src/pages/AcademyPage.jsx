@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API, useAuth } from '../App';
 import { useSubscriptionAccess } from '../components/SubscriptionGate';
+import { useTranslation } from 'react-i18next';
 import { 
   GraduationCap, 
   Clock, 
@@ -20,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 import { Progress } from '../components/ui/progress';
 
 export default function AcademyPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { canAccessCourse, userTier } = useSubscriptionAccess();
   const [courses, setCourses] = useState([]);
@@ -87,13 +89,12 @@ export default function AcademyPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <span className="text-primary text-sm font-medium uppercase tracking-wider">Crypto Academy</span>
+            <span className="text-primary text-sm font-medium uppercase tracking-wider">{t('academy.heroTag')}</span>
             <h1 className="font-heading text-5xl md:text-6xl font-bold mt-4 mb-6">
-              Your Path to <span className="text-gradient">Crypto Mastery</span>
+              {t('academy.heroTitle1')} <span className="text-gradient">{t('academy.heroTitleHighlight')}</span>
             </h1>
             <p className="text-lg text-slate-300">
-              Three structured levels taking you from beginner to expert. Each course builds on the last, 
-              culminating in industry-recognized certifications.
+              {t('academy.heroSubtitle')}
             </p>
           </motion.div>
         </div>
@@ -136,22 +137,22 @@ export default function AcademyPage() {
                         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
                           <div className="text-center">
                             <Lock className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                            <p className="text-slate-400">Sign in to access</p>
+                            <p className="text-slate-400">{t('academy.signInToAccess')}</p>
                           </div>
                         </div>
                       )}
-                      
+
                       {needsUpgrade && (
                         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
                           <div className="text-center px-4">
                             <Crown className="w-8 h-8 text-primary mx-auto mb-2" />
-                            <p className="text-slate-300 font-medium mb-1">Abonnement requis</p>
+                            <p className="text-slate-300 font-medium mb-1">{t('academy.upgradeRequired')}</p>
                             <p className="text-slate-400 text-sm mb-3">
-                              {course.level === 2 ? 'Starter' : 'Pro'} ou supérieur
+                              {course.level === 2 ? 'Starter' : 'Pro'} {t('academy.orHigher')}
                             </p>
                             <Link to="/pricing">
                               <Button size="sm" className="bg-primary hover:bg-primary/90">
-                                Voir les plans
+                                {t('academy.viewPlans')}
                               </Button>
                             </Link>
                           </div>
@@ -161,7 +162,7 @@ export default function AcademyPage() {
                       <CardHeader>
                         <div className="flex items-center justify-between mb-4">
                           <span className={`px-3 py-1 rounded-full text-xs font-medium border ${styles.badge}`}>
-                            Level {course.level}
+                            {t('academy.level')} {course.level}
                           </span>
                           <div className={`w-10 h-10 rounded-lg ${styles.icon} flex items-center justify-center`}>
                             <GraduationCap className="w-5 h-5" />
@@ -178,7 +179,7 @@ export default function AcademyPage() {
                           <div className="flex items-center gap-6 text-sm text-slate-400">
                             <div className="flex items-center gap-2">
                               <BookOpen className="w-4 h-4" />
-                              <span>{course.lessons_count} Lessons</span>
+                              <span>{course.lessons_count} {t('academy.lessons')}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Clock className="w-4 h-4" />
@@ -189,7 +190,7 @@ export default function AcademyPage() {
                           {user && (
                             <div className="space-y-2">
                               <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">Progress</span>
+                                <span className="text-slate-400">{t('academy.progress')}</span>
                                 <span className="text-primary font-medium">{progress}%</span>
                               </div>
                               <Progress value={progress} className="h-2" />
@@ -209,7 +210,7 @@ export default function AcademyPage() {
 
                           <Link to={`/course/${course.id}`} className="block pt-4">
                             <Button className="w-full bg-slate-800 hover:bg-slate-700 group-hover:bg-primary group-hover:text-white transition-colors">
-                              {progress > 0 ? 'Continue Learning' : 'Start Course'}
+                              {progress > 0 ? t('academy.continueLearning') : t('academy.startCourse')}
                               <ChevronRight className="w-4 h-4 ml-2" />
                             </Button>
                           </Link>
@@ -234,10 +235,10 @@ export default function AcademyPage() {
             viewport={{ once: true }}
           >
             <h2 className="font-heading text-4xl md:text-5xl font-bold mb-4">
-              Earn <span className="text-primary">Certifications</span>
+              {t('academy.certTitle')}
             </h2>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              Complete each level and pass the exam to earn verified certificates with QR verification
+              {t('academy.certSubtitle')}
             </p>
           </motion.div>
 
@@ -257,20 +258,20 @@ export default function AcademyPage() {
                     </div>
                     <h3 className="font-heading font-bold text-xl mb-2">{cert.name}</h3>
                     <p className="text-slate-400 text-sm mb-6">
-                      Complete Level {cert.level} curriculum and pass the certification exam with 80% or higher
+                      {t('academy.certExamRequired', { level: cert.level })}
                     </p>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-slate-400">
                         <CheckCircle className="w-4 h-4 text-green-500" />
-                        <span>PDF Certificate Download</span>
+                        <span>{t('academy.pdfDownload')}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-slate-400">
                         <CheckCircle className="w-4 h-4 text-green-500" />
-                        <span>QR Code Verification</span>
+                        <span>{t('academy.qrVerification')}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-slate-400">
                         <CheckCircle className="w-4 h-4 text-green-500" />
-                        <span>Shareable Credential</span>
+                        <span>{t('academy.shareable')}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -291,20 +292,14 @@ export default function AcademyPage() {
             viewport={{ once: true }}
           >
             <h2 className="font-heading text-4xl md:text-5xl font-bold mb-4">
-              How It <span className="text-primary">Works</span>
+              {t('academy.howItWorksTitle')}
             </h2>
           </motion.div>
 
           <div className="space-y-8">
-            {[
-              { step: 1, title: "Start with Foundations", desc: "Learn blockchain basics, Bitcoin, wallets, and security" },
-              { step: 2, title: "Complete Lessons", desc: "Work through structured content with examples and case studies" },
-              { step: 3, title: "Take Quizzes", desc: "Test your knowledge after each lesson" },
-              { step: 4, title: "Pass the Exam", desc: "Complete the level exam with 80% or higher to certify" },
-              { step: 5, title: "Advance to Next Level", desc: "Continue learning with more advanced topics" }
-            ].map((item, index) => (
+            {[1, 2, 3, 4, 5].map((step, index) => (
               <motion.div
-                key={item.step}
+                key={step}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -312,11 +307,11 @@ export default function AcademyPage() {
                 className="flex items-start gap-6"
               >
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <span className="text-primary font-bold">{item.step}</span>
+                  <span className="text-primary font-bold">{step}</span>
                 </div>
                 <div>
-                  <h3 className="font-heading font-semibold text-lg">{item.title}</h3>
-                  <p className="text-slate-400">{item.desc}</p>
+                  <h3 className="font-heading font-semibold text-lg">{t(`academy.step${step}Title`)}</h3>
+                  <p className="text-slate-400">{t(`academy.step${step}Desc`)}</p>
                 </div>
               </motion.div>
             ))}
@@ -335,14 +330,14 @@ export default function AcademyPage() {
               className="bg-card border border-border rounded-2xl p-8"
             >
               <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4">
-                Ready to Start Learning?
+                {t('academy.ctaTitle')}
               </h2>
               <p className="text-slate-400 mb-6">
-                Create a free account to track your progress and earn certifications
+                {t('academy.ctaSubtitle')}
               </p>
               <Link to="/register">
                 <Button size="lg" className="bg-primary hover:bg-primary/90 px-8">
-                  Get Started Free
+                  {t('academy.getStartedFree')}
                   <ChevronRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>

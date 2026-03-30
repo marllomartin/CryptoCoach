@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Home, ArrowLeft, Search } from 'lucide-react';
+import { Home, ArrowLeft } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 const NotFoundPage = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 flex items-center justify-center p-4">
       <div className="text-center max-w-md">
@@ -18,32 +21,30 @@ const NotFoundPage = () => {
         </div>
 
         <h1 className="text-3xl font-bold text-white mb-4">
-          Page Not Found
+          {t('notFound.title')}
         </h1>
-        
+
         <p className="text-gray-400 mb-8">
-          Oops! The page you're looking for seems to have vanished into the blockchain. 
-          Let's get you back on track.
+          {t('notFound.message')}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link to="/">
             <Button className="w-full sm:w-auto">
               <Home className="w-4 h-4 mr-2" />
-              Go Home
+              {t('notFound.goHome')}
             </Button>
           </Link>
           <Button variant="outline" onClick={() => window.history.back()} className="w-full sm:w-auto">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Go Back
+            {t('notFound.goBack')}
           </Button>
         </div>
 
         {/* Fun crypto fact */}
         <div className="mt-12 p-4 bg-gray-900/50 border border-gray-800 rounded-xl">
           <p className="text-sm text-gray-500">
-            💡 <span className="text-gray-400">Did you know?</span> The first Bitcoin transaction was for 10,000 BTC 
-            used to buy two pizzas in 2010!
+            💡 <span className="text-gray-400">{t('notFound.funFact')}</span>
           </p>
         </div>
       </div>

@@ -4,7 +4,8 @@ import { Layout } from '../components/Layout';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API } from '../App';
-import { 
+import { useTranslation } from 'react-i18next';
+import {
   Clock,
   User,
   ChevronLeft,
@@ -18,6 +19,7 @@ import { toast } from 'sonner';
 
 export default function BlogPostPage() {
   const { slug } = useParams();
+  const { t, i18n } = useTranslation();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +46,7 @@ export default function BlogPostPage() {
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      toast.success('Link copied to clipboard!');
+      toast.success(t('blog.linkCopied'));
     }
   };
 
@@ -52,7 +54,7 @@ export default function BlogPostPage() {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-pulse text-primary text-xl">Loading article...</div>
+          <div className="animate-pulse text-primary text-xl">{t('blog.loadingArticle')}</div>
         </div>
       </Layout>
     );
@@ -63,9 +65,9 @@ export default function BlogPostPage() {
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Article not found</h1>
+            <h1 className="text-2xl font-bold mb-4">{t('blog.articleNotFound')}</h1>
             <Link to="/blog">
-              <Button>Back to Blog</Button>
+              <Button>{t('blog.backToBlog')}</Button>
             </Link>
           </div>
         </div>
@@ -73,7 +75,7 @@ export default function BlogPostPage() {
     );
   }
 
-  const formattedDate = new Date(post.published_at).toLocaleDateString('en-US', {
+  const formattedDate = new Date(post.published_at).toLocaleDateString(i18n.language, {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -90,7 +92,7 @@ export default function BlogPostPage() {
         >
           <Link to="/blog" className="text-slate-400 hover:text-primary text-sm inline-flex items-center gap-2">
             <ChevronLeft className="w-4 h-4" />
-            Back to Insights
+            {t('blog.backToInsights')}
           </Link>
         </motion.div>
 
@@ -106,7 +108,7 @@ export default function BlogPostPage() {
             </Badge>
             <span className="text-sm text-slate-500 flex items-center gap-1">
               <Clock className="w-4 h-4" />
-              {post.read_time} min read
+              {t('blog.minRead', { n: post.read_time })}
             </span>
           </div>
 
@@ -133,7 +135,7 @@ export default function BlogPostPage() {
             </div>
             <Button variant="outline" size="sm" className="border-slate-700" onClick={sharePost}>
               <Share2 className="w-4 h-4 mr-2" />
-              Share
+              {t('blog.share')}
             </Button>
           </div>
         </motion.header>
@@ -201,14 +203,14 @@ export default function BlogPostPage() {
           className="mt-12 text-center"
         >
           <h3 className="font-heading text-2xl font-bold mb-4">
-            Want to learn more?
+            {t('blog.wantToLearn')}
           </h3>
           <p className="text-slate-400 mb-6">
-            Start your crypto education journey with our structured courses
+            {t('blog.wantToLearnDesc')}
           </p>
           <Link to="/academy">
             <Button size="lg" className="bg-primary hover:bg-primary/90">
-              Explore Academy
+              {t('blog.exploreAcademy')}
             </Button>
           </Link>
         </motion.div>

@@ -3,6 +3,7 @@ import { Layout } from '../components/Layout';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API, useAuth } from '../App';
+import { useTranslation } from 'react-i18next';
 import { 
   Trophy, 
   Medal,
@@ -14,6 +15,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 
 export default function LeaderboardPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,10 +73,10 @@ export default function LeaderboardPage() {
             <Trophy className="w-10 h-10 text-primary" />
           </div>
           <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4">
-            Student <span className="text-primary">Leaderboard</span>
+            {t('leaderboard.title')}
           </h1>
           <p className="text-slate-400 text-lg">
-            Top performers in the CryptoCoach community
+            {t('leaderboard.subtitle')}
           </p>
         </motion.div>
 
@@ -87,19 +89,19 @@ export default function LeaderboardPage() {
         >
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-green-500/20" />
-            <span>XP Points</span>
+            <span>{t('leaderboard.xpPoints')}</span>
           </div>
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4" />
-            <span>Lessons</span>
+            <span>{t('academy.lessons')}</span>
           </div>
           <div className="flex items-center gap-2">
             <Award className="w-4 h-4" />
-            <span>Certificates</span>
+            <span>{t('dashboard.certificatesEarned')}</span>
           </div>
           <div className="flex items-center gap-2">
             <Flame className="w-4 h-4" />
-            <span>Streak</span>
+            <span>{t('leaderboard.streakLabel')}</span>
           </div>
         </motion.div>
 
@@ -124,8 +126,8 @@ export default function LeaderboardPage() {
           <Card className="bg-card border-border">
             <CardContent className="p-12 text-center">
               <Trophy className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-              <h3 className="font-heading text-xl font-bold mb-2">No rankings yet</h3>
-              <p className="text-slate-400">Be the first to complete lessons and appear on the leaderboard!</p>
+              <h3 className="font-heading text-xl font-bold mb-2">{t('leaderboard.noRankings')}</h3>
+              <p className="text-slate-400">{t('leaderboard.beFirst')}</p>
             </CardContent>
           </Card>
         ) : (
@@ -153,21 +155,21 @@ export default function LeaderboardPage() {
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-semibold truncate">
                               {entry.name}
-                              {isCurrentUser && <span className="text-primary ml-2">(You)</span>}
+                              {isCurrentUser && <span className="text-primary ml-2">{t('leaderboard.you')}</span>}
                             </h3>
                           </div>
                           <div className="flex flex-wrap gap-4 text-sm text-slate-400">
                             <span className="flex items-center gap-1">
                               <BookOpen className="w-4 h-4" />
-                              {entry.lessons_completed} lessons
+                              {entry.lessons_completed} {t('leaderboard.lessonsLabel')}
                             </span>
                             <span className="flex items-center gap-1">
                               <Award className="w-4 h-4" />
-                              {entry.certificates} certs
+                              {entry.certificates} {t('dashboard.certificatesEarned')}
                             </span>
                             <span className="flex items-center gap-1">
                               <Flame className="w-4 h-4" />
-                              {entry.streak_days} days
+                              {entry.streak_days} {t('leaderboard.streakLabel')}
                             </span>
                           </div>
                         </div>

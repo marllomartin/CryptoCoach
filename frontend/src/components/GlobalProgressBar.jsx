@@ -5,9 +5,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../App';
 import { Trophy, BookOpen, Star, Flame } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function GlobalProgressBar({ className = "" }) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   
   if (!user) return null;
   
@@ -29,7 +31,7 @@ export function GlobalProgressBar({ className = "" }) {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
               <Star className="w-4 h-4 text-yellow-500" />
-              <span className="text-sm font-medium">Niv. {level}</span>
+              <span className="text-sm font-medium">{t('progressBar.level', { level })}</span>
             </div>
             <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden">
               <motion.div 
@@ -46,7 +48,7 @@ export function GlobalProgressBar({ className = "" }) {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
               <BookOpen className="w-4 h-4 text-primary" />
-              <span className="text-sm">{completedLessons}/{totalLessons} leçons</span>
+              <span className="text-sm">{t('progressBar.lessons', { completed: completedLessons, total: totalLessons })}</span>
             </div>
             <div className="w-32 h-1.5 bg-muted rounded-full overflow-hidden">
               <motion.div 
@@ -63,14 +65,14 @@ export function GlobalProgressBar({ className = "" }) {
           {user.streak_days > 0 && (
             <div className="flex items-center gap-1.5">
               <Flame className="w-4 h-4 text-orange-500" />
-              <span className="text-sm font-medium">{user.streak_days}j</span>
+              <span className="text-sm font-medium">{t('progressBar.streak', { days: user.streak_days })}</span>
             </div>
           )}
           
           {/* Achievements hint */}
           <div className="flex items-center gap-1.5 text-slate-400">
             <Trophy className="w-4 h-4" />
-            <span className="text-xs">{user.achievements?.length || 0} badges</span>
+            <span className="text-xs">{t('progressBar.badges', { count: user.achievements?.length || 0 })}</span>
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API, useAuth } from '../App';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { 
   Clock, 
   AlertTriangle,
@@ -34,6 +35,7 @@ export default function ExamPage() {
   const { level } = useParams();
   const navigate = useNavigate();
   const { token, refreshUser } = useAuth();
+  const { t } = useTranslation();
   const [exam, setExam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState({});
@@ -101,12 +103,12 @@ export default function ExamPage() {
       await refreshUser();
       
       if (response.data.passed) {
-        toast.success(`Congratulations! You passed with ${response.data.score}%!`);
+        toast.success(t('exam.toastPassed', { score: response.data.score }));
       } else {
-        toast.error(`Score: ${response.data.score}%. You need 80% to pass.`);
+        toast.error(t('exam.toastFailed', { score: response.data.score }));
       }
     } catch (e) {
-      toast.error('Failed to submit exam');
+      toast.error(t('exam.toastError'));
     } finally {
       setSubmitting(false);
     }
@@ -121,7 +123,7 @@ export default function ExamPage() {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-pulse text-primary text-xl">Loading exam...</div>
+          <div className="animate-pulse text-primary text-xl">{t('exam.loading')}</div>
         </div>
       </Layout>
     );
@@ -132,9 +134,9 @@ export default function ExamPage() {
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Exam not found</h1>
+            <h1 className="text-2xl font-bold mb-4">{t('exam.notFound')}</h1>
             <Link to="/academy">
-              <Button>Back to Academy</Button>
+              <Button>{t('exam.backToAcademy')}</Button>
             </Link>
           </div>
         </div>
@@ -161,33 +163,33 @@ export default function ExamPage() {
               {examNames[level]} Exam
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-4 text-slate-400">
-              <p>You are about to start the certification exam.</p>
+              <p>{t('exam.aboutToStart')}</p>
               <ul className="space-y-2">
                 <li className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-primary" />
-                  {exam.questions.length} Questions
+                  {t('exam.questions', { count: exam.questions.length })}
                 </li>
                 <li className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-primary" />
-                  {exam.time_limit_minutes} Minutes Time Limit
+                  {t('exam.minutesLimit', { minutes: exam.time_limit_minutes })}
                 </li>
                 <li className="flex items-center gap-2">
                   <Award className="w-4 h-4 text-primary" />
-                  80% Required to Pass
+                  {t('exam.requiredToPass')}
                 </li>
               </ul>
               <p className="text-amber-500 flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4" />
-                The timer will start when you click "Start Exam"
+                {t('exam.timerWarning')}
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => navigate('/academy')} className="border-slate-700">
-              Cancel
+              {t('exam.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction onClick={startExam} className="bg-primary">
-              Start Exam
+              {t('exam.start')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -211,8 +213,8 @@ export default function ExamPage() {
               </div>
             </div>
             <div className="flex items-center justify-between text-sm text-slate-400 mb-2">
-              <span>{answeredCount} of {exam.questions.length} answered</span>
-              <span>{Math.round(progress)}% complete</span>
+              <span>{t('exam.answered', { answered: answeredCount, total: exam.questions.length })}</span>
+              <span>{t('exam.complete', { percent: Math.round(progress) })}</span>
             </div>
             <Progress value={progress} className="h-2" />
           </motion.div>
@@ -275,7 +277,7 @@ export default function ExamPage() {
               disabled={answeredCount < exam.questions.length || submitting}
               className="bg-green-600 hover:bg-green-700 px-8"
             >
-              {submitting ? 'Submitting...' : 'Submit Exam'}
+              {submitting ? t('exam.submitting') : t('exam.submit')}
               <CheckCircle className="w-5 h-5 ml-2" />
             </Button>
           </div>
@@ -306,16 +308,16 @@ export default function ExamPage() {
                 </h2>
                 
                 <p className={`text-xl font-medium mb-4 ${results.passed ? 'text-green-500' : 'text-red-500'}`}>
-                  {results.passed ? 'Congratulations! You Passed!' : 'Not Passed'}
+                  {results.passed ? t('exam.passed') : t('exam.notPassed')}
                 </p>
-                
+
                 <p className="text-slate-400 mb-6">
-                  {results.correct} of {results.total} correct answers
+                  {t('exam.correctAnswers', { correct: results.correct, total: results.total })}
                 </p>
 
                 {results.passed && results.certificate_id && (
                   <div className="bg-card border border-border rounded-lg p-4 mb-6">
-                    <p className="text-sm text-slate-400 mb-2">Certificate Earned</p>
+                    <p className="text-sm text-slate-400 mb-2">{t('exam.certificateEarned')}</p>
                     <p className="font-heading font-bold text-lg text-primary">
                       {results.certificate_name}
                     </p>
@@ -329,13 +331,13 @@ export default function ExamPage() {
                 <>
                   <Link to="/certificates">
                     <Button className="bg-primary hover:bg-primary/90">
-                      View Certificates
+                      {t('exam.viewCertificates')}
                       <Award className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
                   <Link to="/academy">
                     <Button variant="outline" className="border-slate-700">
-                      Continue Learning
+                      {t('exam.continueLearning')}
                       <ChevronRight className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
@@ -353,11 +355,11 @@ export default function ExamPage() {
                     }}
                     className="bg-primary hover:bg-primary/90"
                   >
-                    Retake Exam
+                    {t('exam.retake')}
                   </Button>
                   <Link to="/academy">
                     <Button variant="outline" className="border-slate-700">
-                      Review Lessons
+                      {t('exam.reviewLessons')}
                     </Button>
                   </Link>
                 </>

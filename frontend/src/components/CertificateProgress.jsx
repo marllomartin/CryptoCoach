@@ -2,37 +2,13 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Award, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // Progress to certificate bar
-export function CertificateProgress({ completedLessons = 0, totalLessons = 23, language = 'en' }) {
+export function CertificateProgress({ completedLessons = 0, totalLessons = 23 }) {
+  const { t } = useTranslation();
   const progress = (completedLessons / totalLessons) * 100;
   const remaining = totalLessons - completedLessons;
-  
-  const labels = {
-    en: {
-      title: 'Your path to certification',
-      remaining: 'lessons to certificate',
-      complete: 'Ready for certification!',
-      almostThere: 'Almost there!',
-      takeExam: 'Take the exam'
-    },
-    fr: {
-      title: 'Votre chemin vers la certification',
-      remaining: 'leçons avant le certificat',
-      complete: 'Prêt pour la certification !',
-      almostThere: 'Presque terminé !',
-      takeExam: 'Passer l\'examen'
-    },
-    ar: {
-      title: 'طريقك للشهادة',
-      remaining: 'درس للشهادة',
-      complete: 'جاهز للشهادة!',
-      almostThere: 'على وشك الانتهاء!',
-      takeExam: 'قدم الامتحان'
-    }
-  };
-  
-  const t = labels[language] || labels.en;
   
   const isComplete = completedLessons >= totalLessons;
   const isAlmostThere = remaining <= 3 && !isComplete;
@@ -52,7 +28,7 @@ export function CertificateProgress({ completedLessons = 0, totalLessons = 23, l
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Award className={`w-5 h-5 ${isComplete ? 'text-green-400' : isAlmostThere ? 'text-amber-400' : 'text-primary'}`} />
-          <span className="text-sm font-medium text-white">{t.title}</span>
+          <span className="text-sm font-medium text-white">{t('certificate.title')}</span>
         </div>
         
         {isComplete ? (
@@ -60,13 +36,13 @@ export function CertificateProgress({ completedLessons = 0, totalLessons = 23, l
             to="/exam/final"
             className="flex items-center gap-1 text-sm text-green-400 hover:text-green-300 transition-colors"
           >
-            {t.takeExam}
+            {t('certificate.takeExam')}
             <ChevronRight className="w-4 h-4" />
           </Link>
         ) : (
           <span className={`text-sm font-medium ${isAlmostThere ? 'text-amber-400' : 'text-slate-400'}`}>
-            {isAlmostThere && t.almostThere + ' '}
-            {remaining} {t.remaining}
+            {isAlmostThere && t('certificate.almostThere') + ' '}
+            {remaining} {t('certificate.remaining')}
           </span>
         )}
       </div>

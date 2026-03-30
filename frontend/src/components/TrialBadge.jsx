@@ -6,13 +6,15 @@ import { motion } from 'framer-motion';
 import { Clock, Gift, Lock, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
-export function TrialBadge({ 
-  trialStatus, 
+export function TrialBadge({
+  trialStatus,
   onUpgradeClick,
-  compact = false 
+  compact = false
 }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   if (!trialStatus) return null;
   
@@ -37,12 +39,12 @@ export function TrialBadge({
       >
         <Gift className="w-4 h-4 text-green-400" />
         <span className="text-sm font-medium text-green-400">
-          Essai gratuit
+          {t('trialBadge.freeTrial')}
         </span>
         <div className="flex items-center gap-1 px-2 py-0.5 bg-green-500/20 rounded-full">
           <Clock className="w-3 h-3 text-green-300" />
           <span className="text-xs font-bold text-green-300">
-            {days_remaining}j restant{days_remaining > 1 ? 's' : ''}
+            {t(days_remaining > 1 ? 'trialBadge.daysRemaining_other' : 'trialBadge.daysRemaining_one', { count: days_remaining })}
           </span>
         </div>
       </motion.div>
@@ -60,17 +62,17 @@ export function TrialBadge({
         <div className={`${compact ? 'inline-flex' : 'flex'} items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30`}>
           <Lock className="w-4 h-4 text-amber-400" />
           <span className="text-sm font-medium text-amber-400">
-            Aperçu {preview_seconds}s
+            {t('trialBadge.previewSeconds', { seconds: preview_seconds })}
           </span>
         </div>
         {!compact && (
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             onClick={() => onUpgradeClick ? onUpgradeClick() : navigate('/pricing')}
             className="w-full bg-gradient-to-r from-primary to-purple-500 hover:opacity-90"
           >
             <Sparkles className="w-4 h-4 mr-2" />
-            Débloquer l'accès complet
+            {t('trialBadge.unlockAccess')}
           </Button>
         )}
       </motion.div>
@@ -82,6 +84,7 @@ export function TrialBadge({
 
 // Countdown timer for trial
 export function TrialCountdown({ endDate, onExpire }) {
+  const { t } = useTranslation();
   const [timeLeft, setTimeLeft] = React.useState({ days: 0, hours: 0, minutes: 0 });
   
   React.useEffect(() => {
@@ -118,8 +121,8 @@ export function TrialCountdown({ endDate, onExpire }) {
     <div className="flex items-center gap-2 text-sm">
       <Clock className="w-4 h-4 text-green-400" />
       <span className="text-green-400">
-        {timeLeft.days > 0 && `${timeLeft.days}j `}
-        {timeLeft.hours}h {timeLeft.minutes}m restants
+        {timeLeft.days > 0 && `${timeLeft.days}${t('trialBadge.dayUnit')} `}
+        {timeLeft.hours}{t('trialBadge.hourUnit')} {timeLeft.minutes}{t('trialBadge.minuteUnit')} {t('trialBadge.remaining')}
       </span>
     </div>
   );

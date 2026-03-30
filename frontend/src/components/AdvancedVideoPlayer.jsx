@@ -18,6 +18,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { Button } from './ui/button';
+import { useTranslation } from 'react-i18next';
 
 const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
@@ -30,6 +31,7 @@ export function AdvancedVideoPlayer({
   onUpgradeClick,
   className = ""
 }) {
+  const { t } = useTranslation();
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -202,18 +204,17 @@ export function AdvancedVideoPlayer({
             className="text-center p-8 max-w-md"
           >
             <Lock className="w-16 h-16 text-amber-400 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold mb-2">Aperçu terminé</h3>
+            <h3 className="text-2xl font-bold mb-2">{t('videoPlayer.previewEnded')}</h3>
             <p className="text-slate-400 mb-6">
-              Vous avez regardé les {previewSeconds} premières secondes. 
-              Passez à un abonnement pour accéder au contenu complet.
+              {t('videoPlayer.previewMessage', { seconds: previewSeconds })}
             </p>
-            <Button 
+            <Button
               size="lg"
               onClick={onUpgradeClick}
               className="bg-gradient-to-r from-primary to-purple-500 hover:opacity-90"
             >
               <Sparkles className="w-5 h-5 mr-2" />
-              Débloquer l'accès complet
+              {t('videoPlayer.unlockAccess')}
             </Button>
           </motion.div>
         </div>

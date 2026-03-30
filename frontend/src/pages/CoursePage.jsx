@@ -4,6 +4,7 @@ import { Layout } from '../components/Layout';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API, useAuth } from '../App';
+import { useTranslation } from 'react-i18next';
 import { 
   BookOpen, 
   Clock, 
@@ -21,6 +22,7 @@ import { Progress } from '../components/ui/progress';
 export default function CoursePage() {
   const { courseId } = useParams();
   const { user, token } = useAuth();
+  const { t } = useTranslation();
   const [course, setCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +63,7 @@ export default function CoursePage() {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-pulse text-primary text-xl">Loading course...</div>
+          <div className="animate-pulse text-primary text-xl">{t('course.loading')}</div>
         </div>
       </Layout>
     );
@@ -72,9 +74,9 @@ export default function CoursePage() {
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Course not found</h1>
+            <h1 className="text-2xl font-bold mb-4">{t('course.notFound')}</h1>
             <Link to="/academy">
-              <Button>Back to Academy</Button>
+              <Button>{t('exam.backToAcademy')}</Button>
             </Link>
           </div>
         </div>
@@ -94,13 +96,13 @@ export default function CoursePage() {
             animate={{ opacity: 1, y: 0 }}
           >
             <Link to="/academy" className="text-slate-400 hover:text-primary text-sm mb-4 inline-block">
-              ← Back to Academy
+              {t('course.backToAcademy')}
             </Link>
             
             <div className="flex flex-col lg:flex-row gap-8 items-start">
               <div className="flex-1">
                 <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-                  Level {course.level}
+                  {t('course.level', { n: course.level })}
                 </span>
                 
                 <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4">
@@ -114,22 +116,22 @@ export default function CoursePage() {
                 <div className="flex flex-wrap items-center gap-6 text-sm text-slate-400 mb-6">
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4" />
-                    <span>{course.lessons_count} Lessons</span>
+                    <span>{t('course.lessons', { count: course.lessons_count })}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4" />
-                    <span>{course.duration_hours} Hours</span>
+                    <span>{t('course.hours', { count: course.duration_hours })}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Award className="w-4 h-4" />
-                    <span>Certificate Included</span>
+                    <span>{t('course.certificateIncluded')}</span>
                   </div>
                 </div>
 
                 {user && (
                   <div className="space-y-2 mb-6">
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">Your Progress</span>
+                      <span className="text-slate-400">{t('course.yourProgress')}</span>
                       <span className="text-primary font-medium">{progress}%</span>
                     </div>
                     <Progress value={progress} className="h-3" />
@@ -139,7 +141,7 @@ export default function CoursePage() {
                 {!user && (
                   <Link to="/register">
                     <Button size="lg" className="bg-primary hover:bg-primary/90">
-                      Sign Up to Start
+                      {t('course.signUpToStart')}
                       <ChevronRight className="w-5 h-5 ml-2" />
                     </Button>
                   </Link>
@@ -149,7 +151,7 @@ export default function CoursePage() {
               <div className="w-full lg:w-80">
                 <Card className="bg-card border-border">
                   <CardHeader>
-                    <CardTitle className="text-lg">Topics Covered</CardTitle>
+                    <CardTitle className="text-lg">{t('course.topicsCovered')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
@@ -171,7 +173,7 @@ export default function CoursePage() {
       {/* Lessons List */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="font-heading text-2xl font-bold mb-8">Course Lessons</h2>
+          <h2 className="font-heading text-2xl font-bold mb-8">{t('course.courseLessons')}</h2>
 
           <div className="space-y-4">
             {lessons.map((lesson, index) => {
@@ -194,11 +196,11 @@ export default function CoursePage() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-1">
-                              <span className="text-sm text-slate-500">Lesson {lesson.order}</span>
+                              <span className="text-sm text-slate-500">{t('course.lessonNumber', { n: lesson.order })}</span>
                             </div>
                             <h3 className="font-semibold text-slate-400">{lesson.title}</h3>
                           </div>
-                          <span className="text-sm text-slate-500">Sign in to access</span>
+                          <span className="text-sm text-slate-500">{t('course.signInToAccess')}</span>
                         </div>
                       ) : (
                         <Link to={`/lesson/${lesson.id}`} className="flex items-center gap-4 p-6">
@@ -211,7 +213,7 @@ export default function CoursePage() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-1">
-                              <span className="text-sm text-slate-500">Lesson {lesson.order}</span>
+                              <span className="text-sm text-slate-500">{t('course.lessonNumber', { n: lesson.order })}</span>
                               <span className="text-sm text-slate-500">•</span>
                               <span className="text-sm text-slate-500">{lesson.duration_minutes} min</span>
                             </div>
@@ -237,25 +239,25 @@ export default function CoursePage() {
               <CardContent className="p-8 text-center">
                 <Award className={`w-12 h-12 mx-auto mb-4 ${allLessonsCompleted() ? 'text-primary' : 'text-slate-500'}`} />
                 <h3 className="font-heading text-2xl font-bold mb-2">
-                  Certification Exam
+                  {t('course.certificationExam')}
                 </h3>
                 <p className="text-slate-400 mb-6 max-w-md mx-auto">
-                  {allLessonsCompleted() 
-                    ? "You've completed all lessons! Take the exam to earn your certificate."
-                    : `Complete all ${lessons.length} lessons to unlock the certification exam.`
+                  {allLessonsCompleted()
+                    ? t('course.allCompleted')
+                    : t('course.completeToUnlock', { count: lessons.length })
                   }
                 </p>
                 {allLessonsCompleted() ? (
                   <Link to={`/exam/${course.level}`}>
                     <Button size="lg" className="bg-primary hover:bg-primary/90">
-                      Take Certification Exam
+                      {t('course.takeCertExam')}
                       <ChevronRight className="w-5 h-5 ml-2" />
                     </Button>
                   </Link>
                 ) : (
                   <div className="flex items-center justify-center gap-2 text-slate-500">
                     <Lock className="w-4 h-4" />
-                    <span>Complete all lessons to unlock</span>
+                    <span>{t('course.completeAllLessons')}</span>
                   </div>
                 )}
               </CardContent>

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API, useAuth } from '../App';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { 
   Award,
   Download,
@@ -17,6 +18,7 @@ import { Card, CardContent } from '../components/ui/card';
 
 export default function CertificatesPage() {
   const { token } = useAuth();
+  const { t, i18n } = useTranslation();
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(null);
@@ -61,9 +63,9 @@ export default function CertificatesPage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
       
-      toast.success('Certificate downloaded!');
+      toast.success(t('certificates.toastDownloaded'));
     } catch (e) {
-      toast.error('Failed to download certificate');
+      toast.error(t('certificates.toastError'));
     } finally {
       setDownloading(null);
     }
@@ -91,10 +93,10 @@ export default function CertificatesPage() {
             <Award className="w-10 h-10 text-primary" />
           </div>
           <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4">
-            Your <span className="text-primary">Certificates</span>
+            {t('certificates.title')}
           </h1>
           <p className="text-slate-400 text-lg">
-            Download and share your verified achievements
+            {t('certificates.subtitle')}
           </p>
         </motion.div>
 
@@ -119,13 +121,13 @@ export default function CertificatesPage() {
           <Card className="bg-card border-border">
             <CardContent className="p-12 text-center">
               <Award className="w-16 h-16 text-slate-500 mx-auto mb-6" />
-              <h3 className="font-heading text-2xl font-bold mb-2">No Certificates Yet</h3>
+              <h3 className="font-heading text-2xl font-bold mb-2">{t('certificates.noCertsTitle')}</h3>
               <p className="text-slate-400 mb-6 max-w-md mx-auto">
-                Complete course exams with 80% or higher to earn your certificates. Start learning today!
+                {t('certificates.noCertsMessage')}
               </p>
               <Link to="/academy">
                 <Button className="bg-primary hover:bg-primary/90">
-                  Explore Courses
+                  {t('certificates.exploreCourses')}
                 </Button>
               </Link>
             </CardContent>
@@ -134,7 +136,7 @@ export default function CertificatesPage() {
           <div className="space-y-6">
             {certificates.map((cert, index) => {
               const colors = getCertColor(cert.level);
-              const formattedDate = new Date(cert.issued_at).toLocaleDateString('en-US', {
+              const formattedDate = new Date(cert.issued_at).toLocaleDateString(i18n.language, {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
@@ -159,7 +161,7 @@ export default function CertificatesPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <CheckCircle className="w-5 h-5 text-green-500" />
-                            <span className="text-green-500 text-sm font-medium">Verified</span>
+                            <span className="text-green-500 text-sm font-medium">{t('certificates.verified')}</span>
                           </div>
                           <h3 className="font-heading font-bold text-2xl mb-2">
                             {cert.cert_name}
@@ -167,9 +169,9 @@ export default function CertificatesPage() {
                           <div className="flex flex-wrap items-center gap-4 text-sm text-slate-400">
                             <span className="flex items-center gap-1">
                               <Calendar className="w-4 h-4" />
-                              Issued: {formattedDate}
+                              {t('certificates.issued')} {formattedDate}
                             </span>
-                            <span>Score: {cert.score}%</span>
+                            <span>{t('certificates.score')} {cert.score}%</span>
                             <span className="font-mono text-xs">ID: {cert.id.slice(0, 8).toUpperCase()}</span>
                           </div>
                         </div>
@@ -183,7 +185,7 @@ export default function CertificatesPage() {
                             disabled={downloading === cert.id}
                           >
                             <Download className="w-4 h-4 mr-2" />
-                            {downloading === cert.id ? 'Downloading...' : 'Download PDF'}
+                            {downloading === cert.id ? t('certificates.downloading') : t('certificates.downloadPdf')}
                           </Button>
                         </div>
                       </div>
@@ -203,10 +205,9 @@ export default function CertificatesPage() {
             transition={{ delay: 0.5 }}
             className="mt-12 p-6 bg-muted/50 rounded-xl text-center"
           >
-            <h3 className="font-semibold mb-2">Certificate Verification</h3>
+            <h3 className="font-semibold mb-2">{t('certificates.verificationTitle')}</h3>
             <p className="text-sm text-slate-400">
-              Each certificate includes a unique QR code that can be scanned to verify its authenticity. 
-              Share your certificates with confidence!
+              {t('certificates.verificationMessage')}
             </p>
           </motion.div>
         )}

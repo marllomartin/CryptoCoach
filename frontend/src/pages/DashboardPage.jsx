@@ -4,6 +4,7 @@ import { Layout } from '../components/Layout';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API, useAuth } from '../App';
+import { useTranslation } from 'react-i18next';
 import { 
   GraduationCap, 
   Award, 
@@ -21,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Progress } from '../components/ui/progress';
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const { user, token } = useAuth();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,17 +52,17 @@ export default function DashboardPage() {
   const totalCertificates = user?.certificates?.length || 0;
 
   const stats = [
-    { icon: BookOpen, label: 'Lessons Completed', value: totalLessonsCompleted, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { icon: Target, label: 'Quizzes Passed', value: totalQuizzesCompleted, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-    { icon: Award, label: 'Certificates Earned', value: totalCertificates, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    { icon: Zap, label: 'Total XP', value: user?.xp_points || 0, color: 'text-green-500', bg: 'bg-green-500/10' }
+    { icon: BookOpen, label: t('dashboard.lessonsCompleted'), value: totalLessonsCompleted, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { icon: Target, label: t('dashboard.quizzesPassed'), value: totalQuizzesCompleted, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { icon: Award, label: t('dashboard.certificatesEarned'), value: totalCertificates, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { icon: Zap, label: t('dashboard.totalXp'), value: user?.xp_points || 0, color: 'text-green-500', bg: 'bg-green-500/10' }
   ];
 
   const quickActions = [
-    { icon: GraduationCap, label: 'Continue Learning', href: '/academy', color: 'bg-blue-500' },
-    { icon: Bot, label: 'AI Mentor', href: '/mentor', color: 'bg-purple-500' },
-    { icon: TrendingUp, label: 'Trading Simulator', href: '/simulator', color: 'bg-green-500' },
-    { icon: Trophy, label: 'Leaderboard', href: '/leaderboard', color: 'bg-amber-500' }
+    { icon: GraduationCap, label: t('dashboard.continueLearning'), href: '/academy', color: 'bg-blue-500' },
+    { icon: Bot, label: t('dashboard.aiMentor'), href: '/mentor', color: 'bg-purple-500' },
+    { icon: TrendingUp, label: t('dashboard.tradingSimulator'), href: '/simulator', color: 'bg-green-500' },
+    { icon: Trophy, label: t('nav.leaderboard'), href: '/leaderboard', color: 'bg-amber-500' }
   ];
 
   return (
@@ -75,16 +77,16 @@ export default function DashboardPage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="font-heading text-3xl md:text-4xl font-bold mb-2">
-                Welcome back, {user?.full_name?.split(' ')[0]}!
+                {t('dashboard.welcomeBack', { name: user?.full_name?.split(' ')[0] })}
               </h1>
               <p className="text-slate-400">
-                Track your progress and continue your crypto education journey
+                {t('dashboard.subtitle')}
               </p>
             </div>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
                 <Flame className="w-5 h-5 text-amber-500" />
-                <span className="text-amber-500 font-medium">{user?.streak_days || 0} Day Streak</span>
+                <span className="text-amber-500 font-medium">{t('dashboard.dayStreak', { count: user?.streak_days || 0 })}</span>
               </div>
             </div>
           </div>
@@ -117,7 +119,7 @@ export default function DashboardPage() {
           transition={{ delay: 0.2 }}
           className="mb-12"
         >
-          <h2 className="font-heading text-xl font-bold mb-4">Quick Actions</h2>
+          <h2 className="font-heading text-xl font-bold mb-4">{t('dashboard.quickActions')}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {quickActions.map((action) => (
               <Link key={action.label} to={action.href}>
@@ -141,10 +143,10 @@ export default function DashboardPage() {
           transition={{ delay: 0.3 }}
         >
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading text-xl font-bold">Your Courses</h2>
+            <h2 className="font-heading text-xl font-bold">{t('dashboard.yourCourses')}</h2>
             <Link to="/academy">
               <Button variant="ghost" size="sm" className="text-primary">
-                View All
+                {t('dashboard.viewAll')}
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
@@ -178,18 +180,18 @@ export default function DashboardPage() {
                     <Card className={`bg-card border ${color.border} hover:border-opacity-100 transition-colors h-full`}>
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-4">
-                          <span className={`text-sm font-medium ${color.text}`}>Level {course.level}</span>
+                          <span className={`text-sm font-medium ${color.text}`}>{t('academy.level')} {course.level}</span>
                           <span className="text-sm text-slate-400">{progress}%</span>
                         </div>
                         <h3 className="font-heading font-bold text-lg mb-2">{course.title}</h3>
                         <p className="text-sm text-slate-400 mb-4 line-clamp-2">{course.description}</p>
                         <Progress value={progress} className="h-2" />
                         <div className="mt-4 flex items-center justify-between text-sm">
-                          <span className="text-slate-500">{course.lessons_count} lessons</span>
+                          <span className="text-slate-500">{course.lessons_count} {t('academy.lessons')}</span>
                           {progress === 100 ? (
                             <span className="text-green-500 flex items-center gap-1">
                               <Award className="w-4 h-4" />
-                              Completed
+                              {t('dashboard.completed')}
                             </span>
                           ) : (
                             <span className={color.text}>Continue →</span>
@@ -219,13 +221,13 @@ export default function DashboardPage() {
                     <Award className="w-8 h-8 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-heading font-bold text-xl">You have {totalCertificates} certificate{totalCertificates > 1 ? 's' : ''}!</h3>
-                    <p className="text-slate-400">Download and share your achievements</p>
+                    <h3 className="font-heading font-bold text-xl">{t('dashboard.certificatesCta', { count: totalCertificates })}</h3>
+                    <p className="text-slate-400">{t('dashboard.downloadAchievements')}</p>
                   </div>
                 </div>
                 <Link to="/certificates">
                   <Button className="bg-primary hover:bg-primary/90">
-                    View Certificates
+                    {t('dashboard.viewCertificates')}
                     <ChevronRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>

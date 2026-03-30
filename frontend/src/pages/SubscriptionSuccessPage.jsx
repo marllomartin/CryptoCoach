@@ -7,24 +7,27 @@ import { toast } from 'sonner';
 import Layout from '../components/Layout';
 import { Button } from '../components/ui/button';
 import { useAuth, API } from '../App';
+import { useTranslation } from 'react-i18next';
 
 const SubscriptionSuccessPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { token, refreshUser } = useAuth();
   const [status, setStatus] = useState('checking'); // checking, success, error
-  const [message, setMessage] = useState('Vérification du paiement...');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
+    setMessage(t('subscriptionSuccess.checkingMessage'));
     const sessionId = searchParams.get('session_id');
     if (sessionId && token) {
       pollPaymentStatus(sessionId);
     } else if (!token) {
       setStatus('error');
-      setMessage('Veuillez vous connecter pour vérifier votre paiement');
+      setMessage(t('subscriptionSuccess.errorLogin'));
     } else {
       setStatus('error');
-      setMessage('Session de paiement non trouvée');
+      setMessage(t('subscriptionSuccess.errorNoSession'));
     }
   }, [searchParams, token]);
 
@@ -34,7 +37,7 @@ const SubscriptionSuccessPage = () => {
 
     if (attempts >= maxAttempts) {
       setStatus('error');
-      setMessage('La vérification a pris trop de temps. Veuillez vérifier votre tableau de bord.');
+      setMessage(t('subscriptionSuccess.errorTimeout'));
       return;
     }
 
@@ -46,13 +49,13 @@ const SubscriptionSuccessPage = () => {
 
       if (response.data.payment_status === 'paid') {
         setStatus('success');
-        setMessage(`Félicitations! Votre abonnement ${response.data.tier?.toUpperCase() || ''} est maintenant actif.`);
+        setMessage(t('subscriptionSuccess.successMessage', { tier: response.data.tier?.toUpperCase() || '' }));
         await refreshUser();
-        toast.success('Abonnement activé avec succès!');
+        toast.success(t('subscriptionSuccess.activated'));
         return;
       } else if (response.data.status === 'expired') {
         setStatus('error');
-        setMessage('La session de paiement a expiré.');
+        setMessage(t('subscriptionSuccess.errorExpired'));
         return;
       }
 
@@ -61,14 +64,14 @@ const SubscriptionSuccessPage = () => {
     } catch (error) {
       console.error('Error checking payment:', error);
       setStatus('error');
-      setMessage('Erreur lors de la vérification du paiement.');
+      setMessage(t('subscriptionSuccess.errorMessage'));
     }
   };
 
   return (
     <Layout>
       <div className="min-h-screen bg-background flex items-center justify-center py-20">
-        <motion.div 
+        <motion.div
           className="max-w-md w-full mx-4"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -79,7 +82,7 @@ const SubscriptionSuccessPage = () => {
               <>
                 <Loader2 className="h-16 w-16 animate-spin text-primary mx-auto mb-6" />
                 <h1 className="text-2xl font-bold text-foreground mb-2">
-                  Vérification en cours
+                  {t('subscriptionSuccess.checking')}
                 </h1>
                 <p className="text-muted-foreground">{message}</p>
               </>
@@ -95,24 +98,24 @@ const SubscriptionSuccessPage = () => {
                   <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-6" />
                 </motion.div>
                 <h1 className="text-2xl font-bold text-foreground mb-2">
-                  Paiement réussi!
+                  {t('subscriptionSuccess.success')}
                 </h1>
                 <p className="text-muted-foreground mb-8">{message}</p>
                 <div className="space-y-3">
-                  <Button 
+                  <Button
                     data-testid="go-to-dashboard-btn"
                     className="w-full bg-primary hover:bg-primary/90"
                     onClick={() => navigate('/dashboard')}
                   >
-                    Accéder au tableau de bord
+                    {t('subscriptionSuccess.goToDashboard')}
                   </Button>
-                  <Button 
+                  <Button
                     data-testid="go-to-academy-btn"
                     variant="outline"
                     className="w-full"
                     onClick={() => navigate('/academy')}
                   >
-                    Explorer l'académie
+                    {t('subscriptionSuccess.exploreAcademy')}
                   </Button>
                 </div>
               </>
@@ -122,24 +125,24 @@ const SubscriptionSuccessPage = () => {
               <>
                 <XCircle className="h-16 w-16 text-red-500 mx-auto mb-6" />
                 <h1 className="text-2xl font-bold text-foreground mb-2">
-                  Erreur
+                  {t('subscriptionSuccess.error')}
                 </h1>
                 <p className="text-muted-foreground mb-8">{message}</p>
                 <div className="space-y-3">
-                  <Button 
+                  <Button
                     data-testid="try-again-btn"
                     className="w-full bg-primary hover:bg-primary/90"
                     onClick={() => navigate('/pricing')}
                   >
-                    Réessayer
+                    {t('subscriptionSuccess.tryAgain')}
                   </Button>
-                  <Button 
+                  <Button
                     data-testid="contact-support-btn"
                     variant="outline"
                     className="w-full"
                     onClick={() => navigate('/contact')}
                   >
-                    Contacter le support
+                    {t('subscriptionSuccess.contactSupport')}
                   </Button>
                 </div>
               </>

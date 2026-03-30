@@ -44,7 +44,7 @@ export default function LessonPage() {
   const { lessonId } = useParams();
   const navigate = useNavigate();
   const { user, token, refreshUser } = useAuth();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const appLanguage = i18n.language;
   const [lesson, setLesson] = useState(null);
   const [allLessons, setAllLessons] = useState([]);
@@ -225,10 +225,10 @@ export default function LessonPage() {
       await axios.post(`${API}/lessons/${lessonId}/complete`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success('Leçon terminée! +50 XP');
+      toast.success(t('lesson.toastCompleted'));
       await refreshUser();
     } catch (e) {
-      toast.error('Erreur de validation');
+      toast.error(t('lesson.toastError'));
     } finally {
       setCompleting(false);
     }
@@ -255,9 +255,9 @@ export default function LessonPage() {
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Leçon introuvable</h1>
+            <h1 className="text-2xl font-bold mb-4">{t('lesson.lessonNotFound')}</h1>
             <Link to="/academy">
-              <Button>Retour à l'Académie</Button>
+              <Button>{t('lesson.backToAcademy')}</Button>
             </Link>
           </div>
         </div>
@@ -387,7 +387,7 @@ export default function LessonPage() {
         >
           <Link to={`/course/${lesson.course_id}`} className="text-slate-400 hover:text-primary text-sm inline-flex items-center gap-2">
             <ChevronLeft className="w-4 h-4" />
-            Retour au cours
+            {t('lesson.backToCourse')}
           </Link>
           
           {/* Mode toggles */}
@@ -450,7 +450,7 @@ export default function LessonPage() {
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-4 flex-wrap">
                 <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                  Leçon {lesson.order + 1}
+                  {t('lesson.lessonNumber', { n: lesson.order + 1 })}
                 </span>
                 <span className="text-slate-500 text-sm flex items-center gap-1">
                   <Clock className="w-4 h-4" />
@@ -593,7 +593,7 @@ export default function LessonPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Lightbulb className="w-5 h-5 text-amber-500" />
-                    Exemples concrets
+                    {t('lesson.practicalExamples')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -687,7 +687,7 @@ export default function LessonPage() {
                 <Link to={`/lesson/${prevLesson.id}`}>
                   <Button variant="outline" className="flex items-center gap-2">
                     <ChevronLeft className="w-4 h-4" />
-                    Précédent
+                    {t('lesson.previous')}
                   </Button>
                 </Link>
               )}
@@ -725,7 +725,7 @@ export default function LessonPage() {
               {nextLesson && (
                 <Link to={`/lesson/${nextLesson.id}`}>
                   <Button variant="outline" className="flex items-center gap-2">
-                    Suivant
+                    {t('lesson.next')}
                     <ChevronRight className="w-4 h-4" />
                   </Button>
                 </Link>
@@ -749,7 +749,7 @@ export default function LessonPage() {
                 >
                   <Card className="bg-card border-border">
                     <CardHeader>
-                      <CardTitle className="text-sm">Table des matières</CardTitle>
+                      <CardTitle className="text-sm">{t('lesson.tableOfContents')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-2 text-sm">
@@ -780,7 +780,7 @@ export default function LessonPage() {
                 <div className="space-y-3">
                   <Progress value={(currentIndex / allLessons.length) * 100} className="h-2" />
                   <p className="text-xs text-slate-400">
-                    Leçon {currentIndex + 1} sur {allLessons.length}
+                    {t('lesson.lessonOf', { current: currentIndex + 1, total: allLessons.length })}
                   </p>
                 </div>
                 

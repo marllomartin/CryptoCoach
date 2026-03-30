@@ -2,8 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function PrivacyPage() {
+  const { t } = useTranslation();
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -12,105 +15,89 @@ export default function PrivacyPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           <h1 className="font-heading text-4xl md:text-5xl font-bold mb-8">
-            Privacy <span className="text-primary">Policy</span>
+            {t('privacy.title')} <span className="text-primary">{t('privacy.titleHighlight')}</span>
           </h1>
 
           <div className="prose prose-invert max-w-none">
             <p className="text-slate-400 text-lg mb-8">
-              Last updated: January 2025
+              {t('privacy.lastUpdated')}
             </p>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">1. Information We Collect</h2>
-              <p className="text-slate-300 mb-4">
-                We collect information you provide directly:
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('privacy.s1Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('privacy.s1Body')}</p>
               <ul className="list-disc list-inside text-slate-300 space-y-2">
-                <li>Account information (name, email, password)</li>
-                <li>Learning progress and quiz/exam results</li>
-                <li>Contact form submissions</li>
-                <li>Trading simulator activity</li>
+                <li>{t('privacy.s1Li1')}</li>
+                <li>{t('privacy.s1Li2')}</li>
+                <li>{t('privacy.s1Li3')}</li>
+                <li>{t('privacy.s1Li4')}</li>
               </ul>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">2. How We Use Information</h2>
-              <p className="text-slate-300 mb-4">
-                We use collected information to:
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('privacy.s2Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('privacy.s2Body')}</p>
               <ul className="list-disc list-inside text-slate-300 space-y-2">
-                <li>Provide and improve our educational services</li>
-                <li>Track your learning progress</li>
-                <li>Issue certificates for completed courses</li>
-                <li>Respond to your inquiries</li>
-                <li>Send educational updates (with your consent)</li>
+                <li>{t('privacy.s2Li1')}</li>
+                <li>{t('privacy.s2Li2')}</li>
+                <li>{t('privacy.s2Li3')}</li>
+                <li>{t('privacy.s2Li4')}</li>
+                <li>{t('privacy.s2Li5')}</li>
               </ul>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">3. Data Security</h2>
-              <p className="text-slate-300 mb-4">
-                We implement industry-standard security measures to protect your data:
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('privacy.s3Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('privacy.s3Body')}</p>
               <ul className="list-disc list-inside text-slate-300 space-y-2">
-                <li>Encrypted data transmission (HTTPS)</li>
-                <li>Secure password hashing</li>
-                <li>Regular security audits</li>
-                <li>Limited employee access to personal data</li>
+                <li>{t('privacy.s3Li1')}</li>
+                <li>{t('privacy.s3Li2')}</li>
+                <li>{t('privacy.s3Li3')}</li>
+                <li>{t('privacy.s3Li4')}</li>
               </ul>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">4. Data Sharing</h2>
-              <p className="text-slate-300 mb-4">
-                We do not sell your personal information. We may share data with:
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('privacy.s4Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('privacy.s4Body')}</p>
               <ul className="list-disc list-inside text-slate-300 space-y-2">
-                <li>Service providers who assist in operating our Platform</li>
-                <li>Legal authorities when required by law</li>
+                <li>{t('privacy.s4Li1')}</li>
+                <li>{t('privacy.s4Li2')}</li>
               </ul>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">5. Your Rights</h2>
-              <p className="text-slate-300 mb-4">
-                You have the right to:
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('privacy.s5Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('privacy.s5Body')}</p>
               <ul className="list-disc list-inside text-slate-300 space-y-2">
-                <li>Access your personal data</li>
-                <li>Correct inaccurate data</li>
-                <li>Request deletion of your data</li>
-                <li>Export your data</li>
-                <li>Opt out of marketing communications</li>
+                <li>{t('privacy.s5Li1')}</li>
+                <li>{t('privacy.s5Li2')}</li>
+                <li>{t('privacy.s5Li3')}</li>
+                <li>{t('privacy.s5Li4')}</li>
+                <li>{t('privacy.s5Li5')}</li>
               </ul>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">6. Cookies</h2>
-              <p className="text-slate-300 mb-4">
-                We use essential cookies for Platform functionality and optional analytics cookies to improve our services. You can manage cookie preferences in your browser settings.
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('privacy.s6Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('privacy.s6Body')}</p>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">7. Children's Privacy</h2>
-              <p className="text-slate-300 mb-4">
-                TheCryptoCoach.io is not intended for users under 18 years of age. We do not knowingly collect information from children.
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('privacy.s7Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('privacy.s7Body')}</p>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">8. Changes to This Policy</h2>
-              <p className="text-slate-300 mb-4">
-                We may update this Privacy Policy periodically. We will notify you of significant changes via email or Platform notification.
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('privacy.s8Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('privacy.s8Body')}</p>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">9. Contact Us</h2>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('privacy.s9Title')}</h2>
               <p className="text-slate-300 mb-4">
-                For privacy-related questions or to exercise your rights, please contact us at{' '}
-                <Link to="/contact" className="text-primary hover:underline">our contact page</Link>.
+                {t('privacy.s9Body')}{' '}
+                <Link to="/contact" className="text-primary hover:underline">{t('privacy.contactPage')}</Link>.
               </p>
             </section>
           </div>

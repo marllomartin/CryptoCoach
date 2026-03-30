@@ -5,6 +5,7 @@ import axios from 'axios';
 import { API, useAuth } from '../App';
 import { toast } from 'sonner';
 import { SubscriptionGate, useSubscriptionAccess } from '../components/SubscriptionGate';
+import { useTranslation } from 'react-i18next';
 import { 
   TrendingUp, 
   TrendingDown,
@@ -29,6 +30,7 @@ import {
 
 function SimulatorContent() {
   const { token } = useAuth();
+  const { t } = useTranslation();
   const [prices, setPrices] = useState({});
   const [portfolio, setPortfolio] = useState({ balance: 10000, portfolio: {} });
   const [loading, setLoading] = useState(true);
@@ -75,7 +77,7 @@ function SimulatorContent() {
 
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) {
-      toast.error('Please enter a valid amount');
+      toast.error(t('simulator.toastInvalidAmount'));
       return;
     }
 
@@ -92,9 +94,9 @@ function SimulatorContent() {
 
       setPortfolio({ balance: response.data.balance, portfolio: response.data.portfolio });
       setAmount('');
-      toast.success(`Successfully ${action === 'buy' ? 'bought' : 'sold'} ${numAmount} ${selectedCrypto}`);
+      toast.success(`${action === 'buy' ? t('simulator.toastBought') : t('simulator.toastSold')} ${numAmount} ${selectedCrypto}`);
     } catch (e) {
-      toast.error(e.response?.data?.detail || 'Trade failed');
+      toast.error(e.response?.data?.detail || t('simulator.toastTradeError'));
     } finally {
       setTrading(false);
     }
@@ -130,10 +132,10 @@ function SimulatorContent() {
           className="mb-12"
         >
           <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4">
-            Trading <span className="text-primary">Simulator</span>
+            {t('simulator.title')}
           </h1>
           <p className="text-slate-400 text-lg">
-            Practice trading strategies with virtual funds. No real money at risk.
+            {t('simulator.subtitle')}
           </p>
         </motion.div>
 
@@ -169,7 +171,7 @@ function SimulatorContent() {
                     <CardTitle className="flex items-center justify-between">
                       <span className="flex items-center gap-2">
                         <PieChart className="w-5 h-5 text-primary" />
-                        Portfolio Overview
+                        {t('simulator.portfolioOverview')}
                       </span>
                       <Button variant="ghost" size="sm" onClick={fetchPortfolio}>
                         <RefreshCw className="w-4 h-4" />
@@ -179,19 +181,19 @@ function SimulatorContent() {
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="p-4 bg-muted rounded-lg">
-                        <div className="text-sm text-slate-400 mb-1">Total Value</div>
+                        <div className="text-sm text-slate-400 mb-1">{t('simulator.totalValue')}</div>
                         <div className="text-2xl font-heading font-bold">
                           ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       </div>
                       <div className="p-4 bg-muted rounded-lg">
-                        <div className="text-sm text-slate-400 mb-1">Cash Balance</div>
+                        <div className="text-sm text-slate-400 mb-1">{t('simulator.cashBalance')}</div>
                         <div className="text-2xl font-heading font-bold">
                           ${portfolio.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       </div>
                       <div className="p-4 bg-muted rounded-lg">
-                        <div className="text-sm text-slate-400 mb-1">Total P&L</div>
+                        <div className="text-sm text-slate-400 mb-1">{t('simulator.totalPnl')}</div>
                         <div className={`text-2xl font-heading font-bold flex items-center gap-1 ${pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                           {pnl >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
                           ${Math.abs(pnl).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -202,7 +204,7 @@ function SimulatorContent() {
                     {/* Holdings */}
                     {Object.keys(portfolio.portfolio || {}).length > 0 && (
                       <div className="mt-6">
-                        <h4 className="text-sm font-medium text-slate-400 mb-3">Your Holdings</h4>
+                        <h4 className="text-sm font-medium text-slate-400 mb-3">{t('simulator.yourHoldings')}</h4>
                         <div className="space-y-2">
                           {Object.entries(portfolio.portfolio).map(([symbol, amount]) => (
                             <div key={symbol} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
@@ -212,7 +214,7 @@ function SimulatorContent() {
                                 </div>
                                 <div>
                                   <div className="font-medium">{symbol}</div>
-                                  <div className="text-sm text-slate-400">{amount.toFixed(4)} coins</div>
+                                  <div className="text-sm text-slate-400">{t('simulator.coins', { amount: amount.toFixed(4) })}</div>
                                 </div>
                               </div>
                               <div className="text-right">
@@ -243,7 +245,7 @@ function SimulatorContent() {
                     <CardTitle className="flex items-center justify-between">
                       <span className="flex items-center gap-2">
                         <TrendingUp className="w-5 h-5 text-primary" />
-                        Live Market Prices
+                        {t('simulator.liveMarketPrices')}
                       </span>
                       <Button variant="ghost" size="sm" onClick={fetchPrices}>
                         <RefreshCw className="w-4 h-4" />
@@ -284,7 +286,7 @@ function SimulatorContent() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Wallet className="w-5 h-5 text-primary" />
-                    Trade
+                    {t('simulator.trade')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -296,7 +298,7 @@ function SimulatorContent() {
                       onClick={() => setAction('buy')}
                     >
                       <ArrowUpRight className="w-4 h-4 mr-2" />
-                      Buy
+                      {t('simulator.buy')}
                     </Button>
                     <Button
                       variant={action === 'sell' ? 'default' : 'outline'}
@@ -304,13 +306,13 @@ function SimulatorContent() {
                       onClick={() => setAction('sell')}
                     >
                       <ArrowDownRight className="w-4 h-4 mr-2" />
-                      Sell
+                      {t('simulator.sell')}
                     </Button>
                   </div>
 
                   {/* Crypto Selection */}
                   <div className="space-y-2">
-                    <Label>Cryptocurrency</Label>
+                    <Label>{t('simulator.cryptocurrency')}</Label>
                     <Select value={selectedCrypto} onValueChange={setSelectedCrypto}>
                       <SelectTrigger className="bg-muted border-border">
                         <SelectValue />
@@ -327,7 +329,7 @@ function SimulatorContent() {
 
                   {/* Amount */}
                   <div className="space-y-2">
-                    <Label>Amount (coins)</Label>
+                    <Label>{t('simulator.amountCoins')}</Label>
                     <Input
                       type="number"
                       placeholder="0.00"
@@ -337,7 +339,7 @@ function SimulatorContent() {
                     />
                     {amount && prices[selectedCrypto] && (
                       <p className="text-sm text-slate-400">
-                        Total: ${(parseFloat(amount) * prices[selectedCrypto]).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {t('simulator.total', { total: (parseFloat(amount) * prices[selectedCrypto]).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) })}
                       </p>
                     )}
                   </div>
@@ -363,18 +365,18 @@ function SimulatorContent() {
                     disabled={!amount || trading}
                     onClick={executeTrade}
                   >
-                    {trading ? 'Processing...' : `${action === 'buy' ? 'Buy' : 'Sell'} ${selectedCrypto}`}
+                    {trading ? t('simulator.processing') : (action === 'buy' ? t('simulator.executeBuy', { symbol: selectedCrypto }) : t('simulator.executeSell', { symbol: selectedCrypto }))}
                   </Button>
 
                   {/* Balance Info */}
                   <div className="pt-4 border-t border-border">
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">Available Balance</span>
+                      <span className="text-slate-400">{t('simulator.availableBalance')}</span>
                       <span className="font-medium">${portfolio.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                     </div>
                     {portfolio.portfolio?.[selectedCrypto] > 0 && (
                       <div className="flex justify-between text-sm mt-2">
-                        <span className="text-slate-400">{selectedCrypto} Owned</span>
+                        <span className="text-slate-400">{t('simulator.owned', { symbol: selectedCrypto })}</span>
                         <span className="font-medium">{portfolio.portfolio[selectedCrypto].toFixed(4)}</span>
                       </div>
                     )}
@@ -393,7 +395,7 @@ function SimulatorContent() {
           className="mt-12 p-4 bg-muted/50 rounded-lg text-center text-sm text-slate-500"
         >
           <DollarSign className="w-5 h-5 inline mr-2" />
-          This simulator uses virtual funds only. No real money is involved. Prices are simulated and may not reflect actual market values.
+          {t('simulator.disclaimer')}
         </motion.div>
       </div>
     </Layout>
@@ -402,13 +404,14 @@ function SimulatorContent() {
 
 export default function SimulatorPage() {
   const { canAccessSimulator } = useSubscriptionAccess();
-  
+  const { t } = useTranslation();
+
   if (!canAccessSimulator) {
     return (
       <Layout>
-        <SubscriptionGate 
-          requiredTier="starter" 
-          feature="Le Simulateur de Trading"
+        <SubscriptionGate
+          requiredTier="starter"
+          feature={t('simulator.featureName')}
         />
       </Layout>
     );

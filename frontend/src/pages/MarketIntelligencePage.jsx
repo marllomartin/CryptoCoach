@@ -41,11 +41,11 @@ import {
 
 // Fear & Greed colors
 const getFearGreedColor = (value) => {
-  if (value <= 25) return { color: 'text-red-500', bg: 'bg-red-500', label: 'Extreme Fear' };
-  if (value <= 45) return { color: 'text-orange-500', bg: 'bg-orange-500', label: 'Fear' };
-  if (value <= 55) return { color: 'text-yellow-500', bg: 'bg-yellow-500', label: 'Neutral' };
-  if (value <= 75) return { color: 'text-green-400', bg: 'bg-green-400', label: 'Greed' };
-  return { color: 'text-green-500', bg: 'bg-green-500', label: 'Extreme Greed' };
+  if (value <= 25) return { color: 'text-red-500', bg: 'bg-red-500', labelKey: 'market.extremeFear' };
+  if (value <= 45) return { color: 'text-orange-500', bg: 'bg-orange-500', labelKey: 'market.fear' };
+  if (value <= 55) return { color: 'text-yellow-500', bg: 'bg-yellow-500', labelKey: 'market.neutral' };
+  if (value <= 75) return { color: 'text-green-400', bg: 'bg-green-400', labelKey: 'market.greed' };
+  return { color: 'text-green-500', bg: 'bg-green-500', labelKey: 'market.extremeGreed' };
 };
 
 // Format large numbers
@@ -91,6 +91,7 @@ function Sparkline({ data, color = '#22c55e', width = 80, height = 30 }) {
 
 // Crypto row component
 function CryptoRow({ crypto, rank, isWatchlisted, onToggleWatchlist, hasAlert, onSetAlert, userTier }) {
+  const { t } = useTranslation();
   const isPositive = crypto.price_change_percentage_24h >= 0;
   
   return (
@@ -132,14 +133,14 @@ function CryptoRow({ crypto, rank, isWatchlisted, onToggleWatchlist, hasAlert, o
         <button
           onClick={() => onToggleWatchlist(crypto.id)}
           className={`p-2 rounded-lg transition-colors ${isWatchlisted ? 'text-yellow-400 bg-yellow-400/10' : 'text-slate-400 hover:text-yellow-400 hover:bg-yellow-400/10'}`}
-          title={isWatchlisted ? 'Remove from watchlist' : 'Add to watchlist'}
+          title={isWatchlisted ? t('market.removeFromWatchlist') : t('market.addToWatchlist')}
         >
           {isWatchlisted ? <Star className="w-4 h-4 fill-current" /> : <StarOff className="w-4 h-4" />}
         </button>
         <button
           onClick={() => onSetAlert(crypto)}
           className={`p-2 rounded-lg transition-colors ${hasAlert ? 'text-primary bg-primary/10' : 'text-slate-400 hover:text-primary hover:bg-primary/10'}`}
-          title="Set price alert"
+          title={t('market.setAlertTitle')}
         >
           {hasAlert ? <Bell className="w-4 h-4 fill-current" /> : <BellPlus className="w-4 h-4" />}
         </button>
@@ -150,6 +151,7 @@ function CryptoRow({ crypto, rank, isWatchlisted, onToggleWatchlist, hasAlert, o
 
 // News item component
 function NewsItem({ article, isLocked }) {
+  const { t } = useTranslation();
   if (isLocked) {
     return (
       <div className="p-4 bg-muted/30 rounded-xl border border-dashed border-slate-600 relative overflow-hidden">
@@ -161,7 +163,7 @@ function NewsItem({ article, isLocked }) {
           <Link to="/pricing">
             <Button size="sm" variant="outline" className="gap-2">
               <Lock className="w-4 h-4" />
-              Upgrade to unlock
+              {t('market.upgradeToUnlock')}
             </Button>
           </Link>
         </div>
@@ -203,22 +205,23 @@ function NewsItem({ article, isLocked }) {
 
 // AI Briefing component
 function AIBriefing({ userTier, briefing }) {
+  const { t, i18n } = useTranslation();
   const isLocked = userTier === 'free';
-  
+
   if (isLocked) {
     return (
       <Card className="bg-gradient-to-br from-primary/10 to-purple-500/10 border-primary/30 relative overflow-hidden">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bot className="w-5 h-5 text-primary" />
-            AI Daily Briefing
+            {t('market.aiBriefing')}
             <Lock className="w-4 h-4 text-slate-400 ml-auto" />
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="blur-sm mb-4">
             <p className="text-slate-300">
-              "Bitcoin continues its consolidation above $65K support with key resistance at $70K. 
+              "Bitcoin continues its consolidation above $65K support with key resistance at $70K.
               Ethereum shows strength with increasing L2 activity. Key events today include..."
             </p>
           </div>
@@ -226,7 +229,7 @@ function AIBriefing({ userTier, briefing }) {
             <Link to="/pricing">
               <Button className="gap-2 bg-primary hover:bg-primary/90">
                 <Crown className="w-4 h-4" />
-                Unlock AI Insights
+                {t('market.unlockAIInsights')}
               </Button>
             </Link>
           </div>
@@ -234,15 +237,15 @@ function AIBriefing({ userTier, briefing }) {
       </Card>
     );
   }
-  
+
   return (
     <Card className="bg-gradient-to-br from-primary/10 to-purple-500/10 border-primary/30">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bot className="w-5 h-5 text-primary" />
-          AI Daily Briefing
+          {t('market.aiBriefing')}
           <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded-full ml-auto">
-            {new Date().toLocaleDateString()}
+            {new Date().toLocaleDateString(i18n.language)}
           </span>
         </CardTitle>
       </CardHeader>
@@ -252,7 +255,7 @@ function AIBriefing({ userTier, briefing }) {
             <p className="text-slate-300 leading-relaxed">{briefing.summary}</p>
             {briefing.keyEvents && (
               <div>
-                <h4 className="text-sm font-semibold text-white mb-2">Key Events Today:</h4>
+                <h4 className="text-sm font-semibold text-white mb-2">{t('market.keyEventsToday')}</h4>
                 <ul className="space-y-1">
                   {briefing.keyEvents.map((event, i) => (
                     <li key={i} className="flex items-center gap-2 text-sm text-slate-400">
@@ -267,7 +270,7 @@ function AIBriefing({ userTier, briefing }) {
         ) : (
           <div className="flex items-center gap-3 text-slate-400">
             <Loader2 className="w-5 h-5 animate-spin" />
-            Generating AI briefing...
+            {t('market.generatingBriefing')}
           </div>
         )}
       </CardContent>
@@ -277,12 +280,13 @@ function AIBriefing({ userTier, briefing }) {
 
 // Alert Modal
 function AlertModal({ crypto, onClose, onSave }) {
+  const { t } = useTranslation();
   const [priceAbove, setPriceAbove] = useState('');
   const [priceBelow, setPriceBelow] = useState('');
-  
+
   const handleSave = () => {
     if (!priceAbove && !priceBelow) {
-      toast.error('Set at least one price target');
+      toast.error(t('market.setAtLeastOne'));
       return;
     }
     onSave({
@@ -313,7 +317,7 @@ function AlertModal({ crypto, onClose, onSave }) {
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-white flex items-center gap-2">
             <Bell className="w-5 h-5 text-primary" />
-            Set Price Alert
+            {t('market.setPriceAlert')}
           </h3>
           <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg">
             <X className="w-5 h-5" />
@@ -324,7 +328,7 @@ function AlertModal({ crypto, onClose, onSave }) {
           <img src={crypto.image} alt={crypto.name} className="w-10 h-10 rounded-full" />
           <div>
             <p className="font-semibold text-white">{crypto.symbol?.toUpperCase()}</p>
-            <p className="text-sm text-slate-400">Current: ${crypto.current_price?.toLocaleString()}</p>
+            <p className="text-sm text-slate-400">{t('market.current', { price: crypto.current_price?.toLocaleString() })}</p>
           </div>
         </div>
         
@@ -332,7 +336,7 @@ function AlertModal({ crypto, onClose, onSave }) {
           <div>
             <label className="text-sm text-slate-400 mb-2 block flex items-center gap-2">
               <ArrowUpRight className="w-4 h-4 text-green-400" />
-              Alert when price goes above
+              {t('market.alertAbove')}
             </label>
             <Input
               type="number"
@@ -345,7 +349,7 @@ function AlertModal({ crypto, onClose, onSave }) {
           <div>
             <label className="text-sm text-slate-400 mb-2 block flex items-center gap-2">
               <ArrowDownRight className="w-4 h-4 text-red-400" />
-              Alert when price goes below
+              {t('market.alertBelow')}
             </label>
             <Input
               type="number"
@@ -359,10 +363,10 @@ function AlertModal({ crypto, onClose, onSave }) {
         
         <div className="flex gap-3">
           <Button variant="outline" onClick={onClose} className="flex-1">
-            Cancel
+            {t('market.cancel')}
           </Button>
           <Button onClick={handleSave} className="flex-1 bg-primary hover:bg-primary/90">
-            Save Alert
+            {t('market.saveAlert')}
           </Button>
         </div>
       </motion.div>
@@ -372,7 +376,7 @@ function AlertModal({ crypto, onClose, onSave }) {
 
 // Main Component
 export default function MarketIntelligencePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [cryptos, setCryptos] = useState([]);
   const [globalData, setGlobalData] = useState(null);
@@ -443,50 +447,50 @@ export default function MarketIntelligencePage() {
   // Toggle watchlist
   const toggleWatchlist = (cryptoId) => {
     if (!user) {
-      toast.error('Please login to use watchlist');
+      toast.error(t('market.loginToWatchlist'));
       return;
     }
-    
+
     let newWatchlist;
     if (watchlist.includes(cryptoId)) {
       newWatchlist = watchlist.filter(id => id !== cryptoId);
     } else {
       if (watchlist.length >= limits.watchlist) {
-        toast.error(`Watchlist limit reached (${limits.watchlist}). Upgrade for more!`);
+        toast.error(t('market.watchlistLimitReached', { limit: limits.watchlist }));
         return;
       }
       newWatchlist = [...watchlist, cryptoId];
     }
-    
+
     setWatchlist(newWatchlist);
     localStorage.setItem(`watchlist_${user.id}`, JSON.stringify(newWatchlist));
-    toast.success(watchlist.includes(cryptoId) ? 'Removed from watchlist' : 'Added to watchlist');
+    toast.success(watchlist.includes(cryptoId) ? t('market.removedFromWatchlist') : t('market.addedToWatchlist'));
   };
   
   // Save alert
   const saveAlert = (alertData) => {
     if (!user) {
-      toast.error('Please login to set alerts');
+      toast.error(t('market.loginToAlerts'));
       return;
     }
-    
+
     const existingAlertIndex = alerts.findIndex(a => a.cryptoId === alertData.cryptoId);
     let newAlerts;
-    
+
     if (existingAlertIndex >= 0) {
       newAlerts = [...alerts];
       newAlerts[existingAlertIndex] = alertData;
     } else {
       if (alerts.length >= limits.alerts) {
-        toast.error(`Alert limit reached (${limits.alerts}). Upgrade for more!`);
+        toast.error(t('market.alertLimitReached', { limit: limits.alerts }));
         return;
       }
       newAlerts = [...alerts, alertData];
     }
-    
+
     setAlerts(newAlerts);
     localStorage.setItem(`alerts_${user.id}`, JSON.stringify(newAlerts));
-    toast.success('Price alert saved!');
+    toast.success(t('market.alertSaved'));
   };
   
   // Filter cryptos by search
@@ -506,7 +510,7 @@ export default function MarketIntelligencePage() {
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-slate-400">Loading market intelligence...</p>
+            <p className="text-slate-400">{t('market.loading')}</p>
           </div>
         </div>
       </Layout>
@@ -522,17 +526,17 @@ export default function MarketIntelligencePage() {
             <div>
               <h1 className="text-3xl font-bold text-white flex items-center gap-3">
                 <BarChart3 className="w-8 h-8 text-primary" />
-                Market Intelligence
+                {t('market.title')}
               </h1>
               <p className="text-slate-400 mt-1">
-                Real-time crypto market data & insights
+                {t('market.subtitle')}
               </p>
             </div>
             
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 text-sm text-slate-400">
                 <Clock className="w-4 h-4" />
-                Updated {lastUpdate.toLocaleTimeString()}
+                {t('market.updated', { time: lastUpdate.toLocaleTimeString(i18n.language) })}
               </div>
               <Button variant="outline" size="sm" onClick={fetchData}>
                 <RefreshCw className="w-4 h-4" />
@@ -541,7 +545,7 @@ export default function MarketIntelligencePage() {
                 <Link to="/pricing">
                   <Button size="sm" className="gap-2 bg-gradient-to-r from-primary to-purple-500">
                     <Crown className="w-4 h-4" />
-                    Upgrade
+                    {t('market.upgrade')}
                   </Button>
                 </Link>
               )}
@@ -552,7 +556,7 @@ export default function MarketIntelligencePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <Card className="bg-card border-border">
               <CardContent className="p-4">
-                <p className="text-sm text-slate-400 mb-1">Market Cap</p>
+                <p className="text-sm text-slate-400 mb-1">{t('market.marketCap')}</p>
                 <p className="text-2xl font-bold text-white">
                   ${formatNumber(globalData?.total_market_cap?.usd || 2400000000000)}
                 </p>
@@ -564,7 +568,7 @@ export default function MarketIntelligencePage() {
             
             <Card className="bg-card border-border">
               <CardContent className="p-4">
-                <p className="text-sm text-slate-400 mb-1">24h Volume</p>
+                <p className="text-sm text-slate-400 mb-1">{t('market.volume24h')}</p>
                 <p className="text-2xl font-bold text-white">
                   ${formatNumber(globalData?.total_volume?.usd || 89000000000)}
                 </p>
@@ -573,7 +577,7 @@ export default function MarketIntelligencePage() {
             
             <Card className="bg-card border-border">
               <CardContent className="p-4">
-                <p className="text-sm text-slate-400 mb-1">BTC Dominance</p>
+                <p className="text-sm text-slate-400 mb-1">{t('market.btcDominance')}</p>
                 <p className="text-2xl font-bold text-white">
                   {(globalData?.market_cap_percentage?.btc || 52.3).toFixed(1)}%
                 </p>
@@ -582,13 +586,13 @@ export default function MarketIntelligencePage() {
             
             <Card className={`border-border ${fgData?.bg}/10`}>
               <CardContent className="p-4">
-                <p className="text-sm text-slate-400 mb-1">Fear & Greed</p>
+                <p className="text-sm text-slate-400 mb-1">{t('market.fearGreed')}</p>
                 <div className="flex items-center gap-3">
                   <p className={`text-2xl font-bold ${fgData?.color}`}>
                     {fearGreed?.value || 65}
                   </p>
                   <span className={`text-sm px-2 py-0.5 rounded-full ${fgData?.bg}/20 ${fgData?.color}`}>
-                    {fgData?.label}
+                    {fgData ? t(fgData.labelKey) : ''}
                   </span>
                 </div>
               </CardContent>
@@ -598,11 +602,11 @@ export default function MarketIntelligencePage() {
           {/* Tabs */}
           <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
             {[
-              { id: 'market', label: 'Market', icon: Activity },
-              { id: 'watchlist', label: `Watchlist (${watchlist.length})`, icon: Star },
-              { id: 'alerts', label: `Alerts (${alerts.length})`, icon: Bell },
-              { id: 'news', label: 'News', icon: Newspaper },
-              { id: 'ai', label: 'AI Insights', icon: Bot, premium: userTier === 'free' }
+              { id: 'market', label: t('market.tabMarket'), icon: Activity },
+              { id: 'watchlist', label: t('market.tabWatchlist', { count: watchlist.length }), icon: Star },
+              { id: 'alerts', label: t('market.tabAlerts', { count: alerts.length }), icon: Bell },
+              { id: 'news', label: t('market.tabNews'), icon: Newspaper },
+              { id: 'ai', label: t('market.tabAI'), icon: Bot, premium: userTier === 'free' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -630,7 +634,7 @@ export default function MarketIntelligencePage() {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <Input
-                      placeholder="Search cryptocurrencies..."
+                      placeholder={t('market.searchPlaceholder')}
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
                       className="pl-10 bg-muted/50"
@@ -642,13 +646,13 @@ export default function MarketIntelligencePage() {
                     <CardHeader className="flex flex-row items-center justify-between">
                       <CardTitle className="flex items-center gap-2">
                         <TrendingUp className="w-5 h-5 text-green-400" />
-                        Top Cryptocurrencies
+                        {t('market.topCryptos')}
                       </CardTitle>
                       <span className="text-sm text-slate-400">
-                        Showing {filteredCryptos.length} of {limits.cryptos}
+                        {t('market.showing', { shown: filteredCryptos.length, limit: limits.cryptos })}
                         {userTier !== 'elite' && (
                           <Link to="/pricing" className="text-primary ml-2 hover:underline">
-                            Unlock more
+                            {t('market.unlockMore')}
                           </Link>
                         )}
                       </span>
@@ -676,7 +680,7 @@ export default function MarketIntelligencePage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Star className="w-5 h-5 text-yellow-400" />
-                      Your Watchlist
+                      {t('market.yourWatchlist')}
                       <span className="text-sm text-slate-400 ml-auto">
                         {watchlist.length}/{limits.watchlist}
                       </span>
@@ -701,8 +705,8 @@ export default function MarketIntelligencePage() {
                     ) : (
                       <div className="text-center py-12 text-slate-400">
                         <Star className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <p>Your watchlist is empty</p>
-                        <p className="text-sm">Click the star icon on any crypto to add it</p>
+                        <p>{t('market.watchlistEmpty')}</p>
+                        <p className="text-sm">{t('market.watchlistEmptyHint')}</p>
                       </div>
                     )}
                   </CardContent>
@@ -714,7 +718,7 @@ export default function MarketIntelligencePage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Bell className="w-5 h-5 text-primary" />
-                      Price Alerts
+                      {t('market.priceAlerts')}
                       <span className="text-sm text-slate-400 ml-auto">
                         {alerts.length}/{limits.alerts}
                       </span>
@@ -733,10 +737,10 @@ export default function MarketIntelligencePage() {
                                 <p className="font-medium text-white">{alert.symbol?.toUpperCase()}</p>
                                 <div className="flex gap-3 text-sm">
                                   {alert.priceAbove && (
-                                    <span className="text-green-400">Above ${alert.priceAbove}</span>
+                                    <span className="text-green-400">{t('market.above', { price: alert.priceAbove })}</span>
                                   )}
                                   {alert.priceBelow && (
-                                    <span className="text-red-400">Below ${alert.priceBelow}</span>
+                                    <span className="text-red-400">{t('market.below', { price: alert.priceBelow })}</span>
                                   )}
                                 </div>
                               </div>
@@ -746,7 +750,7 @@ export default function MarketIntelligencePage() {
                                 const newAlerts = alerts.filter((_, i) => i !== index);
                                 setAlerts(newAlerts);
                                 localStorage.setItem(`alerts_${user.id}`, JSON.stringify(newAlerts));
-                                toast.success('Alert removed');
+                                toast.success(t('market.alertRemoved'));
                               }}
                               className="p-2 text-slate-400 hover:text-red-400 transition-colors"
                             >
@@ -758,8 +762,8 @@ export default function MarketIntelligencePage() {
                     ) : (
                       <div className="text-center py-12 text-slate-400">
                         <Bell className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <p>No price alerts set</p>
-                        <p className="text-sm">Click the bell icon on any crypto to set an alert</p>
+                        <p>{t('market.noAlerts')}</p>
+                        <p className="text-sm">{t('market.noAlertsHint')}</p>
                       </div>
                     )}
                   </CardContent>
@@ -771,7 +775,7 @@ export default function MarketIntelligencePage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Newspaper className="w-5 h-5 text-blue-400" />
-                      Crypto News
+                      {t('market.cryptoNews')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -803,30 +807,30 @@ export default function MarketIntelligencePage() {
               {/* Quick Stats */}
               <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="text-lg">Your Stats</CardTitle>
+                  <CardTitle className="text-lg">{t('market.yourStats')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Tier</span>
+                    <span className="text-slate-400">{t('market.tier')}</span>
                     <span className="font-medium text-white capitalize">{userTier}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Watchlist</span>
+                    <span className="text-slate-400">{t('market.tabWatchlist', { count: '' }).replace(' ()', '')}</span>
                     <span className="font-medium text-white">{watchlist.length}/{limits.watchlist}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Alerts</span>
+                    <span className="text-slate-400">{t('market.tabAlerts', { count: '' }).replace(' ()', '')}</span>
                     <span className="font-medium text-white">{alerts.length}/{limits.alerts}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400">News Access</span>
-                    <span className="font-medium text-white">{limits.news === 999 ? 'Unlimited' : `${limits.news}/day`}</span>
+                    <span className="text-slate-400">{t('market.newsAccess')}</span>
+                    <span className="font-medium text-white">{limits.news === 999 ? t('market.unlimited') : t('market.perDay', { n: limits.news })}</span>
                   </div>
                   {userTier !== 'elite' && (
                     <Link to="/pricing">
                       <Button className="w-full mt-2 gap-2">
                         <Crown className="w-4 h-4" />
-                        Upgrade for More
+                        {t('market.upgradeForMore')}
                       </Button>
                     </Link>
                   )}
@@ -838,7 +842,7 @@ export default function MarketIntelligencePage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Zap className="w-5 h-5 text-yellow-400" />
-                    Trending
+                    {t('market.trending')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">

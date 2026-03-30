@@ -5,6 +5,7 @@ import axios from 'axios';
 import { API, useAuth } from '../App';
 import { toast } from 'sonner';
 import { SubscriptionGate, useSubscriptionAccess } from '../components/SubscriptionGate';
+import { useTranslation } from 'react-i18next';
 import { 
   Bot, 
   Send,
@@ -19,6 +20,7 @@ import { Textarea } from '../components/ui/textarea';
 
 function MentorContent() {
   const { token, user } = useAuth();
+  const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -52,10 +54,10 @@ function MentorContent() {
       setSessionId(response.data.session_id);
       setMessages(prev => [...prev, { role: 'assistant', content: response.data.response }]);
     } catch (e) {
-      toast.error('Failed to get response. Please try again.');
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: "I'm sorry, I encountered an error. Please try again or rephrase your question." 
+      toast.error(t('mentor.toastError'));
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: t('mentor.errorMessage')
       }]);
     } finally {
       setLoading(false);
@@ -75,11 +77,11 @@ function MentorContent() {
   };
 
   const suggestedQuestions = [
-    "What is blockchain technology?",
-    "How do I safely store cryptocurrency?",
-    "Explain DeFi in simple terms",
-    "What are the risks of crypto investing?",
-    "How do smart contracts work?"
+    t('mentor.suggested1'),
+    t('mentor.suggested2'),
+    t('mentor.suggested3'),
+    t('mentor.suggested4'),
+    t('mentor.suggested5')
   ];
 
   return (
@@ -98,7 +100,7 @@ function MentorContent() {
             CryptoCoach <span className="text-primary">AI</span>
           </h1>
           <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Your personal AI mentor for cryptocurrency education. Ask anything about blockchain, trading, DeFi, and more.
+            {t('mentor.subtitle')}
           </p>
         </motion.div>
 
@@ -113,12 +115,12 @@ function MentorContent() {
               <CardTitle className="flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-primary" />
-                  Chat with CryptoCoach AI
+                  {t('mentor.chatTitle')}
                 </span>
                 {messages.length > 0 && (
                   <Button variant="ghost" size="sm" onClick={clearChat} className="text-slate-400">
                     <Trash2 className="w-4 h-4 mr-2" />
-                    Clear
+                    {t('mentor.clear')}
                   </Button>
                 )}
               </CardTitle>
@@ -130,10 +132,10 @@ function MentorContent() {
                   <div className="h-full flex flex-col items-center justify-center text-center">
                     <Bot className="w-12 h-12 text-slate-500 mb-4" />
                     <p className="text-slate-400 mb-6">
-                      Hi {user?.full_name?.split(' ')[0]}! I'm CryptoCoach AI. How can I help you learn about cryptocurrency today?
+                      {t('mentor.greeting', { name: user?.full_name?.split(' ')[0] })}
                     </p>
                     <div className="space-y-2 w-full max-w-md">
-                      <p className="text-sm text-slate-500 mb-3">Try asking:</p>
+                      <p className="text-sm text-slate-500 mb-3">{t('mentor.tryAsking')}</p>
                       {suggestedQuestions.map((question, index) => (
                         <button
                           key={index}
@@ -202,7 +204,7 @@ function MentorContent() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ask me anything about cryptocurrency..."
+                    placeholder={t('mentor.inputPlaceholder')}
                     className="min-h-[60px] max-h-[120px] bg-muted border-border resize-none"
                     disabled={loading}
                   />
@@ -215,7 +217,7 @@ function MentorContent() {
                   </Button>
                 </div>
                 <p className="text-xs text-slate-500 mt-2">
-                  Press Enter to send, Shift+Enter for new line
+                  {t('mentor.enterHint')}
                 </p>
               </div>
             </CardContent>
@@ -229,7 +231,7 @@ function MentorContent() {
           transition={{ delay: 0.3 }}
           className="mt-8 p-4 bg-muted/50 rounded-lg text-center text-sm text-slate-500"
         >
-          CryptoCoach AI provides educational information only. It is not financial advice. Always do your own research before making investment decisions.
+          {t('mentor.disclaimer')}
         </motion.div>
       </div>
     </Layout>
@@ -238,13 +240,14 @@ function MentorContent() {
 
 export default function MentorPage() {
   const { canAccessAIMentor } = useSubscriptionAccess();
-  
+  const { t } = useTranslation();
+
   if (!canAccessAIMentor) {
     return (
       <Layout>
-        <SubscriptionGate 
-          requiredTier="elite" 
-          feature="L'AI Crypto Mentor (CryptoCoach AI)"
+        <SubscriptionGate
+          requiredTier="elite"
+          feature={t('mentor.featureName')}
         />
       </Layout>
     );

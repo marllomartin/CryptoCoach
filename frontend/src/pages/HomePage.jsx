@@ -165,7 +165,7 @@ export default function HomePage() {
                   className="bg-primary hover:bg-primary/90 text-white px-8 py-6 text-lg shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:shadow-[0_0_40px_rgba(37,99,235,0.6)]"
                   data-testid="hero-get-started-btn"
                 >
-                  Start Learning Free
+                  {t('homepage.startLearning')}
                   <ChevronRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>

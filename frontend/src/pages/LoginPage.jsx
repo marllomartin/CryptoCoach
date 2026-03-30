@@ -39,10 +39,10 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      toast.success('Welcome back!');
+      toast.success(t('auth.welcomeBackToast'));
       navigate('/dashboard');
     } catch (e) {
-      toast.error(e.response?.data?.detail || 'Invalid credentials');
+      toast.error(e.response?.data?.detail || t('auth.invalidCredentials'));
     } finally {
       setLoading(false);
     }
@@ -72,13 +72,13 @@ export default function LoginPage() {
 
         <Card className="bg-card border-border">
           <CardHeader className="text-center">
-            <CardTitle className="font-heading text-2xl">Welcome Back</CardTitle>
-            <CardDescription>Sign in to continue your learning journey</CardDescription>
+            <CardTitle className="font-heading text-2xl">{t('auth.welcomeBack')}</CardTitle>
+            <CardDescription>{t('auth.signInContinue')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth.email')}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <Input
@@ -95,7 +95,7 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('auth.password')}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <Input
@@ -127,19 +127,19 @@ export default function LoginPage() {
                 {loading ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Signing in...
+                    {t('auth.signingIn')}
                   </>
                 ) : (
-                  'Sign In'
+                  t('auth.signInBtn')
                 )}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-slate-400">
-                Don't have an account?{' '}
+                {t('auth.noAccount')}{' '}
                 <Link to="/register" className="text-primary hover:underline font-medium">
-                  Create one
+                  {t('auth.createOne')}
                 </Link>
               </p>
             </div>
@@ -147,10 +147,10 @@ export default function LoginPage() {
         </Card>
 
         <p className="text-center text-sm text-slate-500 mt-6">
-          By signing in, you agree to our{' '}
-          <Link to="/terms" className="text-primary hover:underline">Terms</Link>
-          {' '}and{' '}
-          <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+          {t('auth.termsAgreeSignIn')}{' '}
+          <Link to="/terms" className="text-primary hover:underline">{t('auth.terms')}</Link>
+          {' '}{t('auth.and')}{' '}
+          <Link to="/privacy" className="text-primary hover:underline">{t('auth.privacyPolicy')}</Link>
         </p>
       </motion.div>
     </div>

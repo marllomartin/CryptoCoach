@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Layout } from '../components/Layout';
 import { motion } from 'framer-motion';
-import { 
-  Award, 
-  TrendingUp, 
-  Users, 
-  BookOpen, 
+import { useTranslation } from 'react-i18next';
+import {
+  Award,
+  TrendingUp,
+  Users,
+  BookOpen,
   Target,
   Lightbulb,
   Globe,
@@ -18,47 +19,24 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 
 export default function AboutPage() {
+  const { t } = useTranslation();
+
   const expertise = [
-    "Bitcoin and blockchain fundamentals",
-    "Cryptocurrency market cycles",
-    "Digital asset education",
-    "Decentralized finance (DeFi)",
-    "Web3 infrastructure",
-    "Crypto investment fundamentals"
+    t('about.exp1'), t('about.exp2'), t('about.exp3'),
+    t('about.exp4'), t('about.exp5'), t('about.exp6')
   ];
 
   const principles = [
-    {
-      title: "Clarity",
-      description: "Complex technology should be explained in simple language."
-    },
-    {
-      title: "Education before speculation",
-      description: "Understanding digital assets is more valuable than chasing short-term market movements."
-    },
-    {
-      title: "Long-term thinking",
-      description: "Blockchain innovation should be approached with a strategic perspective."
-    }
+    { title: t('about.principleTitle1'), description: t('about.principleDesc1') },
+    { title: t('about.principleTitle2'), description: t('about.principleDesc2') },
+    { title: t('about.principleTitle3'), description: t('about.principleDesc3') }
   ];
 
   const faqs = [
-    {
-      question: "Who is Mehdi Arbi?",
-      answer: "Mehdi Arbi is an entrepreneur and cryptocurrency educator known for his work in digital finance and blockchain education. He is the founder of TheCryptoCoach.io, an online platform dedicated to explaining cryptocurrency and blockchain technology."
-    },
-    {
-      question: "What is TheCryptoCoach.io?",
-      answer: "TheCryptoCoach.io is a cryptocurrency education platform that provides structured lessons, guides, and educational resources about blockchain technology, digital assets, and crypto markets."
-    },
-    {
-      question: "What topics does Mehdi Arbi write about?",
-      answer: "Mehdi Arbi focuses on topics related to cryptocurrency markets, blockchain technology, decentralized finance (DeFi), Web3 innovation, and digital asset education."
-    },
-    {
-      question: "What is Mehdi Arbi known for?",
-      answer: "Mehdi Arbi is known for creating educational resources that help explain cryptocurrency concepts and blockchain technology through accessible and structured content."
-    }
+    { question: t('about.faqQ1'), answer: t('about.faqA1') },
+    { question: t('about.faqQ2'), answer: t('about.faqA2') },
+    { question: t('about.faqQ3'), answer: t('about.faqA3') },
+    { question: t('about.faqQ4'), answer: t('about.faqA4') }
   ];
 
   // JSON-LD Schema for SEO
@@ -87,9 +65,9 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 hero-glow opacity-50" />
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <motion.div 
+          <motion.div
             className="max-w-3xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -98,10 +76,10 @@ export default function AboutPage() {
               <span className="text-gradient">Mehdi Arbi</span>
             </h1>
             <p className="text-xl text-slate-300 mb-4">
-              Entrepreneur, Crypto Educator, and Founder of TheCryptoCoach.io
+              {t('about.heroSubtitle')}
             </p>
             <p className="text-lg text-slate-400">
-              Mehdi Arbi is an entrepreneur and cryptocurrency educator known for his work in digital finance, blockchain education, and online entrepreneurship. As the founder of TheCryptoCoach.io, he focuses on helping individuals understand cryptocurrency markets, blockchain technology, and the evolving digital asset ecosystem.
+              {t('about.heroBio')}
             </p>
           </motion.div>
         </div>
@@ -117,28 +95,23 @@ export default function AboutPage() {
               viewport={{ once: true }}
             >
               <h2 className="font-heading text-4xl font-bold mb-6">
-                About <span className="text-primary">Mehdi Arbi</span>
+                {t('about.aboutHeading')} <span className="text-primary">Mehdi Arbi</span>
               </h2>
-              
+
               <div className="space-y-4 text-slate-300">
-                <p>
-                  Mehdi Arbi is an entrepreneur with experience in cryptocurrency markets, digital assets, and online business development. His work combines education, digital entrepreneurship, and research into emerging technologies such as blockchain and Web3.
-                </p>
-                <p>
-                  Over the years, he has focused on understanding how digital assets operate within the broader financial system and how blockchain technology may transform the future of finance.
-                </p>
-                <p>
-                  Through educational resources and structured learning programs, Mehdi Arbi works to make complex topics such as Bitcoin, blockchain infrastructure, and decentralized finance accessible to a broader audience.
-                </p>
-                <p>
-                  This experience led him to create TheCryptoCoach.io, a platform dedicated to structured cryptocurrency education.
-                </p>
+                <p>{t('about.aboutP1')}</p>
+                <p>{t('about.aboutP2')}</p>
+                <p>{t('about.aboutP3')}</p>
+                <p>{t('about.aboutP4')}</p>
               </div>
 
               <div className="mt-8">
-                <h3 className="font-heading font-semibold text-lg mb-4">Areas of Focus</h3>
+                <h3 className="font-heading font-semibold text-lg mb-4">{t('about.areasOfFocus')}</h3>
                 <div className="flex flex-wrap gap-2">
-                  {["cryptocurrency markets", "blockchain technology", "decentralized finance (DeFi)", "digital asset education", "Web3 innovation"].map((area) => (
+                  {[
+                    t('about.focusArea1'), t('about.focusArea2'), t('about.focusArea3'),
+                    t('about.focusArea4'), t('about.focusArea5')
+                  ].map((area) => (
                     <span key={area} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
                       {area}
                     </span>
@@ -156,8 +129,8 @@ export default function AboutPage() {
                 <div className="w-full aspect-square max-w-md mx-auto rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-blue-600/20 flex items-center justify-center">
                   <div className="text-center p-8">
                     <Globe className="w-24 h-24 text-primary mx-auto mb-6" />
-                    <h3 className="font-heading text-2xl font-bold mb-2">Global Impact</h3>
-                    <p className="text-slate-400">Making crypto education accessible worldwide</p>
+                    <h3 className="font-heading text-2xl font-bold mb-2">{t('about.globalImpact')}</h3>
+                    <p className="text-slate-400">{t('about.globalImpactDesc')}</p>
                   </div>
                 </div>
               </div>
@@ -179,7 +152,7 @@ export default function AboutPage() {
               <span className="text-primary">TheCryptoCoach.io</span>
             </h2>
             <p className="text-slate-400 text-lg">
-              TheCryptoCoach.io was created to provide structured educational resources about cryptocurrency and blockchain technology.
+              {t('about.platformDesc')}
             </p>
           </motion.div>
 
@@ -187,18 +160,18 @@ export default function AboutPage() {
             <Card className="bg-card border-border">
               <CardContent className="p-6">
                 <BookOpen className="w-10 h-10 text-primary mb-4" />
-                <h3 className="font-heading font-semibold text-lg mb-2">Cryptocurrency Learning Platform</h3>
+                <h3 className="font-heading font-semibold text-lg mb-2">{t('about.card1Title')}</h3>
                 <p className="text-slate-400 text-sm">
-                  Structured courses taking you from beginner to advanced levels with practical, real-world knowledge.
+                  {t('about.card1Desc')}
                 </p>
               </CardContent>
             </Card>
             <Card className="bg-card border-border">
               <CardContent className="p-6">
                 <Target className="w-10 h-10 text-primary mb-4" />
-                <h3 className="font-heading font-semibold text-lg mb-2">Crypto Knowledge Hub</h3>
+                <h3 className="font-heading font-semibold text-lg mb-2">{t('about.card2Title')}</h3>
                 <p className="text-slate-400 text-sm">
-                  Comprehensive guides, articles, and educational content covering all aspects of digital assets.
+                  {t('about.card2Desc')}
                 </p>
               </CardContent>
             </Card>
@@ -210,15 +183,11 @@ export default function AboutPage() {
             viewport={{ once: true }}
             className="mt-12"
           >
-            <h3 className="font-heading text-xl font-semibold mb-4 text-center">Key Topics Covered</h3>
+            <h3 className="font-heading text-xl font-semibold mb-4 text-center">{t('about.keyTopicsHeading')}</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {[
-                "How blockchain works",
-                "How Bitcoin operates",
-                "Cryptocurrency market fundamentals",
-                "Crypto investment principles",
-                "Decentralized finance ecosystems",
-                "Security best practices"
+                t('about.topic1'), t('about.topic2'), t('about.topic3'),
+                t('about.topic4'), t('about.topic5'), t('about.topic6')
               ].map((topic, index) => (
                 <div key={index} className="flex items-center gap-2 text-slate-300">
                   <ChevronRight className="w-4 h-4 text-primary flex-shrink-0" />
@@ -240,19 +209,19 @@ export default function AboutPage() {
             className="text-center mb-12"
           >
             <h2 className="font-heading text-4xl font-bold mb-4">
-              Philosophy on <span className="text-primary">Blockchain and Digital Finance</span>
+              {t('about.philosophyHeading')} <span className="text-primary">{t('about.philosophyHeadingHighlight')}</span>
             </h2>
             <p className="text-slate-400 text-lg">
-              Mehdi Arbi views blockchain technology as one of the most significant technological innovations in modern finance.
+              {t('about.philosophySubtitle')}
             </p>
           </motion.div>
 
           <div className="bg-card border border-border rounded-xl p-8 mb-8">
             <p className="text-slate-300 text-center mb-8">
-              However, he emphasizes that participation in the crypto economy requires:
+              {t('about.philosophyRequires')}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              {["education", "critical thinking", "long-term perspective"].map((item) => (
+              {[t('about.req1'), t('about.req2'), t('about.req3')].map((item) => (
                 <span key={item} className="px-4 py-2 bg-primary/10 text-primary rounded-lg font-medium">
                   {item}
                 </span>
@@ -292,10 +261,10 @@ export default function AboutPage() {
             className="text-center mb-12"
           >
             <h2 className="font-heading text-4xl font-bold mb-4">
-              Areas of <span className="text-primary">Expertise</span>
+              {t('about.expertiseHeading')} <span className="text-primary">{t('about.expertiseHeadingHighlight')}</span>
             </h2>
             <p className="text-slate-400">
-              Mehdi Arbi focuses on the following areas within the cryptocurrency ecosystem:
+              {t('about.expertiseSubtitle')}
             </p>
           </motion.div>
 
@@ -326,20 +295,18 @@ export default function AboutPage() {
             viewport={{ once: true }}
           >
             <h2 className="font-heading text-4xl font-bold mb-6">
-              Educational <span className="text-primary">Mission</span>
+              {t('about.missionHeading')} <span className="text-primary">{t('about.missionHeadingHighlight')}</span>
             </h2>
             <p className="text-slate-300 text-lg mb-8">
-              The mission behind TheCryptoCoach.io is to provide accessible, structured education about cryptocurrency and blockchain technology.
+              {t('about.missionDesc')}
             </p>
-            
+
             <div className="bg-card border border-border rounded-xl p-8">
-              <h3 className="font-heading font-semibold mb-4">The platform aims to help individuals understand:</h3>
+              <h3 className="font-heading font-semibold mb-4">{t('about.missionSubheading')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                 {[
-                  "How cryptocurrencies function",
-                  "The role of blockchain technology",
-                  "The evolution of decentralized finance",
-                  "The future of digital assets in global finance"
+                  t('about.missionItem1'), t('about.missionItem2'),
+                  t('about.missionItem3'), t('about.missionItem4')
                 ].map((item, index) => (
                   <div key={index} className="flex items-center gap-2 text-slate-300">
                     <ChevronRight className="w-4 h-4 text-primary flex-shrink-0" />
@@ -362,7 +329,7 @@ export default function AboutPage() {
             className="text-center mb-12"
           >
             <h2 className="font-heading text-4xl font-bold mb-4">
-              Frequently Asked <span className="text-primary">Questions</span>
+              {t('about.faqHeading')} <span className="text-primary">{t('about.faqHeadingHighlight')}</span>
             </h2>
           </motion.div>
 
@@ -396,19 +363,19 @@ export default function AboutPage() {
             viewport={{ once: true }}
           >
             <h2 className="font-heading text-4xl font-bold mb-6">
-              Learn More About <span className="text-primary">Cryptocurrency</span>
+              {t('about.learnMoreHeading')} <span className="text-primary">{t('about.learnMoreHeadingHighlight')}</span>
             </h2>
             <p className="text-slate-400 text-lg mb-8">
-              Explore educational resources designed to help you better understand digital assets and the rapidly evolving blockchain ecosystem.
+              {t('about.learnMoreDesc')}
             </p>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <Link to="/academy" className="block">
                 <Card className="bg-card border-border hover:border-primary/50 transition-colors h-full">
                   <CardContent className="p-6 text-center">
                     <BookOpen className="w-8 h-8 text-primary mx-auto mb-3" />
-                    <h3 className="font-heading font-semibold">Crypto Academy</h3>
-                    <p className="text-slate-400 text-sm mt-2">Structured courses from beginner to advanced</p>
+                    <h3 className="font-heading font-semibold">{t('about.link1Title')}</h3>
+                    <p className="text-slate-400 text-sm mt-2">{t('about.link1Desc')}</p>
                   </CardContent>
                 </Card>
               </Link>
@@ -416,8 +383,8 @@ export default function AboutPage() {
                 <Card className="bg-card border-border hover:border-primary/50 transition-colors h-full">
                   <CardContent className="p-6 text-center">
                     <Target className="w-8 h-8 text-primary mx-auto mb-3" />
-                    <h3 className="font-heading font-semibold">Crypto Knowledge Base</h3>
-                    <p className="text-slate-400 text-sm mt-2">Comprehensive glossary and guides</p>
+                    <h3 className="font-heading font-semibold">{t('about.link2Title')}</h3>
+                    <p className="text-slate-400 text-sm mt-2">{t('about.link2Desc')}</p>
                   </CardContent>
                 </Card>
               </Link>
@@ -425,8 +392,8 @@ export default function AboutPage() {
                 <Card className="bg-card border-border hover:border-primary/50 transition-colors h-full">
                   <CardContent className="p-6 text-center">
                     <TrendingUp className="w-8 h-8 text-primary mx-auto mb-3" />
-                    <h3 className="font-heading font-semibold">Crypto Insights</h3>
-                    <p className="text-slate-400 text-sm mt-2">Latest articles and market analysis</p>
+                    <h3 className="font-heading font-semibold">{t('about.link3Title')}</h3>
+                    <p className="text-slate-400 text-sm mt-2">{t('about.link3Desc')}</p>
                   </CardContent>
                 </Card>
               </Link>
@@ -435,13 +402,13 @@ export default function AboutPage() {
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/academy">
                 <Button size="lg" className="bg-primary hover:bg-primary/90 px-8">
-                  Start Learning
+                  {t('about.startLearning')}
                   <ChevronRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
               <Link to="/contact">
                 <Button variant="outline" size="lg" className="border-slate-700 px-8">
-                  Get in Touch
+                  {t('about.getInTouch')}
                 </Button>
               </Link>
             </div>

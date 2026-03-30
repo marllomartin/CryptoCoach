@@ -2,8 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function TermsPage() {
+  const { t } = useTranslation();
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -12,81 +15,65 @@ export default function TermsPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           <h1 className="font-heading text-4xl md:text-5xl font-bold mb-8">
-            Terms of <span className="text-primary">Service</span>
+            {t('terms.title')} <span className="text-primary">{t('terms.titleHighlight')}</span>
           </h1>
 
           <div className="prose prose-invert max-w-none">
             <p className="text-slate-400 text-lg mb-8">
-              Last updated: January 2025
+              {t('terms.lastUpdated')}
             </p>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">1. Agreement to Terms</h2>
-              <p className="text-slate-300 mb-4">
-                By accessing or using TheCryptoCoach.io ("the Platform"), you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access the Platform.
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('terms.s1Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('terms.s1Body')}</p>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">2. Educational Purpose</h2>
-              <p className="text-slate-300 mb-4">
-                The content provided on TheCryptoCoach.io is for educational purposes only. We do not provide financial, investment, legal, or tax advice. All information is general in nature and should not be relied upon for making investment decisions.
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('terms.s2Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('terms.s2Body')}</p>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">3. User Accounts</h2>
-              <p className="text-slate-300 mb-4">
-                When you create an account, you must provide accurate and complete information. You are responsible for maintaining the confidentiality of your account credentials and for all activities under your account.
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('terms.s3Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('terms.s3Body')}</p>
               <ul className="list-disc list-inside text-slate-300 space-y-2">
-                <li>You must be at least 18 years old to create an account</li>
-                <li>One account per person</li>
-                <li>Account sharing is prohibited</li>
-                <li>You must notify us of any unauthorized use</li>
+                <li>{t('terms.s3Li1')}</li>
+                <li>{t('terms.s3Li2')}</li>
+                <li>{t('terms.s3Li3')}</li>
+                <li>{t('terms.s3Li4')}</li>
               </ul>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">4. Intellectual Property</h2>
-              <p className="text-slate-300 mb-4">
-                All content on TheCryptoCoach.io, including courses, lessons, quizzes, and materials, is owned by TheCryptoCoach.io or its licensors. You may not reproduce, distribute, or create derivative works without explicit permission.
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('terms.s4Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('terms.s4Body')}</p>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">5. Certificates</h2>
-              <p className="text-slate-300 mb-4">
-                Certificates earned on TheCryptoCoach.io represent completion of educational coursework. They do not constitute professional certifications, licenses, or qualifications recognized by regulatory bodies.
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('terms.s5Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('terms.s5Body')}</p>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">6. Trading Simulator</h2>
-              <p className="text-slate-300 mb-4">
-                The trading simulator uses virtual funds and simulated market data. Results achieved in the simulator are not indicative of actual trading results. No real cryptocurrency or money is involved.
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('terms.s6Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('terms.s6Body')}</p>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">7. Limitation of Liability</h2>
-              <p className="text-slate-300 mb-4">
-                TheCryptoCoach.io shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the Platform or any content therein.
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('terms.s7Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('terms.s7Body')}</p>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">8. Changes to Terms</h2>
-              <p className="text-slate-300 mb-4">
-                We reserve the right to modify these terms at any time. We will notify users of significant changes via email or Platform notification. Continued use after changes constitutes acceptance.
-              </p>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('terms.s8Title')}</h2>
+              <p className="text-slate-300 mb-4">{t('terms.s8Body')}</p>
             </section>
 
             <section className="mb-8">
-              <h2 className="font-heading text-2xl font-bold mb-4">9. Contact</h2>
+              <h2 className="font-heading text-2xl font-bold mb-4">{t('terms.s9Title')}</h2>
               <p className="text-slate-300 mb-4">
-                For questions about these Terms, please contact us at{' '}
-                <Link to="/contact" className="text-primary hover:underline">our contact page</Link>.
+                {t('terms.s9Body')}{' '}
+                <Link to="/contact" className="text-primary hover:underline">{t('terms.contactPage')}</Link>.
               </p>
             </section>
           </div>

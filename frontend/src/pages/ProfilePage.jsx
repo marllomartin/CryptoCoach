@@ -52,7 +52,7 @@ const ProfilePage = () => {
 
   const saveProfile = async () => {
     if (!editName.trim()) {
-      toast.error('Name cannot be empty');
+      toast.error(t('profile.nameRequired'));
       return;
     }
 
@@ -63,11 +63,11 @@ const ProfilePage = () => {
         { full_name: editName },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success('Profile updated!');
+      toast.success(t('profile.profileUpdated'));
       setEditing(false);
       refreshUser?.();
     } catch (error) {
-      toast.error('Failed to update profile');
+      toast.error(t('profile.updateFailed'));
     } finally {
       setSaving(false);
     }
@@ -105,7 +105,7 @@ const ProfilePage = () => {
                   </div>
                 </div>
                 <div className="absolute -bottom-2 -right-2 bg-primary text-white text-sm font-bold px-4 py-1 rounded-full">
-                  Lv. {level}
+                  {t('profile.levelBadge', { level })}
                 </div>
               </div>
 
@@ -135,7 +135,7 @@ const ProfilePage = () => {
                 )}
                 
                 <p className="text-primary font-medium mb-3">
-                  {profile?.avatar?.title || 'Nouveau Venu'}
+                  {profile?.avatar?.title || t('profile.newUser')}
                 </p>
 
                 <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
@@ -143,7 +143,7 @@ const ProfilePage = () => {
                   <span className="text-white font-bold">{xp.toLocaleString()} XP</span>
                   <span className="text-gray-500">•</span>
                   <span className="text-gray-400">
-                    {levelProgress.xp_in_level || 0} / {levelProgress.xp_needed || 100} to Lv. {level + 1}
+                    {levelProgress.xp_in_level || 0} / {levelProgress.xp_needed || 100} {t('profile.toNextLevel', { level: level + 1 })}
                   </span>
                 </div>
                 <Progress value={levelProgress.progress || 0} className="h-2 max-w-md" />
@@ -154,17 +154,17 @@ const ProfilePage = () => {
                 <div className="text-center p-3 bg-gray-800/50 rounded-lg">
                   <Flame className="w-6 h-6 text-orange-500 mx-auto mb-1" />
                   <p className="text-xl font-bold text-white">{streakInfo?.current_streak || 0}</p>
-                  <p className="text-xs text-gray-400">Streak</p>
+                  <p className="text-xs text-gray-400">{t('profile.streak')}</p>
                 </div>
                 <div className="text-center p-3 bg-gray-800/50 rounded-lg">
                   <Star className="w-6 h-6 text-yellow-500 mx-auto mb-1" />
                   <p className="text-xl font-bold text-white">{profile?.coins || 0}</p>
-                  <p className="text-xs text-gray-400">Coins</p>
+                  <p className="text-xs text-gray-400">{t('profile.coins')}</p>
                 </div>
                 <div className="text-center p-3 bg-gray-800/50 rounded-lg">
                   <Trophy className="w-6 h-6 text-purple-500 mx-auto mb-1" />
                   <p className="text-xl font-bold text-white">{profile?.achievements_count || 0}</p>
-                  <p className="text-xs text-gray-400">Achievements</p>
+                  <p className="text-xs text-gray-400">{t('profile.achievements')}</p>
                 </div>
               </div>
             </div>
@@ -175,14 +175,14 @@ const ProfilePage = () => {
             <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-6">
               <h2 className="font-bold text-white mb-4 flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-green-500" />
-                Statistics
+                {t('profile.statistics')}
               </h2>
               <div className="space-y-4">
-                <StatRow icon={BookOpen} label="Lessons Completed" value={profile?.stats?.lessons_completed || 0} color="blue" />
-                <StatRow icon={Target} label="Quizzes Passed" value={profile?.stats?.quizzes_completed || 0} color="green" />
-                <StatRow icon={Award} label="Exams Passed" value={profile?.stats?.exams_passed || 0} color="purple" />
-                <StatRow icon={TrendingUp} label="Trades Executed" value={profile?.stats?.trades_count || 0} color="cyan" />
-                <StatRow icon={Crown} label="Certificates Earned" value={profile?.stats?.certificates_earned || 0} color="yellow" />
+                <StatRow icon={BookOpen} label={t('profile.lessonsCompleted')} value={profile?.stats?.lessons_completed || 0} color="blue" />
+                <StatRow icon={Target} label={t('profile.quizzesPassed')} value={profile?.stats?.quizzes_completed || 0} color="green" />
+                <StatRow icon={Award} label={t('profile.examsPassed')} value={profile?.stats?.exams_passed || 0} color="purple" />
+                <StatRow icon={TrendingUp} label={t('profile.tradesExecuted')} value={profile?.stats?.trades_count || 0} color="cyan" />
+                <StatRow icon={Crown} label={t('profile.certificatesEarned')} value={profile?.stats?.certificates_earned || 0} color="yellow" />
               </div>
             </div>
 
@@ -190,18 +190,18 @@ const ProfilePage = () => {
             <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-6">
               <h2 className="font-bold text-white mb-4 flex items-center gap-2">
                 <Flame className="w-5 h-5 text-orange-500" />
-                Streak Milestones
+                {t('profile.streakMilestones')}
               </h2>
-              
+
               <div className="mb-4 p-4 bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm">Current Streak</p>
-                    <p className="text-3xl font-bold text-orange-500">{streakInfo?.current_streak || 0} days</p>
+                    <p className="text-gray-400 text-sm">{t('profile.currentStreak')}</p>
+                    <p className="text-3xl font-bold text-orange-500">{streakInfo?.current_streak || 0} {t('profile.days')}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-gray-400 text-sm">Longest Streak</p>
-                    <p className="text-xl font-bold text-white">{streakInfo?.longest_streak || 0} days</p>
+                    <p className="text-gray-400 text-sm">{t('profile.longestStreak')}</p>
+                    <p className="text-xl font-bold text-white">{streakInfo?.longest_streak || 0} {t('profile.days')}</p>
                   </div>
                 </div>
               </div>
@@ -238,7 +238,7 @@ const ProfilePage = () => {
             <div className="md:col-span-2 bg-gray-900/60 border border-gray-800 rounded-xl p-6">
               <h2 className="font-bold text-white mb-4 flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-yellow-500" />
-                Achievements ({profile?.achievements_count || 0}/12)
+                {t('profile.achievementsCount', { count: profile?.achievements_count || 0 })}
               </h2>
               
               <div className="grid grid-cols-4 md:grid-cols-6 gap-3">

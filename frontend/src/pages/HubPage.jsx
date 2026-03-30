@@ -306,7 +306,7 @@ const HubPage = () => {
                 
                 <Link to="/achievements" className="block mt-4">
                   <Button variant="outline" size="sm" className="w-full">
-                    Voir tous les achievements
+                    {t('hub.viewAllAchievements')}
                   </Button>
                 </Link>
               </div>

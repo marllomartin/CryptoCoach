@@ -60,7 +60,7 @@ const ShopPage = () => {
 
   const purchaseItem = async (itemId) => {
     if (!user) {
-      toast.error('Please login to purchase');
+      toast.error(t('shop.loginToPurchase'));
       return;
     }
 
@@ -73,11 +73,11 @@ const ShopPage = () => {
       );
 
       if (response.data.success) {
-        toast.success(`Purchased successfully! New balance: ${response.data.new_balance} coins`);
+        toast.success(t('shop.purchaseSuccess', { balance: response.data.new_balance }));
         fetchData();
       }
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Purchase failed');
+      toast.error(error.response?.data?.detail || t('shop.purchaseFailed'));
     } finally {
       setPurchasing(null);
     }
@@ -96,10 +96,10 @@ const ShopPage = () => {
   };
 
   const categories = [
-    { id: 'boosters', name: 'Boosters', icon: Zap },
-    { id: 'quiz_powerups', name: 'Quiz Power-ups', icon: Lightbulb },
-    { id: 'cosmetics', name: 'Cosmetics', icon: Sparkles },
-    { id: 'special', name: 'Special', icon: Award }
+    { id: 'boosters', name: t('shop.catBoosters'), icon: Zap },
+    { id: 'quiz_powerups', name: t('shop.catQuizPowerups'), icon: Lightbulb },
+    { id: 'cosmetics', name: t('shop.catCosmetics'), icon: Sparkles },
+    { id: 'special', name: t('shop.catSpecial'), icon: Award }
   ];
 
   if (loading) {
@@ -121,10 +121,10 @@ const ShopPage = () => {
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/20 rounded-full mb-4">
               <Store className="w-5 h-5 text-yellow-500" />
-              <span className="text-yellow-500 font-medium">Shop</span>
+              <span className="text-yellow-500 font-medium">{t('shop.badge')}</span>
             </div>
-            <h1 className="text-4xl font-bold text-white mb-3">CryptoCoach Shop</h1>
-            <p className="text-gray-400">Spend your coins on boosters, power-ups, and cosmetics</p>
+            <h1 className="text-4xl font-bold text-white mb-3">{t('shop.title')}</h1>
+            <p className="text-gray-400">{t('shop.subtitle')}</p>
           </div>
 
           {/* Balance Card */}
@@ -136,13 +136,13 @@ const ShopPage = () => {
                     <Coins className="w-7 h-7 text-yellow-500" />
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Your Balance</p>
-                    <p className="text-3xl font-bold text-white">{inventory.coins.toLocaleString()} <span className="text-yellow-500">Coins</span></p>
+                    <p className="text-gray-400 text-sm">{t('shop.yourBalance')}</p>
+                    <p className="text-3xl font-bold text-white">{inventory.coins.toLocaleString()} <span className="text-yellow-500">{t('shop.coins')}</span></p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-400">Active Boosters: {inventory.active_boosters?.length || 0}</p>
-                  <p className="text-sm text-gray-400">Streak Freezes: {inventory.streak_freezes || 0}</p>
+                  <p className="text-sm text-gray-400">{t('shop.activeBoosters', { count: inventory.active_boosters?.length || 0 })}</p>
+                  <p className="text-sm text-gray-400">{t('shop.streakFreezes', { count: inventory.streak_freezes || 0 })}</p>
                 </div>
               </div>
             </div>
@@ -199,7 +199,7 @@ const ShopPage = () => {
                       <p className="text-sm text-gray-400 mb-3">{getLocalizedDesc(item)}</p>
                       
                       {owned > 0 && !isCosmetic && (
-                        <p className="text-xs text-primary mb-2">Owned: {owned}</p>
+                        <p className="text-xs text-primary mb-2">{t('shop.owned', { count: owned })}</p>
                       )}
 
                       <div className="flex items-center justify-between">
@@ -211,10 +211,10 @@ const ShopPage = () => {
                         {alreadyOwned ? (
                           <span className="flex items-center gap-1 text-green-500 text-sm">
                             <Check className="w-4 h-4" />
-                            Owned
+                            {t('shop.ownedLabel')}
                           </span>
                         ) : maxReached ? (
-                          <span className="text-gray-500 text-sm">Max owned</span>
+                          <span className="text-gray-500 text-sm">{t('shop.maxOwned')}</span>
                         ) : (
                           <Button
                             size="sm"
@@ -225,9 +225,9 @@ const ShopPage = () => {
                             {purchasing === item.id ? (
                               <RefreshCw className="w-4 h-4 animate-spin" />
                             ) : !canAfford ? (
-                              <><Lock className="w-4 h-4 mr-1" /> Locked</>
+                              <><Lock className="w-4 h-4 mr-1" /> {t('shop.locked')}</>
                             ) : (
-                              <><ShoppingCart className="w-4 h-4 mr-1" /> Buy</>
+                              <><ShoppingCart className="w-4 h-4 mr-1" /> {t('shop.buy')}</>
                             )}
                           </Button>
                         )}
@@ -242,7 +242,7 @@ const ShopPage = () => {
           {/* Active Boosters */}
           {inventory?.active_boosters?.length > 0 && (
             <div className="mt-8">
-              <h2 className="text-xl font-bold text-white mb-4">Active Boosters</h2>
+              <h2 className="text-xl font-bold text-white mb-4">{t('shop.activeBoostersTitle')}</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 {inventory.active_boosters.map((booster, idx) => (
                   <div key={idx} className="bg-gradient-to-r from-primary/20 to-purple-500/20 border border-primary/30 rounded-xl p-4">
@@ -252,7 +252,7 @@ const ShopPage = () => {
                         <div>
                           <p className="font-medium text-white">{booster.item_id}</p>
                           <p className="text-xs text-gray-400">
-                            Expires: {new Date(booster.expires_at).toLocaleString()}
+                            {t('shop.expires', { date: new Date(booster.expires_at).toLocaleString(i18n.language) })}
                           </p>
                         </div>
                       </div>

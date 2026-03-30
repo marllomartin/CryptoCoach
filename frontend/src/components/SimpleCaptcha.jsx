@@ -1,45 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, CheckCircle, XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 
 // Simple math CAPTCHA - no external dependencies
-export function SimpleCaptcha({ onVerify, language = 'en' }) {
+export function SimpleCaptcha({ onVerify }) {
+  const { t } = useTranslation();
   const [num1, setNum1] = useState(0);
   const [num2, setNum2] = useState(0);
   const [operator, setOperator] = useState('+');
   const [userAnswer, setUserAnswer] = useState('');
   const [isVerified, setIsVerified] = useState(false);
   const [error, setError] = useState(false);
-  
-  const labels = {
-    en: {
-      title: 'Security Check',
-      placeholder: 'Your answer',
-      verify: 'Verify',
-      verified: 'Verified!',
-      wrong: 'Wrong answer, try again',
-      refresh: 'New question'
-    },
-    fr: {
-      title: 'Vérification de sécurité',
-      placeholder: 'Votre réponse',
-      verify: 'Vérifier',
-      verified: 'Vérifié !',
-      wrong: 'Mauvaise réponse, réessayez',
-      refresh: 'Nouvelle question'
-    },
-    ar: {
-      title: 'فحص أمني',
-      placeholder: 'إجابتك',
-      verify: 'تحقق',
-      verified: 'تم التحقق!',
-      wrong: 'إجابة خاطئة، حاول مرة أخرى',
-      refresh: 'سؤال جديد'
-    }
-  };
-  
-  const t = labels[language] || labels.en;
   
   const generateQuestion = useCallback(() => {
     const operators = ['+', '-', '×'];
@@ -104,7 +77,7 @@ export function SimpleCaptcha({ onVerify, language = 'en' }) {
     return (
       <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
         <CheckCircle className="w-5 h-5 text-green-500" />
-        <span className="text-green-400 font-medium">{t.verified}</span>
+        <span className="text-green-400 font-medium">{t('captcha.verified')}</span>
       </div>
     );
   }
@@ -112,7 +85,7 @@ export function SimpleCaptcha({ onVerify, language = 'en' }) {
   return (
     <div className="p-4 bg-muted/50 border border-border rounded-lg space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-slate-300">{t.title}</span>
+        <span className="text-sm font-medium text-slate-300">{t('captcha.title')}</span>
         <Button
           type="button"
           variant="ghost"
@@ -136,7 +109,7 @@ export function SimpleCaptcha({ onVerify, language = 'en' }) {
           value={userAnswer}
           onChange={(e) => setUserAnswer(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder={t.placeholder}
+          placeholder={t('captcha.placeholder')}
           className={`w-24 text-center ${error ? 'border-red-500' : ''}`}
           data-testid="captcha-input"
         />
@@ -148,14 +121,14 @@ export function SimpleCaptcha({ onVerify, language = 'en' }) {
           size="sm"
           data-testid="captcha-verify-btn"
         >
-          {t.verify}
+          {t('captcha.verify')}
         </Button>
       </div>
       
       {error && (
         <div className="flex items-center gap-2 text-red-400 text-sm">
           <XCircle className="w-4 h-4" />
-          {t.wrong}
+          {t('captcha.wrong')}
         </div>
       )}
     </div>

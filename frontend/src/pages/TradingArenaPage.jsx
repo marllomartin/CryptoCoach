@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth, API } from '../App';
 import Layout from '../components/Layout';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { 
   TrendingUp, TrendingDown, Wallet, RefreshCw, History, 
   BarChart3, ArrowUp, ArrowDown, DollarSign, Activity,
@@ -13,6 +14,7 @@ import { Progress } from '../components/ui/progress';
 import { toast } from 'sonner';
 
 const TradingArenaPage = () => {
+  const { t, i18n } = useTranslation();
   const { user, token } = useAuth();
   const [prices, setPrices] = useState({});
   const [portfolio, setPortfolio] = useState(null);
@@ -58,7 +60,7 @@ const TradingArenaPage = () => {
 
   const executeTrade = async () => {
     if (!tradeAmount || parseFloat(tradeAmount) <= 0) {
-      toast.error('Veuillez entrer un montant valide');
+      toast.error(t('trading.invalidAmount'));
       return;
     }
 
@@ -76,19 +78,19 @@ const TradingArenaPage = () => {
       );
 
       if (response.data.success) {
-        toast.success(`${tradeAction === 'buy' ? 'Achat' : 'Vente'} de ${tradeAmount} ${selectedCrypto} effectué !`);
+        toast.success(`${tradeAction === 'buy' ? t('trading.purchased') : t('trading.sold')} ${tradeAmount} ${selectedCrypto}`);
         setTradeAmount('');
         fetchData();
       }
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Erreur lors du trade');
+      toast.error(error.response?.data?.detail || t('trading.tradeError'));
     } finally {
       setTrading(false);
     }
   };
 
   const resetPortfolio = async () => {
-    if (!window.confirm('Êtes-vous sûr de vouloir réinitialiser votre portfolio ? Vous perdrez tous vos trades.')) {
+    if (!window.confirm(t('trading.confirmReset'))) {
       return;
     }
 
@@ -99,10 +101,10 @@ const TradingArenaPage = () => {
         { starting_capital: 10000 },
         { headers }
       );
-      toast.success('Portfolio réinitialisé avec 10,000$ !');
+      toast.success(t('trading.resetSuccess'));
       fetchData();
     } catch (error) {
-      toast.error('Erreur lors de la réinitialisation');
+      toast.error(t('trading.resetError'));
     }
   };
 
@@ -112,7 +114,7 @@ const TradingArenaPage = () => {
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-400">Chargement de l'arène...</p>
+            <p className="text-gray-400">{t('trading.loading')}</p>
           </div>
         </div>
       </Layout>
@@ -134,13 +136,13 @@ const TradingArenaPage = () => {
                 <BarChart3 className="w-8 h-8 text-primary" />
                 Trading Arena
               </h1>
-              <p className="text-gray-400 mt-1">Simulateur de trading professionnel avec données live</p>
+              <p className="text-gray-400 mt-1">{t('trading.subtitle')}</p>
             </div>
             
             {portfolio?.career_level && (
               <div className="bg-gradient-to-r from-primary/20 to-purple-600/20 border border-primary/30 rounded-xl px-4 py-2" data-testid="career-level-badge">
-                <p className="text-xs text-gray-400">Rang Carrière</p>
-                <p className="font-bold text-primary" data-testid="career-level-name">{portfolio.career_level.current?.name || 'Stagiaire'}</p>
+                <p className="text-xs text-gray-400">{t('trading.careerRank')}</p>
+                <p className="font-bold text-primary" data-testid="career-level-name">{portfolio.career_level.current?.name || 'Intern'}</p>
               </div>
             )}
           </div>
@@ -152,30 +154,30 @@ const TradingArenaPage = () => {
               
               {/* Portfolio Summary Cards */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="portfolio-summary-cards">
-                <SummaryCard 
+                <SummaryCard
                   icon={Wallet}
-                  label="Valeur Totale"
+                  label={t('trading.totalValue')}
                   value={`$${portfolio?.total_value?.toLocaleString(undefined, {maximumFractionDigits: 2}) || '10,000'}`}
                   color="blue"
                   testId="summary-total-value"
                 />
-                <SummaryCard 
+                <SummaryCard
                   icon={DollarSign}
-                  label="Cash"
+                  label={t('trading.cash')}
                   value={`$${portfolio?.balance?.toLocaleString(undefined, {maximumFractionDigits: 2}) || '10,000'}`}
                   color="green"
                   testId="summary-cash"
                 />
-                <SummaryCard 
+                <SummaryCard
                   icon={portfolio?.total_pnl >= 0 ? TrendingUp : TrendingDown}
-                  label="P&L Total"
+                  label={t('trading.pnlTotal')}
                   value={`${portfolio?.total_pnl >= 0 ? '+' : ''}$${portfolio?.total_pnl?.toLocaleString(undefined, {maximumFractionDigits: 2}) || '0'}`}
                   color={portfolio?.total_pnl >= 0 ? 'green' : 'red'}
                   testId="summary-pnl"
                 />
-                <SummaryCard 
+                <SummaryCard
                   icon={Activity}
-                  label="ROI"
+                  label={t('trading.roi')}
                   value={`${portfolio?.total_pnl_percent >= 0 ? '+' : ''}${portfolio?.total_pnl_percent?.toFixed(2) || '0'}%`}
                   color={portfolio?.total_pnl_percent >= 0 ? 'green' : 'red'}
                   testId="summary-roi"
@@ -185,10 +187,10 @@ const TradingArenaPage = () => {
               {/* Market Prices Grid */}
               <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="market-prices-section">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-white">Prix du Marché</h2>
+                  <h2 className="text-xl font-bold text-white">{t('trading.marketPrices')}</h2>
                   <Button variant="ghost" size="sm" onClick={fetchData} data-testid="refresh-prices-btn">
                     <RefreshCw className="w-4 h-4 mr-2" />
-                    Actualiser
+                    {t('trading.refresh')}
                   </Button>
                 </div>
                 
@@ -208,16 +210,16 @@ const TradingArenaPage = () => {
               {/* Holdings */}
               {portfolio?.holdings?.length > 0 && (
                 <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="holdings-section">
-                  <h2 className="text-xl font-bold text-white mb-4">Mes Positions</h2>
+                  <h2 className="text-xl font-bold text-white mb-4">{t('trading.myPositions')}</h2>
                   <div className="overflow-x-auto">
                     <table className="w-full" data-testid="holdings-table">
                       <thead>
                         <tr className="text-left text-gray-400 text-sm border-b border-gray-800">
-                          <th className="pb-3">Crypto</th>
-                          <th className="pb-3">Quantité</th>
-                          <th className="pb-3">Prix Actuel</th>
-                          <th className="pb-3">Valeur</th>
-                          <th className="pb-3">P&L</th>
+                          <th className="pb-3">{t('trading.crypto')}</th>
+                          <th className="pb-3">{t('trading.quantity')}</th>
+                          <th className="pb-3">{t('trading.currentPrice')}</th>
+                          <th className="pb-3">{t('trading.value')}</th>
+                          <th className="pb-3">{t('trading.pnl')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -248,7 +250,7 @@ const TradingArenaPage = () => {
               <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="trade-history-section">
                 <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <History className="w-5 h-5" />
-                  Historique des Trades
+                  {t('trading.tradeHistory')}
                 </h2>
                 
                 {tradeHistory.length > 0 ? (
@@ -267,10 +269,10 @@ const TradingArenaPage = () => {
                           </div>
                           <div>
                             <p className="font-medium text-white">
-                              {trade.action === 'buy' ? 'Achat' : 'Vente'} {trade.symbol}
+                              {trade.action === 'buy' ? t('trading.buy') : t('trading.sell')} {trade.symbol}
                             </p>
                             <p className="text-xs text-gray-500">
-                              {new Date(trade.timestamp).toLocaleString('fr-FR')}
+                              {new Date(trade.timestamp).toLocaleString(i18n.language)}
                             </p>
                           </div>
                         </div>
@@ -284,7 +286,7 @@ const TradingArenaPage = () => {
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <History className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                    <p>Aucun trade effectué</p>
+                    <p>{t('trading.noTrades')}</p>
                   </div>
                 )}
               </div>
@@ -295,7 +297,7 @@ const TradingArenaPage = () => {
               
               {/* Trade Form */}
               <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6 sticky top-6" data-testid="trade-form">
-                <h2 className="text-xl font-bold text-white mb-4">Passer un Ordre</h2>
+                <h2 className="text-xl font-bold text-white mb-4">{t('trading.placeOrder')}</h2>
                 
                 {/* Selected Crypto Display */}
                 <div className="bg-gray-800/50 rounded-lg p-4 mb-4" data-testid="selected-crypto">
@@ -326,7 +328,7 @@ const TradingArenaPage = () => {
                         : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
                     }`}
                   >
-                    Acheter
+                    {t('trading.buy')}
                   </button>
                   <button
                     onClick={() => setTradeAction('sell')}
@@ -337,13 +339,13 @@ const TradingArenaPage = () => {
                         : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
                     }`}
                   >
-                    Vendre
+                    {t('trading.sell')}
                   </button>
                 </div>
 
                 {/* Amount Input */}
                 <div className="mb-4">
-                  <label className="text-sm text-gray-400 mb-2 block">Quantité ({selectedCrypto})</label>
+                  <label className="text-sm text-gray-400 mb-2 block">{t('trading.amount')} ({selectedCrypto})</label>
                   <Input
                     type="number"
                     step="any"
@@ -372,7 +374,7 @@ const TradingArenaPage = () => {
                 {/* Total */}
                 <div className="bg-gray-800/50 rounded-lg p-4 mb-4" data-testid="trade-total">
                   <div className="flex justify-between text-sm text-gray-400 mb-1">
-                    <span>Total estimé</span>
+                    <span>{t('trading.estimatedTotal')}</span>
                     <span>USD</span>
                   </div>
                   <p className="text-2xl font-bold text-white" data-testid="estimated-total">
@@ -394,18 +396,18 @@ const TradingArenaPage = () => {
                   {trading ? (
                     <>
                       <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
-                      Traitement...
+                      {t('trading.processing')}
                     </>
                   ) : (
                     <>
-                      {tradeAction === 'buy' ? 'Acheter' : 'Vendre'} {selectedCrypto}
+                      {tradeAction === 'buy' ? t('trading.buy') : t('trading.sell')} {selectedCrypto}
                     </>
                   )}
                 </Button>
 
                 {/* Available Balance */}
                 <p className="text-center text-sm text-gray-500 mt-3" data-testid="available-balance">
-                  Solde disponible: ${portfolio?.balance?.toLocaleString(undefined, {maximumFractionDigits: 2}) || '10,000'}
+                  {t('trading.availableBalance')}: ${portfolio?.balance?.toLocaleString(undefined, {maximumFractionDigits: 2}) || '10,000'}
                 </p>
 
                 {/* Reset Button */}
@@ -417,7 +419,7 @@ const TradingArenaPage = () => {
                   data-testid="reset-portfolio-btn"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Réinitialiser le portfolio
+                  {t('trading.resetPortfolio')}
                 </Button>
               </div>
 
@@ -426,7 +428,7 @@ const TradingArenaPage = () => {
                 <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="career-progress-section">
                   <h3 className="font-bold text-white mb-4 flex items-center gap-2">
                     <Award className="w-5 h-5 text-yellow-500" />
-                    Progression Carrière
+                    {t('trading.careerProgress')}
                   </h3>
                   
                   <div className="space-y-2">

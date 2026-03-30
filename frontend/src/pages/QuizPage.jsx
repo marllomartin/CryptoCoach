@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API, useAuth } from '../App';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { 
   CheckCircle, 
   XCircle,
@@ -23,6 +24,7 @@ export default function QuizPage() {
   const { lessonId } = useParams();
   const navigate = useNavigate();
   const { token, refreshUser } = useAuth();
+  const { t } = useTranslation();
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -65,12 +67,12 @@ export default function QuizPage() {
       await refreshUser();
       
       if (response.data.score >= 80) {
-        toast.success(`Great job! ${response.data.score}% - You earned ${response.data.xp_earned} XP!`);
+        toast.success(t('quiz.toastGreat', { score: response.data.score, xp: response.data.xp_earned }));
       } else {
-        toast.info(`Score: ${response.data.score}%. Review the explanations and try again!`);
+        toast.info(t('quiz.toastReview', { score: response.data.score }));
       }
     } catch (e) {
-      toast.error('Failed to submit quiz');
+      toast.error(t('quiz.toastError'));
     } finally {
       setSubmitting(false);
     }
@@ -80,7 +82,7 @@ export default function QuizPage() {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-pulse text-primary text-xl">Loading quiz...</div>
+          <div className="animate-pulse text-primary text-xl">{t('quiz.loading')}</div>
         </div>
       </Layout>
     );
@@ -91,9 +93,9 @@ export default function QuizPage() {
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Quiz not found</h1>
+            <h1 className="text-2xl font-bold mb-4">{t('quiz.notFound')}</h1>
             <Link to="/academy">
-              <Button>Back to Academy</Button>
+              <Button>{t('quiz.backToAcademy')}</Button>
             </Link>
           </div>
         </div>
@@ -118,10 +120,10 @@ export default function QuizPage() {
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-slate-400">
-                  Question {currentQuestion + 1} of {quiz.questions.length}
+                  {t('quiz.questionOf', { current: currentQuestion + 1, total: quiz.questions.length })}
                 </span>
                 <span className="text-sm text-primary font-medium">
-                  {Math.round(progress)}% Complete
+                  {t('quiz.percentComplete', { percent: Math.round(progress) })}
                 </span>
               </div>
               <Progress value={progress} className="h-2" />
@@ -184,7 +186,7 @@ export default function QuizPage() {
                 disabled={currentQuestion === 0}
               >
                 <ChevronLeft className="w-4 h-4 mr-2" />
-                Previous
+                {t('quiz.previous')}
               </Button>
 
               {currentQuestion < quiz.questions.length - 1 ? (
@@ -193,7 +195,7 @@ export default function QuizPage() {
                   disabled={!answers[question.id]}
                   className="bg-primary hover:bg-primary/90"
                 >
-                  Next
+                  {t('quiz.next')}
                   <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               ) : (
@@ -202,7 +204,7 @@ export default function QuizPage() {
                   disabled={!allAnswered || submitting}
                   className="bg-green-600 hover:bg-green-700"
                 >
-                  {submitting ? 'Submitting...' : 'Submit Quiz'}
+                  {submitting ? t('quiz.submitting') : t('quiz.submit')}
                   <CheckCircle className="w-4 h-4 ml-2" />
                 </Button>
               )}
@@ -249,16 +251,16 @@ export default function QuizPage() {
                   {results.score}%
                 </h2>
                 <p className="text-slate-400 mb-4">
-                  {results.correct} of {results.total} correct
+                  {t('quiz.correctOf', { correct: results.correct, total: results.total })}
                 </p>
                 <p className="text-primary font-medium">
-                  +{results.xp_earned} XP Earned
+                  {t('quiz.xpEarned', { xp: results.xp_earned })}
                 </p>
               </CardContent>
             </Card>
 
             {/* Review Answers */}
-            <h3 className="font-heading text-xl font-bold mb-4">Review Your Answers</h3>
+            <h3 className="font-heading text-xl font-bold mb-4">{t('quiz.reviewTitle')}</h3>
             <div className="space-y-4 mb-8">
               {quiz.questions.map((q, index) => {
                 const result = results.results.find(r => r.question_id === q.id);
@@ -274,11 +276,11 @@ export default function QuizPage() {
                         <div className="flex-1">
                           <p className="font-medium mb-2">{q.question}</p>
                           <p className="text-sm text-slate-400 mb-1">
-                            Your answer: <span className={result.correct ? 'text-green-500' : 'text-red-500'}>{answers[q.id]}</span>
+                            {t('quiz.yourAnswer')} <span className={result.correct ? 'text-green-500' : 'text-red-500'}>{answers[q.id]}</span>
                           </p>
                           {!result.correct && (
                             <p className="text-sm text-slate-400">
-                              Correct answer: <span className="text-green-500">{result.correct_answer}</span>
+                              {t('quiz.correctAnswer')} <span className="text-green-500">{result.correct_answer}</span>
                             </p>
                           )}
                           <p className="text-sm text-slate-500 mt-2 bg-muted p-2 rounded">
@@ -297,7 +299,7 @@ export default function QuizPage() {
               <Link to={`/lesson/${lessonId}`}>
                 <Button variant="outline" className="border-slate-700">
                   <ChevronLeft className="w-4 h-4 mr-2" />
-                  Back to Lesson
+                  {t('quiz.backToLesson')}
                 </Button>
               </Link>
               <Button
@@ -310,11 +312,11 @@ export default function QuizPage() {
                 variant="outline"
                 className="border-slate-700"
               >
-                Retake Quiz
+                {t('quiz.retake')}
               </Button>
               <Link to="/academy">
                 <Button className="bg-primary hover:bg-primary/90">
-                  Continue Learning
+                  {t('quiz.continueLearning')}
                   <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>

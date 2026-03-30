@@ -81,10 +81,10 @@ const CryptoQuestPage = () => {
       );
       
       if (response.data.completed) {
-        toast.success(`${t('quest.mission')} ${t('quest.completed')}! +${mission.xp_reward} XP`);
+        toast.success(t('quest.missionCompleted', { xp: mission.xp_reward }));
         fetchProgress();
       } else {
-        toast.info(`${t('quest.progress')}: ${response.data.current_value}/${response.data.target_value}`);
+        toast.info(t('quest.challengeProgress', { current: response.data.current_value, target: response.data.target_value }));
       }
     } catch (error) {
       console.error('Error checking challenge:', error);

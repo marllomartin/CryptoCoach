@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, XCircle, HelpCircle, Lightbulb, Brain, Target } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 
 export function LessonCheckpoint({ checkpoint, onComplete }) {
+  const { t } = useTranslation();
   const [answered, setAnswered] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [showExplanation, setShowExplanation] = useState(false);
@@ -35,10 +37,10 @@ export function LessonCheckpoint({ checkpoint, onComplete }) {
 
   const getTypeLabel = () => {
     switch (checkpoint.type) {
-      case 'quiz': return 'Quiz Checkpoint';
-      case 'reflection': return 'Point de Réflexion';
-      case 'simulation': return 'Simulation';
-      case 'interactive': return 'Exercice Interactif';
+      case 'quiz': return t('checkpoint.quizCheckpoint');
+      case 'reflection': return t('checkpoint.reflectionPoint');
+      case 'simulation': return t('checkpoint.simulation');
+      case 'interactive': return t('checkpoint.interactiveExercise');
       default: return 'Checkpoint';
     }
   };
@@ -66,13 +68,13 @@ export function LessonCheckpoint({ checkpoint, onComplete }) {
             
             {checkpoint.hint && (
               <div className="mt-4">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={() => setShowHint(!showHint)}
                   className="text-amber-500"
                 >
-                  {showHint ? 'Masquer l\'indice' : 'Voir un indice'}
+                  {showHint ? t('checkpoint.hideHint') : t('checkpoint.showHint')}
                 </Button>
                 
                 <AnimatePresence>
@@ -164,7 +166,7 @@ export function LessonCheckpoint({ checkpoint, onComplete }) {
                   className="mt-4 p-4 bg-background/50 rounded-lg"
                 >
                   <p className="text-slate-300">
-                    <strong>Explication:</strong> {checkpoint.explanation}
+                    <strong>{t('checkpoint.explanation')}:</strong> {checkpoint.explanation}
                   </p>
                 </motion.div>
               )}
@@ -201,12 +203,12 @@ export function LessonCheckpoint({ checkpoint, onComplete }) {
                 {isCorrect ? (
                   <>
                     <CheckCircle className="w-4 h-4" />
-                    Correct!
+                    {t('checkpoint.correct')}
                   </>
                 ) : (
                   <>
                     <XCircle className="w-4 h-4" />
-                    Incorrect
+                    {t('checkpoint.incorrect')}
                   </>
                 )}
               </span>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Lightbulb, GraduationCap } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // Coach tips for each lesson - personalized advice
 const COACH_TIPS = {
@@ -134,6 +135,7 @@ const DEFAULT_TIP = {
 };
 
 export function CoachTip({ lessonId, language = 'en' }) {
+  const { t } = useTranslation();
   const tip = COACH_TIPS[lessonId]?.[language] || COACH_TIPS[lessonId]?.['en'] || DEFAULT_TIP[language] || DEFAULT_TIP['en'];
   
   return (
@@ -147,7 +149,7 @@ export function CoachTip({ lessonId, language = 'en' }) {
         <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full shadow-lg">
           <GraduationCap className="w-5 h-5 text-white" />
           <span className="text-sm font-bold text-white">
-            {language === 'fr' ? 'Conseil du Coach' : language === 'ar' ? 'نصيحة المدرب' : 'Coach\'s Tip'}
+            {t('coachTip.title')}
           </span>
         </div>
       </div>

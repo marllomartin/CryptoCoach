@@ -3,7 +3,8 @@ import { Layout } from '../components/Layout';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API } from '../App';
-import { 
+import { useTranslation } from 'react-i18next';
+import {
   Search,
   BookOpen,
   Filter
@@ -13,6 +14,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 
 export default function GlossaryPage() {
+  const { t } = useTranslation();
   const [terms, setTerms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,10 +63,10 @@ export default function GlossaryPage() {
             <BookOpen className="w-10 h-10 text-primary" />
           </div>
           <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4">
-            Crypto <span className="text-primary">Glossary</span>
+            {t('glossary.title')}
           </h1>
           <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Essential cryptocurrency and blockchain terminology explained in simple terms
+            {t('glossary.subtitle')}
           </p>
         </motion.div>
 
@@ -79,7 +81,7 @@ export default function GlossaryPage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <Input
               type="text"
-              placeholder="Search terms..."
+              placeholder={t('glossary.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-12 h-12 bg-card border-border"
@@ -120,8 +122,8 @@ export default function GlossaryPage() {
           <Card className="bg-card border-border">
             <CardContent className="p-12 text-center">
               <Search className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-              <h3 className="font-heading text-xl font-bold mb-2">No terms found</h3>
-              <p className="text-slate-400">Try adjusting your search or filter</p>
+              <h3 className="font-heading text-xl font-bold mb-2">{t('glossary.noResultsTitle')}</h3>
+              <p className="text-slate-400">{t('glossary.noResultsDesc')}</p>
             </CardContent>
           </Card>
         ) : (
@@ -179,7 +181,7 @@ export default function GlossaryPage() {
           transition={{ delay: 0.5 }}
           className="mt-12 text-center text-slate-500 text-sm"
         >
-          {terms.length} terms in glossary
+          {t('glossary.termCount', { count: terms.length })}
         </motion.div>
       </div>
     </Layout>

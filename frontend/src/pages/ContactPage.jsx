@@ -4,11 +4,11 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API } from '../App';
 import { toast } from 'sonner';
-import { 
+import { useTranslation } from 'react-i18next';
+import {
   Mail,
   MessageSquare,
   Send,
-  MapPin,
   Clock
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -18,6 +18,7 @@ import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 
 export default function ContactPage() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -36,10 +37,10 @@ export default function ContactPage() {
 
     try {
       await axios.post(`${API}/contact`, formData);
-      toast.success('Message sent! We\'ll get back to you soon.');
+      toast.success(t('contact.toastSent'));
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (e) {
-      toast.error('Failed to send message. Please try again.');
+      toast.error(t('contact.toastError'));
     } finally {
       setSubmitting(false);
     }
@@ -48,21 +49,21 @@ export default function ContactPage() {
   const contactInfo = [
     {
       icon: Mail,
-      title: "Email",
+      title: t('contact.emailTitle'),
       value: "support@thecryptocoach.io",
-      description: "For general inquiries"
+      description: t('contact.emailDesc')
     },
     {
       icon: MessageSquare,
-      title: "Support",
+      title: t('contact.supportTitle'),
       value: "help@thecryptocoach.io",
-      description: "For technical support"
+      description: t('contact.supportDesc')
     },
     {
       icon: Clock,
-      title: "Response Time",
-      value: "24-48 hours",
-      description: "We aim to respond quickly"
+      title: t('contact.responseTimeTitle'),
+      value: t('contact.responseTimeValue'),
+      description: t('contact.responseTimeDesc')
     }
   ];
 
@@ -76,10 +77,10 @@ export default function ContactPage() {
           className="text-center mb-12"
         >
           <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4">
-            Get in <span className="text-primary">Touch</span>
+            {t('contact.title')}
           </h1>
           <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Have questions about our courses or need support? We're here to help.
+            {t('contact.subtitle')}
           </p>
         </motion.div>
 
@@ -91,7 +92,7 @@ export default function ContactPage() {
             transition={{ delay: 0.1 }}
             className="space-y-6"
           >
-            {contactInfo.map((item, index) => (
+            {contactInfo.map((item) => (
               <Card key={item.title} className="bg-card border-border">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
@@ -111,12 +112,12 @@ export default function ContactPage() {
             {/* FAQ Link */}
             <Card className="bg-primary/5 border-primary/20">
               <CardContent className="p-6 text-center">
-                <h3 className="font-semibold mb-2">Looking for quick answers?</h3>
+                <h3 className="font-semibold mb-2">{t('contact.faqTitle')}</h3>
                 <p className="text-sm text-slate-400 mb-4">
-                  Check our AI mentor for instant help with common questions
+                  {t('contact.faqDesc')}
                 </p>
                 <Button variant="outline" className="border-primary text-primary" asChild>
-                  <a href="/mentor">Ask CryptoCoach AI</a>
+                  <a href="/mentor">{t('contact.askAI')}</a>
                 </Button>
               </CardContent>
             </Card>
@@ -131,13 +132,13 @@ export default function ContactPage() {
           >
             <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle>Send us a message</CardTitle>
+                <CardTitle>{t('contact.sendMessage')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Your Name</Label>
+                      <Label htmlFor="name">{t('contact.yourName')}</Label>
                       <Input
                         id="name"
                         name="name"
@@ -149,7 +150,7 @@ export default function ContactPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
+                      <Label htmlFor="email">{t('contact.emailAddress')}</Label>
                       <Input
                         id="email"
                         name="email"
@@ -164,11 +165,11 @@ export default function ContactPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="subject">Subject</Label>
+                    <Label htmlFor="subject">{t('contact.subject')}</Label>
                     <Input
                       id="subject"
                       name="subject"
-                      placeholder="How can we help?"
+                      placeholder={t('contact.subjectPlaceholder')}
                       value={formData.subject}
                       onChange={handleChange}
                       required
@@ -177,11 +178,11 @@ export default function ContactPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="message">Message</Label>
+                    <Label htmlFor="message">{t('contact.message')}</Label>
                     <Textarea
                       id="message"
                       name="message"
-                      placeholder="Tell us more about your inquiry..."
+                      placeholder={t('contact.messagePlaceholder')}
                       value={formData.message}
                       onChange={handleChange}
                       required
@@ -190,13 +191,13 @@ export default function ContactPage() {
                     />
                   </div>
 
-                  <Button 
-                    type="submit" 
-                    size="lg" 
+                  <Button
+                    type="submit"
+                    size="lg"
                     className="w-full bg-primary hover:bg-primary/90"
                     disabled={submitting}
                   >
-                    {submitting ? 'Sending...' : 'Send Message'}
+                    {submitting ? t('contact.sending') : t('contact.sendBtn')}
                     <Send className="w-4 h-4 ml-2" />
                   </Button>
                 </form>
