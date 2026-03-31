@@ -134,14 +134,17 @@ export const Layout = ({ children }) => {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
-            <button 
-              className="md:hidden p-2 text-slate-300"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              data-testid="mobile-menu-btn"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            {/* Mobile Header Controls */}
+            <div className="md:hidden flex items-center gap-2">
+              <LanguageSwitcher variant="minimal" />
+              <button
+                className="p-2 text-slate-300"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                data-testid="mobile-menu-btn"
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
 
