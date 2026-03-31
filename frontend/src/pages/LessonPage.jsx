@@ -294,7 +294,7 @@ export default function LessonPage() {
                       variant={currentAudio === 'intro' ? 'default' : 'outline'}
                       onClick={() => setCurrentAudio('intro')}
                     >
-                      Intro
+                      {t('lesson.audioIntro')}
                     </Button>
                   )}
                   {lesson.audio_full && (
@@ -303,7 +303,7 @@ export default function LessonPage() {
                       variant={currentAudio === 'full' ? 'default' : 'outline'}
                       onClick={() => setCurrentAudio('full')}
                     >
-                      Complet
+                      {t('lesson.audioFull')}
                     </Button>
                   )}
                   {lesson.audio_summary && (
@@ -312,7 +312,7 @@ export default function LessonPage() {
                       variant={currentAudio === 'summary' ? 'default' : 'outline'}
                       onClick={() => setCurrentAudio('summary')}
                     >
-                      Résumé
+                      {t('lesson.audioSummaryLabel')}
                     </Button>
                   )}
                 </div>
@@ -400,7 +400,7 @@ export default function LessonPage() {
                 className="flex items-center gap-2"
               >
                 <Headphones className="w-4 h-4" />
-                Mode Audio
+                {t('lesson.audioMode')}
               </Button>
             )}
             <Button
@@ -465,7 +465,7 @@ export default function LessonPage() {
                 {isCompleted && (
                   <span className="px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-sm font-medium flex items-center gap-1">
                     <CheckCircle className="w-4 h-4" />
-                    Terminée
+                    {t('lesson.completed')}
                   </span>
                 )}
               </div>
@@ -491,7 +491,7 @@ export default function LessonPage() {
                   className="mt-4"
                 >
                   <Play className="w-4 h-4 mr-2" />
-                  Écouter l'introduction (30 sec)
+                  {t('lesson.listenIntro')}
                 </Button>
               )}
             </div>
@@ -501,7 +501,7 @@ export default function LessonPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Target className="w-5 h-5 text-primary" />
-                  Objectifs d'apprentissage
+                  {t('lesson.learningObjectives')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -548,9 +548,9 @@ export default function LessonPage() {
               <div className="mb-8" data-testid="lesson-checkpoints">
                 <div className="flex items-center gap-2 mb-4">
                   <Target className="w-5 h-5 text-primary" />
-                  <h3 className="font-heading text-lg font-bold">Vérifiez votre compréhension</h3>
+                  <h3 className="font-heading text-lg font-bold">{t('lesson.checkUnderstanding')}</h3>
                   <span className="text-sm text-slate-400 ml-auto">
-                    {Object.keys(checkpointResults).length}/{lesson.checkpoints.length} complétés
+                    {t('lesson.checkpointsCompleted', { done: Object.keys(checkpointResults).length, total: lesson.checkpoints.length })}
                   </span>
                 </div>
                 
@@ -572,14 +572,14 @@ export default function LessonPage() {
               <div className="mb-8">
                 <h3 className="font-heading text-lg font-bold mb-4 flex items-center gap-2">
                   <Eye className="w-5 h-5 text-primary" />
-                  Infographies
+                  {t('lesson.infographics')}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {lesson.infographics.map((img, index) => (
-                    <img 
+                    <img
                       key={index}
                       src={img.startsWith('http') ? img : `${API.replace('/api', '')}${img}`}
-                      alt={`Infographie ${index + 1}`}
+                      alt={t('lesson.infographicAlt', { n: index + 1 })}
                       className="rounded-lg border border-border"
                     />
                   ))}
@@ -618,7 +618,7 @@ export default function LessonPage() {
                   <CardTitle className="flex items-center justify-between text-lg">
                     <span className="flex items-center gap-2">
                       <BookMarked className="w-5 h-5 text-primary" />
-                      Résumé
+                      {t('lesson.summaryLabel')}
                     </span>
                     {lesson.audio_summary && (
                       <Button
@@ -636,7 +636,7 @@ export default function LessonPage() {
                         }}
                       >
                         <Volume2 className="w-4 h-4 mr-1" />
-                        Écouter
+                        {t('lesson.listen')}
                       </Button>
                     )}
                   </CardTitle>
@@ -653,7 +653,7 @@ export default function LessonPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <BookOpen className="w-5 h-5 text-blue-500" />
-                    Lectures recommandées
+                    {t('lesson.recommendedReadings')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -702,12 +702,12 @@ export default function LessonPage() {
                     {completing ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Validation...
+                        {t('lesson.validating')}
                       </>
                     ) : (
                       <>
                         <CheckCircle className="w-4 h-4 mr-2" />
-                        Marquer comme terminée
+                        {t('lesson.markComplete')}
                       </>
                     )}
                   </Button>
@@ -716,7 +716,7 @@ export default function LessonPage() {
                 <Link to={`/quiz/${lessonId}`}>
                   <Button className="flex items-center gap-2">
                     <GraduationCap className="w-4 h-4" />
-                    Passer le Quiz
+                    {t('lesson.takeQuiz')}
                     <ChevronRight className="w-4 h-4" />
                   </Button>
                 </Link>
@@ -774,7 +774,7 @@ export default function LessonPage() {
             {/* Progress Card */}
             <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="text-sm">Progression du cours</CardTitle>
+                <CardTitle className="text-sm">{t('lesson.courseProgress')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -819,10 +819,8 @@ export default function LessonPage() {
               <Card className="bg-gradient-to-br from-primary/10 to-blue-500/10 border-primary/20">
                 <CardContent className="p-4 text-center">
                   <p className="text-3xl font-bold text-primary">{user.xp_points || 0}</p>
-                  <p className="text-xs text-slate-400">Points XP</p>
-                  <p className="text-xs text-slate-500 mt-2">
-                    +50 XP en complétant cette leçon
-                  </p>
+                  <p className="text-xs text-slate-400">{t('lesson.xpPoints')}</p>
+                  <p className="text-xs text-slate-500 mt-2">{t('lesson.xpOnComplete')}</p>
                 </CardContent>
               </Card>
             )}

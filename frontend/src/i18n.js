@@ -691,7 +691,24 @@ const resources = {
         toastError: 'Validation error',
         next: 'Next',
         previous: 'Previous',
-        practicalExamples: 'Practical Examples'
+        practicalExamples: 'Practical Examples',
+        audioIntro: 'Intro',
+        audioFull: 'Full',
+        audioSummaryLabel: 'Summary',
+        listenIntro: 'Listen to introduction (30s)',
+        learningObjectives: 'Learning Objectives',
+        checkUnderstanding: 'Check Your Understanding',
+        checkpointsCompleted: '{{done}}/{{total}} completed',
+        infographics: 'Infographics',
+        infographicAlt: 'Infographic {{n}}',
+        summaryLabel: 'Summary',
+        listen: 'Listen',
+        recommendedReadings: 'Recommended Readings',
+        validating: 'Validating...',
+        markComplete: 'Mark as Completed',
+        courseProgress: 'Course Progress',
+        xpPoints: 'XP Points',
+        xpOnComplete: '+50 XP for completing this lesson'
       },
       // Crypto Quest
       quest: {
@@ -1823,7 +1840,24 @@ const resources = {
         toastError: 'Erreur de validation',
         next: 'Suivant',
         previous: 'Précédent',
-        practicalExamples: 'Exemples concrets'
+        practicalExamples: 'Exemples concrets',
+        audioIntro: 'Intro',
+        audioFull: 'Complet',
+        audioSummaryLabel: 'Résumé',
+        listenIntro: "Écouter l'introduction (30 sec)",
+        learningObjectives: "Objectifs d'apprentissage",
+        checkUnderstanding: 'Vérifiez votre compréhension',
+        checkpointsCompleted: '{{done}}/{{total}} complétés',
+        infographics: 'Infographies',
+        infographicAlt: 'Infographie {{n}}',
+        summaryLabel: 'Résumé',
+        listen: 'Écouter',
+        recommendedReadings: 'Lectures recommandées',
+        validating: 'Validation...',
+        markComplete: 'Marquer comme terminée',
+        courseProgress: 'Progression du cours',
+        xpPoints: 'Points XP',
+        xpOnComplete: '+50 XP en complétant cette leçon'
       },
       // Crypto Quest
       quest: {
@@ -2762,7 +2796,24 @@ const resources = {
         toastError: 'خطأ في التحقق',
         next: 'التالي',
         previous: 'السابق',
-        practicalExamples: 'أمثلة عملية'
+        practicalExamples: 'أمثلة عملية',
+        audioIntro: 'مقدمة',
+        audioFull: 'كامل',
+        audioSummaryLabel: 'ملخص',
+        listenIntro: 'الاستماع إلى المقدمة (30 ثا)',
+        learningObjectives: 'أهداف التعلم',
+        checkUnderstanding: 'تحقق من فهمك',
+        checkpointsCompleted: '{{done}}/{{total}} مكتمل',
+        infographics: 'الرسوم البيانية',
+        infographicAlt: 'رسم بياني {{n}}',
+        summaryLabel: 'ملخص',
+        listen: 'استمع',
+        recommendedReadings: 'القراءات الموصى بها',
+        validating: 'جارٍ التحقق...',
+        markComplete: 'وضع علامة مكتملة',
+        courseProgress: 'تقدم الدورة',
+        xpPoints: 'نقاط XP',
+        xpOnComplete: '+50 XP لإتمام هذا الدرس'
       },
       // Crypto Quest
       quest: {
@@ -4087,7 +4138,24 @@ const resources = {
         toastError: 'Erro de validação',
         next: 'Próximo',
         previous: 'Anterior',
-        practicalExamples: 'Exemplos Práticos'
+        practicalExamples: 'Exemplos Práticos',
+        audioIntro: 'Intro',
+        audioFull: 'Completo',
+        audioSummaryLabel: 'Resumo',
+        listenIntro: 'Ouvir introdução (30s)',
+        learningObjectives: 'Objetivos de Aprendizado',
+        checkUnderstanding: 'Verifique Seu Entendimento',
+        checkpointsCompleted: '{{done}}/{{total}} concluídos',
+        infographics: 'Infográficos',
+        infographicAlt: 'Infográfico {{n}}',
+        summaryLabel: 'Resumo',
+        listen: 'Ouvir',
+        recommendedReadings: 'Leituras Recomendadas',
+        validating: 'Validando...',
+        markComplete: 'Marcar como Concluída',
+        courseProgress: 'Progresso do Curso',
+        xpPoints: 'Pontos XP',
+        xpOnComplete: '+50 XP ao concluir esta aula'
       },
       // Crypto Quest
       quest: {
