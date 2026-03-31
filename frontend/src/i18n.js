@@ -139,7 +139,8 @@ const resources = {
         marketSentiment: 'Market sentiment',
         bullish: 'Bullish',
         bearish: 'Bearish',
-        viewAllAchievements: 'View all achievements'
+        viewAllAchievements: 'View all achievements',
+        levelShort: 'Lvl.'
       },
       // Trading Arena
       trading: {
@@ -183,14 +184,16 @@ const resources = {
       },
       // Quests
       quests: {
-        lessonOfDay: 'Lesson of the Day',
-        lessonDesc: 'Complete a lesson today',
-        dailyQuiz: 'Daily Quiz',
-        quizDesc: 'Pass a quiz with 70%+',
-        tradeOfDay: 'Trade of the Day',
-        tradeDesc: 'Execute 3 trades in the arena',
         noQuests: 'No active quests',
-        comeBackTomorrow: 'Come back tomorrow for new quests!'
+        comeBackTomorrow: 'Come back tomorrow for new quests!',
+        templates: {
+          daily_lesson: { name: 'Lesson of the Day', desc: 'Complete a lesson today' },
+          daily_quiz: { name: 'Daily Quiz', desc: 'Pass a quiz with 70%+' },
+          daily_trade: { name: 'Trade of the Day', desc: 'Execute 3 trades in the arena' },
+          weekly_scholar: { name: 'Scholar of the Week', desc: 'Complete 5 lessons this week' },
+          weekly_trader: { name: 'Trader of the Week', desc: 'Earn a $500 profit this week' },
+          weekly_perfect: { name: 'Weekly Perfection', desc: 'Get 100% on 3 quizzes this week' }
+        }
       },
       // Auth
       auth: {
@@ -1268,7 +1271,8 @@ const resources = {
         marketSentiment: 'Sentiment du marché',
         bullish: 'Haussier',
         bearish: 'Baissier',
-        viewAllAchievements: 'Voir tous les succès'
+        viewAllAchievements: 'Voir tous les succès',
+        levelShort: 'Niv.'
       },
       // Trading Arena
       trading: {
@@ -1312,14 +1316,16 @@ const resources = {
       },
       // Quests
       quests: {
-        lessonOfDay: 'Leçon du Jour',
-        lessonDesc: 'Complétez une leçon aujourd\'hui',
-        dailyQuiz: 'Quiz Quotidien',
-        quizDesc: 'Réussissez un quiz avec 70%+',
-        tradeOfDay: 'Trade du Jour',
-        tradeDesc: 'Effectuez 3 trades dans l\'arène',
         noQuests: 'Aucune quête active',
-        comeBackTomorrow: 'Revenez demain pour de nouvelles quêtes !'
+        comeBackTomorrow: 'Revenez demain pour de nouvelles quêtes !',
+        templates: {
+          daily_lesson: { name: 'Leçon du Jour', desc: 'Complétez une leçon aujourd\'hui' },
+          daily_quiz: { name: 'Quiz Quotidien', desc: 'Réussissez un quiz avec 70%+' },
+          daily_trade: { name: 'Trade du Jour', desc: 'Effectuez 3 trades dans l\'arène' },
+          weekly_scholar: { name: 'Érudit de la Semaine', desc: 'Complétez 5 leçons cette semaine' },
+          weekly_trader: { name: 'Trader de la Semaine', desc: 'Réalisez un profit de 500$ cette semaine' },
+          weekly_perfect: { name: 'Perfection Hebdo', desc: 'Obtenez 100% sur 3 quiz cette semaine' }
+        }
       },
       // Auth
       auth: {
@@ -2397,7 +2403,8 @@ const resources = {
         marketSentiment: 'مزاج السوق',
         bullish: 'صعودي',
         bearish: 'هبوطي',
-        viewAllAchievements: 'عرض جميع الإنجازات'
+        viewAllAchievements: 'عرض جميع الإنجازات',
+        levelShort: 'مستوى'
       },
       // Trading Arena
       trading: {
@@ -2441,14 +2448,16 @@ const resources = {
       },
       // Quests
       quests: {
-        lessonOfDay: 'درس اليوم',
-        lessonDesc: 'أكمل درساً اليوم',
-        dailyQuiz: 'اختبار اليوم',
-        quizDesc: 'اجتز اختباراً بنسبة 70%+',
-        tradeOfDay: 'صفقة اليوم',
-        tradeDesc: 'نفذ 3 صفقات في الساحة',
         noQuests: 'لا توجد مهام نشطة',
-        comeBackTomorrow: 'عد غداً لمهام جديدة!'
+        comeBackTomorrow: 'عد غداً لمهام جديدة!',
+        templates: {
+          daily_lesson: { name: 'درس اليوم', desc: 'أكمل درساً اليوم' },
+          daily_quiz: { name: 'اختبار اليوم', desc: 'اجتز اختباراً بنسبة 70%+' },
+          daily_trade: { name: 'صفقة اليوم', desc: 'نفذ 3 صفقات في الساحة' },
+          weekly_scholar: { name: 'مثقف الأسبوع', desc: 'أكمل 5 دروس هذا الأسبوع' },
+          weekly_trader: { name: 'تاجر الأسبوع', desc: 'حقق ربحاً بقيمة 500$ هذا الأسبوع' },
+          weekly_perfect: { name: 'الكمال الأسبوعي', desc: 'احصل على 100% في 3 اختبارات هذا الأسبوع' }
+        }
       },
       // Auth
       auth: {

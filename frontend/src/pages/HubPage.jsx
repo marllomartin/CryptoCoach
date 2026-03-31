@@ -340,21 +340,28 @@ const StatCard = ({ icon: Icon, label, value, color, testId }) => {
 };
 
 const QuestCard = ({ quest }) => {
+  const { t } = useTranslation();
   const progress = Math.min((quest.progress / quest.target) * 100, 100);
-  
+  const name = quest.template_id
+    ? t(`quests.templates.${quest.template_id}.name`, { defaultValue: quest.name })
+    : quest.name;
+  const description = quest.template_id
+    ? t(`quests.templates.${quest.template_id}.desc`, { defaultValue: quest.description })
+    : quest.description;
+
   return (
     <div className={`p-4 rounded-lg border ${quest.completed ? 'bg-green-500/10 border-green-500/30' : 'bg-gray-800/50 border-gray-700'}`} data-testid="quest-card">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <Target className={`w-4 h-4 ${quest.completed ? 'text-green-500' : 'text-primary'}`} />
-          <span className="font-medium text-white">{quest.name}</span>
+          <span className="font-medium text-white">{name}</span>
         </div>
         <div className="flex items-center gap-2 text-sm">
           <span className="text-yellow-500">{quest.coins_reward} 🪙</span>
           <span className="text-primary">+{quest.xp_reward} XP</span>
         </div>
       </div>
-      <p className="text-sm text-gray-400 mb-2">{quest.description}</p>
+      <p className="text-sm text-gray-400 mb-2">{description}</p>
       <div className="flex items-center gap-2">
         <Progress value={progress} className="h-2 flex-1" />
         <span className="text-sm text-gray-400">{quest.progress}/{quest.target}</span>
@@ -400,13 +407,14 @@ const ActionButton = ({ icon: Icon, label, sublabel }) => (
 );
 
 const LeaderboardRow = ({ player, rank, currentUserId }) => {
+  const { t } = useTranslation();
   const isCurrentUser = player.user_id === currentUserId;
   const rankColors = {
     1: 'text-yellow-500',
     2: 'text-gray-400',
     3: 'text-amber-600'
   };
-  
+
   return (
     <div className={`flex items-center gap-3 p-2 rounded-lg ${isCurrentUser ? 'bg-primary/10 border border-primary/30' : 'hover:bg-gray-800/50'} transition-colors`}>
       <span className={`w-6 text-center font-bold ${rankColors[rank] || 'text-gray-500'}`}>
@@ -417,7 +425,7 @@ const LeaderboardRow = ({ player, rank, currentUserId }) => {
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-medium text-white truncate text-sm">{player.name}</p>
-        <p className="text-xs text-gray-500">Niv. {player.level}</p>
+        <p className="text-xs text-gray-500">{t('hub.levelShort')} {player.level}</p>
       </div>
       <div className="text-right">
         <p className="font-bold text-primary text-sm">{player.xp_points?.toLocaleString()}</p>
