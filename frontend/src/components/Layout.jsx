@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../App';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   GraduationCap,
   Menu,
   X,
@@ -14,7 +14,6 @@ import {
   Bot,
   TrendingUp,
   Award,
-  Gamepad2,
   BarChart3,
   Store,
   UserCircle
@@ -54,14 +53,13 @@ export const Layout = ({ children }) => {
   ];
 
   const userLinks = [
-    { to: '/hub', label: t('nav.hub'), icon: Gamepad2 },
     { to: '/market-intelligence', label: t('nav.marketIntel', 'Market Intel'), icon: BarChart3, highlight: true },
     { to: '/trading-arena', label: t('nav.tradingArena'), icon: TrendingUp },
+    { to: '/simulator', label: t('nav.simulator'), icon: TrendingUp },
     { to: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
     { to: '/mentor', label: t('nav.aiMentor'), icon: Bot },
     { to: '/shop', label: t('nav.shop', 'Shop'), icon: Store },
     { to: '/profile', label: t('nav.profile', 'Profile'), icon: UserCircle },
-    { to: '/simulator', label: t('nav.simulator'), icon: TrendingUp },
     { to: '/certificates', label: t('nav.certificates'), icon: Award },
   ];
 
@@ -91,10 +89,10 @@ export const Layout = ({ children }) => {
               <LanguageSwitcher variant="minimal" />
               {user ? (
                 <div className="flex items-center gap-4">
-                  <Link to="/hub">
+                  <Link to="/simulator">
                     <Button variant="outline" size="sm" className="text-primary border-primary/50 hover:bg-primary/10">
-                      <Gamepad2 className="w-4 h-4 mr-2" />
-                      {t('nav.hub')}
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      {t('nav.simulator')}
                     </Button>
                   </Link>
                   <NotificationBell />

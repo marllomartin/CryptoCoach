@@ -31,7 +31,6 @@ import DisclaimerPage from './pages/DisclaimerPage';
 import PricingPage from './pages/PricingPage';
 import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import AdminPage from './pages/AdminPage';
-import HubPage from './pages/HubPage';
 import TradingArenaPage from './pages/TradingArenaPage';
 import ProfilePage from './pages/ProfilePage';
 import ShopPage from './pages/ShopPage';
@@ -187,7 +186,6 @@ function App() {
           <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
           
           {/* Protected Routes */}
-          <Route path="/hub" element={<ProtectedRoute><HubPage /></ProtectedRoute>} />
           <Route path="/trading-arena" element={<ProtectedRoute><TradingArenaPage /></ProtectedRoute>} />
           <Route path="/lesson/:lessonId" element={<ProtectedRoute><LessonPage /></ProtectedRoute>} />
           <Route path="/quiz/:lessonId" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
