@@ -5,10 +5,9 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API, useAuth } from '../App';
 import { useTranslation } from 'react-i18next';
-import { 
-  GraduationCap, 
-  Award, 
-  Trophy,
+import {
+  GraduationCap,
+  Award,
   BookOpen,
   TrendingUp,
   Bot,
@@ -62,7 +61,6 @@ export default function DashboardPage() {
     { icon: GraduationCap, label: t('dashboard.continueLearning'), href: '/academy', color: 'bg-blue-500' },
     { icon: Bot, label: t('dashboard.aiMentor'), href: '/mentor', color: 'bg-purple-500' },
     { icon: TrendingUp, label: t('dashboard.tradingSimulator'), href: '/simulator', color: 'bg-green-500' },
-    { icon: Trophy, label: t('nav.leaderboard'), href: '/leaderboard', color: 'bg-amber-500' }
   ];
 
   return (

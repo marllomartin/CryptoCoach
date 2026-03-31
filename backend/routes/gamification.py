@@ -99,25 +99,6 @@ async def get_user_achievements(user_id: str):
     return result
 
 
-@router.get("/quests/{user_id}")
-async def get_user_quests(user_id: str):
-    """Get active quests for a user"""
-    # Generate daily quests if needed
-    daily_quests = await gamification_service.generate_daily_quests(user_id)
-    
-    return {
-        "daily": daily_quests,
-        "weekly": []  # TODO: Implement weekly quests
-    }
-
-
-@router.post("/quests/{user_id}/progress")
-async def update_quest_progress(user_id: str, quest_type: str, progress: int = 1):
-    """Update progress on quests"""
-    completed = await gamification_service.update_quest_progress(user_id, quest_type, progress)
-    return {"completed_quests": completed}
-
-
 @router.get("/avatar/shop")
 async def get_avatar_shop():
     """Get all avatar items in the shop"""
@@ -155,13 +136,6 @@ async def update_streak(user_id: str):
     """Update user's login streak"""
     result = await gamification_service.update_streak(user_id)
     return result
-
-
-@router.get("/leaderboard")
-async def get_leaderboard(limit: int = 50):
-    """Get gamification leaderboard"""
-    leaderboard = await gamification_service.get_leaderboard(limit)
-    return leaderboard
 
 
 @router.get("/level-info")

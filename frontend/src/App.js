@@ -16,7 +16,6 @@ import LessonPage from './pages/LessonPage';
 import QuizPage from './pages/QuizPage';
 import ExamPage from './pages/ExamPage';
 import DashboardPage from './pages/DashboardPage';
-import LeaderboardPage from './pages/LeaderboardPage';
 import SimulatorPage from './pages/SimulatorPage';
 import MentorPage from './pages/MentorPage';
 import GlossaryPage from './pages/GlossaryPage';
@@ -34,7 +33,6 @@ import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import AdminPage from './pages/AdminPage';
 import HubPage from './pages/HubPage';
 import TradingArenaPage from './pages/TradingArenaPage';
-import CryptoQuestPage from './pages/CryptoQuestPage';
 import ProfilePage from './pages/ProfilePage';
 import ShopPage from './pages/ShopPage';
 import MarketIntelligencePage from './pages/MarketIntelligencePage';
@@ -191,12 +189,10 @@ function App() {
           {/* Protected Routes */}
           <Route path="/hub" element={<ProtectedRoute><HubPage /></ProtectedRoute>} />
           <Route path="/trading-arena" element={<ProtectedRoute><TradingArenaPage /></ProtectedRoute>} />
-          <Route path="/crypto-quest" element={<ProtectedRoute><CryptoQuestPage /></ProtectedRoute>} />
           <Route path="/lesson/:lessonId" element={<ProtectedRoute><LessonPage /></ProtectedRoute>} />
           <Route path="/quiz/:lessonId" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
           <Route path="/exam/:level" element={<ProtectedRoute><ExamPage /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-          <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/simulator" element={<ProtectedRoute><SimulatorPage /></ProtectedRoute>} />
           <Route path="/mentor" element={<ProtectedRoute><MentorPage /></ProtectedRoute>} />
           <Route path="/certificates" element={<ProtectedRoute><CertificatesPage /></ProtectedRoute>} />

@@ -21,7 +21,6 @@ const resources = {
         tradingArena: 'Trading Arena',
         aiMentor: 'AI Mentor',
         simulator: 'Simulator',
-        leaderboard: 'Leaderboard',
         certificates: 'Certificates'
       },
       // Homepage
@@ -116,9 +115,6 @@ const resources = {
         days: 'days',
         coins: 'Coins',
         achievements: 'Achievements',
-        dailyQuests: 'Daily Quests',
-        resetIn: 'Reset in',
-        questProgress: 'Progress',
         quickActions: 'Quick Actions',
         continueLearning: 'Continue Learning',
         lessonsAvailable: 'lessons available',
@@ -126,9 +122,6 @@ const resources = {
         proSimulator: 'Pro Simulator',
         classicSimulator: 'Classic Simulator',
         simpleMode: 'Simple mode',
-        viewAllPlayers: 'View all players',
-        topPlayers: 'Top Players',
-        viewAll: 'View all',
         liveMarket: 'Live Market',
         myPortfolio: 'My Portfolio',
         totalValue: 'Total Value',
@@ -181,19 +174,6 @@ const resources = {
         confirmReset: 'Are you sure you want to reset your portfolio? You will lose all your trades.',
         resetSuccess: 'Portfolio reset with $10,000!',
         resetError: 'Error resetting portfolio'
-      },
-      // Quests
-      quests: {
-        noQuests: 'No active quests',
-        comeBackTomorrow: 'Come back tomorrow for new quests!',
-        templates: {
-          daily_lesson: { name: 'Lesson of the Day', desc: 'Complete a lesson today' },
-          daily_quiz: { name: 'Daily Quiz', desc: 'Pass a quiz with 70%+' },
-          daily_trade: { name: 'Trade of the Day', desc: 'Execute 3 trades in the arena' },
-          weekly_scholar: { name: 'Scholar of the Week', desc: 'Complete 5 lessons this week' },
-          weekly_trader: { name: 'Trader of the Week', desc: 'Earn a $500 profit this week' },
-          weekly_perfect: { name: 'Weekly Perfection', desc: 'Get 100% on 3 quizzes this week' }
-        }
       },
       // Auth
       auth: {
@@ -710,38 +690,6 @@ const resources = {
         xpPoints: 'XP Points',
         xpOnComplete: '+50 XP for completing this lesson'
       },
-      // Crypto Quest
-      quest: {
-        title: 'Crypto Quest',
-        subtitle: 'Your journey to becoming a crypto master',
-        chapter: 'Chapter',
-        mission: 'Mission',
-        locked: 'Locked',
-        unlocked: 'Unlocked',
-        completed: 'Completed',
-        inProgress: 'In Progress',
-        startMission: 'Start Mission',
-        continueMission: 'Continue',
-        completeChapter: 'Complete Chapter',
-        reward: 'Reward',
-        xpReward: 'XP Reward',
-        coinsReward: 'Coins Reward',
-        progress: 'Progress',
-        missionCompleted: 'Mission Completed! +{{xp}} XP',
-        challengeProgress: 'Progress: {{current}}/{{target}}',
-        chapters: {
-          ch1: 'The Beginning',
-          ch1Desc: 'Discover the world of cryptocurrency and blockchain',
-          ch2: 'The Fundamentals',
-          ch2Desc: 'Master the basics of Bitcoin and wallets',
-          ch3: 'The Investor',
-          ch3Desc: 'Learn DeFi, NFTs and market analysis',
-          ch4: 'The Strategist',
-          ch4Desc: 'Advanced trading and portfolio management',
-          ch5: 'The Master',
-          ch5Desc: 'Become a true crypto expert'
-        }
-      },
       // Pricing Page
       pricing: {
         title: 'Choose Your Path',
@@ -982,17 +930,6 @@ const resources = {
         goBack: 'Go Back',
         funFact: 'Did you know? The first Bitcoin transaction was for 10,000 BTC used to buy two pizzas in 2010!'
       },
-      // Leaderboard Page
-      leaderboard: {
-        title: 'Student Leaderboard',
-        subtitle: 'Top performers in the CryptoCoach community',
-        xpPoints: 'XP Points',
-        you: '(You)',
-        noRankings: 'No rankings yet',
-        beFirst: 'Be the first to complete lessons and appear on the leaderboard!',
-        lessonsLabel: 'lessons',
-        streakLabel: 'streak'
-      },
       // Subscription Success Page
       subscriptionSuccess: {
         checking: 'Verifying Payment',
@@ -1170,7 +1107,6 @@ const resources = {
         tradingArena: 'Trading Arena',
         aiMentor: 'Mentor IA',
         simulator: 'Simulateur',
-        leaderboard: 'Classement',
         certificates: 'Certificats'
       },
       // Homepage
@@ -1265,9 +1201,6 @@ const resources = {
         days: 'jours',
         coins: 'Pièces',
         achievements: 'Succès',
-        dailyQuests: 'Quêtes Quotidiennes',
-        resetIn: 'Reset dans',
-        questProgress: 'Progression',
         quickActions: 'Actions Rapides',
         continueLearning: 'Continuer l\'apprentissage',
         lessonsAvailable: 'leçons disponibles',
@@ -1275,9 +1208,6 @@ const resources = {
         proSimulator: 'Simulateur Pro',
         classicSimulator: 'Simulateur Classic',
         simpleMode: 'Mode simple',
-        viewAllPlayers: 'Voir tous les joueurs',
-        topPlayers: 'Top Joueurs',
-        viewAll: 'Voir tout',
         liveMarket: 'Marché en Direct',
         myPortfolio: 'Mon Portfolio',
         totalValue: 'Valeur Totale',
@@ -1330,19 +1260,6 @@ const resources = {
         confirmReset: 'Êtes-vous sûr de vouloir réinitialiser votre portfolio ? Vous perdrez tous vos trades.',
         resetSuccess: 'Portfolio réinitialisé avec 10 000 $ !',
         resetError: 'Erreur lors de la réinitialisation'
-      },
-      // Quests
-      quests: {
-        noQuests: 'Aucune quête active',
-        comeBackTomorrow: 'Revenez demain pour de nouvelles quêtes !',
-        templates: {
-          daily_lesson: { name: 'Leçon du Jour', desc: 'Complétez une leçon aujourd\'hui' },
-          daily_quiz: { name: 'Quiz Quotidien', desc: 'Réussissez un quiz avec 70%+' },
-          daily_trade: { name: 'Trade du Jour', desc: 'Effectuez 3 trades dans l\'arène' },
-          weekly_scholar: { name: 'Érudit de la Semaine', desc: 'Complétez 5 leçons cette semaine' },
-          weekly_trader: { name: 'Trader de la Semaine', desc: 'Réalisez un profit de 500$ cette semaine' },
-          weekly_perfect: { name: 'Perfection Hebdo', desc: 'Obtenez 100% sur 3 quiz cette semaine' }
-        }
       },
       // Auth
       auth: {
@@ -1859,38 +1776,6 @@ const resources = {
         xpPoints: 'Points XP',
         xpOnComplete: '+50 XP en complétant cette leçon'
       },
-      // Crypto Quest
-      quest: {
-        title: 'Crypto Quest',
-        subtitle: 'Votre parcours pour devenir un maître crypto',
-        chapter: 'Chapitre',
-        mission: 'Mission',
-        locked: 'Verrouillé',
-        unlocked: 'Déverrouillé',
-        completed: 'Terminé',
-        inProgress: 'En Cours',
-        startMission: 'Démarrer la Mission',
-        continueMission: 'Continuer',
-        completeChapter: 'Compléter le Chapitre',
-        reward: 'Récompense',
-        xpReward: 'Récompense XP',
-        coinsReward: 'Récompense Coins',
-        progress: 'Progression',
-        missionCompleted: 'Mission Terminée ! +{{xp}} XP',
-        challengeProgress: 'Progression : {{current}}/{{target}}',
-        chapters: {
-          ch1: 'Le Commencement',
-          ch1Desc: 'Découvrez le monde de la crypto et de la blockchain',
-          ch2: 'Les Fondamentaux',
-          ch2Desc: 'Maîtrisez les bases du Bitcoin et des portefeuilles',
-          ch3: 'L\'Investisseur',
-          ch3Desc: 'Apprenez la DeFi, les NFTs et l\'analyse de marché',
-          ch4: 'Le Stratège',
-          ch4Desc: 'Trading avancé et gestion de portefeuille',
-          ch5: 'Le Maître',
-          ch5Desc: 'Devenez un véritable expert crypto'
-        }
-      },
       // Pricing Page
       pricing: {
         title: 'Choisissez Votre Parcours',
@@ -2131,17 +2016,6 @@ const resources = {
         goBack: 'Retour',
         funFact: 'Le saviez-vous ? La première transaction Bitcoin était de 10 000 BTC utilisés pour acheter deux pizzas en 2010 !'
       },
-      // Leaderboard Page
-      leaderboard: {
-        title: 'Classement des étudiants',
-        subtitle: 'Les meilleurs dans la communauté CryptoCoach',
-        xpPoints: 'Points XP',
-        you: '(Vous)',
-        noRankings: 'Pas encore de classement',
-        beFirst: 'Soyez le premier à compléter des leçons et à figurer dans le classement !',
-        lessonsLabel: 'leçons',
-        streakLabel: 'série'
-      },
       // Subscription Success Page
       subscriptionSuccess: {
         checking: 'Vérification en cours',
@@ -2319,7 +2193,6 @@ const resources = {
         tradingArena: 'ساحة التداول',
         aiMentor: 'المرشد الذكي',
         simulator: 'المحاكي',
-        leaderboard: 'الترتيب',
         certificates: 'الشهادات'
       },
       // Homepage
@@ -2414,9 +2287,6 @@ const resources = {
         days: 'أيام',
         coins: 'العملات',
         achievements: 'الإنجازات',
-        dailyQuests: 'المهام اليومية',
-        resetIn: 'إعادة التعيين خلال',
-        questProgress: 'التقدم',
         quickActions: 'إجراءات سريعة',
         continueLearning: 'متابعة التعلم',
         lessonsAvailable: 'دروس متاحة',
@@ -2424,9 +2294,6 @@ const resources = {
         proSimulator: 'محاكي احترافي',
         classicSimulator: 'المحاكي الكلاسيكي',
         simpleMode: 'الوضع البسيط',
-        viewAllPlayers: 'عرض جميع اللاعبين',
-        topPlayers: 'أفضل اللاعبين',
-        viewAll: 'عرض الكل',
         liveMarket: 'السوق المباشر',
         myPortfolio: 'محفظتي',
         totalValue: 'القيمة الإجمالية',
@@ -2479,19 +2346,6 @@ const resources = {
         confirmReset: 'هل أنت متأكد من رغبتك في إعادة تعيين محفظتك؟ ستفقد جميع صفقاتك.',
         resetSuccess: 'تمت إعادة تعيين المحفظة بـ 10,000 دولار!',
         resetError: 'خطأ في إعادة تعيين المحفظة'
-      },
-      // Quests
-      quests: {
-        noQuests: 'لا توجد مهام نشطة',
-        comeBackTomorrow: 'عد غداً لمهام جديدة!',
-        templates: {
-          daily_lesson: { name: 'درس اليوم', desc: 'أكمل درساً اليوم' },
-          daily_quiz: { name: 'اختبار اليوم', desc: 'اجتز اختباراً بنسبة 70%+' },
-          daily_trade: { name: 'صفقة اليوم', desc: 'نفذ 3 صفقات في الساحة' },
-          weekly_scholar: { name: 'مثقف الأسبوع', desc: 'أكمل 5 دروس هذا الأسبوع' },
-          weekly_trader: { name: 'تاجر الأسبوع', desc: 'حقق ربحاً بقيمة 500$ هذا الأسبوع' },
-          weekly_perfect: { name: 'الكمال الأسبوعي', desc: 'احصل على 100% في 3 اختبارات هذا الأسبوع' }
-        }
       },
       // Auth
       auth: {
@@ -2815,38 +2669,6 @@ const resources = {
         xpPoints: 'نقاط XP',
         xpOnComplete: '+50 XP لإتمام هذا الدرس'
       },
-      // Crypto Quest
-      quest: {
-        title: 'مهمة العملات المشفرة',
-        subtitle: 'رحلتك لتصبح خبيراً في العملات المشفرة',
-        chapter: 'الفصل',
-        mission: 'المهمة',
-        locked: 'مقفل',
-        unlocked: 'مفتوح',
-        completed: 'مكتمل',
-        inProgress: 'قيد التنفيذ',
-        startMission: 'ابدأ المهمة',
-        continueMission: 'متابعة',
-        completeChapter: 'أكمل الفصل',
-        reward: 'المكافأة',
-        xpReward: 'مكافأة XP',
-        coinsReward: 'مكافأة العملات',
-        progress: 'التقدم',
-        missionCompleted: 'اكتملت المهمة! +{{xp}} XP',
-        challengeProgress: 'التقدم: {{current}}/{{target}}',
-        chapters: {
-          ch1: 'البداية',
-          ch1Desc: 'اكتشف عالم العملات المشفرة والبلوكتشين',
-          ch2: 'الأساسيات',
-          ch2Desc: 'أتقن أساسيات البيتكوين والمحافظ',
-          ch3: 'المستثمر',
-          ch3Desc: 'تعلم DeFi و NFTs وتحليل السوق',
-          ch4: 'الاستراتيجي',
-          ch4Desc: 'التداول المتقدم وإدارة المحفظة',
-          ch5: 'الخبير',
-          ch5Desc: 'كن خبيراً حقيقياً في العملات المشفرة'
-        }
-      },
       // Pricing Page
       pricing: {
         title: 'اختر مسارك',
@@ -3086,17 +2908,6 @@ const resources = {
         goHome: 'الذهاب للرئيسية',
         goBack: 'العودة',
         funFact: 'حقيقة ممتعة: يُمثل رمز الخطأ 404 موردًا غير موجود، مثل عملة مشفرة نادرة لم تُصدر بعد!'
-      },
-      // Leaderboard Page (AR)
-      leaderboard: {
-        title: 'لوحة المتصدرين',
-        subtitle: 'أفضل المتعلمين هذا الأسبوع',
-        xpPoints: 'نقاط XP',
-        you: '(أنت)',
-        noRankings: 'لا توجد تصنيفات بعد',
-        beFirst: 'كن أول من يكمل الدروس ويظهر في لوحة المتصدرين!',
-        lessonsLabel: 'درس',
-        streakLabel: 'يوم'
       },
       // Subscription Success Page (AR)
       subscriptionSuccess: {
@@ -3468,7 +3279,6 @@ const resources = {
         tradingArena: 'Arena de Trading',
         aiMentor: 'Mentor IA',
         simulator: 'Simulador',
-        leaderboard: 'Classificação',
         certificates: 'Certificados'
       },
       // Homepage
@@ -3563,9 +3373,6 @@ const resources = {
         days: 'dias',
         coins: 'Moedas',
         achievements: 'Conquistas',
-        dailyQuests: 'Missões Diárias',
-        resetIn: 'Reinicia em',
-        questProgress: 'Progresso',
         quickActions: 'Ações Rápidas',
         continueLearning: 'Continuar Aprendendo',
         lessonsAvailable: 'aulas disponíveis',
@@ -3573,9 +3380,6 @@ const resources = {
         proSimulator: 'Simulador Pro',
         classicSimulator: 'Simulador Clássico',
         simpleMode: 'Modo simples',
-        viewAllPlayers: 'Ver todos os jogadores',
-        topPlayers: 'Top Jogadores',
-        viewAll: 'Ver tudo',
         liveMarket: 'Mercado ao Vivo',
         myPortfolio: 'Meu Portfólio',
         totalValue: 'Valor Total',
@@ -3628,19 +3432,6 @@ const resources = {
         confirmReset: 'Tem certeza que deseja resetar seu portfólio? Você perderá todos os seus trades.',
         resetSuccess: 'Portfólio resetado com $10.000!',
         resetError: 'Erro ao resetar o portfólio'
-      },
-      // Quests
-      quests: {
-        noQuests: 'Nenhuma missão ativa',
-        comeBackTomorrow: 'Volte amanhã para novas missões!',
-        templates: {
-          daily_lesson: { name: 'Aula do Dia', desc: 'Conclua uma aula hoje' },
-          daily_quiz: { name: 'Quiz Diário', desc: 'Passe em um quiz com 70%+' },
-          daily_trade: { name: 'Trade do Dia', desc: 'Execute 3 trades na arena' },
-          weekly_scholar: { name: 'Estudioso da Semana', desc: 'Conclua 5 aulas esta semana' },
-          weekly_trader: { name: 'Trader da Semana', desc: 'Lucre $500 esta semana' },
-          weekly_perfect: { name: 'Perfeição Semanal', desc: 'Tire 100% em 3 quizzes esta semana' }
-        }
       },
       // Auth
       auth: {
@@ -4157,38 +3948,6 @@ const resources = {
         xpPoints: 'Pontos XP',
         xpOnComplete: '+50 XP ao concluir esta aula'
       },
-      // Crypto Quest
-      quest: {
-        title: 'Crypto Quest',
-        subtitle: 'Sua jornada para se tornar um mestre em cripto',
-        chapter: 'Capítulo',
-        mission: 'Missão',
-        locked: 'Bloqueado',
-        unlocked: 'Desbloqueado',
-        completed: 'Concluído',
-        inProgress: 'Em Andamento',
-        startMission: 'Iniciar Missão',
-        continueMission: 'Continuar',
-        completeChapter: 'Concluir Capítulo',
-        reward: 'Recompensa',
-        xpReward: 'Recompensa XP',
-        coinsReward: 'Recompensa em Moedas',
-        progress: 'Progresso',
-        missionCompleted: 'Missão Concluída! +{{xp}} XP',
-        challengeProgress: 'Progresso: {{current}}/{{target}}',
-        chapters: {
-          ch1: 'O Começo',
-          ch1Desc: 'Descubra o mundo das criptomoedas e do blockchain',
-          ch2: 'Os Fundamentos',
-          ch2Desc: 'Domine os fundamentos do Bitcoin e carteiras',
-          ch3: 'O Investidor',
-          ch3Desc: 'Aprenda DeFi, NFTs e análise de mercado',
-          ch4: 'O Estrategista',
-          ch4Desc: 'Trading avançado e gestão de portfólio',
-          ch5: 'O Mestre',
-          ch5Desc: 'Torne-se um verdadeiro especialista em cripto'
-        }
-      },
       // Pricing Page
       pricing: {
         title: 'Escolha Seu Plano',
@@ -4428,17 +4187,6 @@ const resources = {
         goHome: 'Ir para Home',
         goBack: 'Voltar',
         funFact: 'Você sabia? A primeira transação com Bitcoin foi de 10.000 BTC usados para comprar duas pizzas em 2010!'
-      },
-      // Leaderboard Page
-      leaderboard: {
-        title: 'Classificação de Alunos',
-        subtitle: 'Os melhores desempenhos da comunidade CryptoCoach',
-        xpPoints: 'Pontos XP',
-        you: '(Você)',
-        noRankings: 'Sem classificações ainda',
-        beFirst: 'Seja o primeiro a concluir aulas e aparecer na classificação!',
-        lessonsLabel: 'aulas',
-        streakLabel: 'sequência'
       },
       // Subscription Success Page
       subscriptionSuccess: {

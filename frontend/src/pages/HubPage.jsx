@@ -4,10 +4,10 @@ import { useAuth, API } from '../App';
 import { useTranslation } from 'react-i18next';
 import Layout from '../components/Layout';
 import axios from 'axios';
-import { 
-  Trophy, Flame, Target, TrendingUp, Award, Zap, 
-  ChevronRight, Star, Crown, Users, BookOpen, 
-  BarChart3, Wallet, Gift, Clock, ArrowUp, ArrowDown, Map
+import {
+  Trophy, Flame, TrendingUp, Award, Zap,
+  ChevronRight, Star, BookOpen,
+  BarChart3, Wallet, ArrowUp, ArrowDown
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Progress } from '../components/ui/progress';
@@ -19,8 +19,6 @@ const HubPage = () => {
   const [gamificationProfile, setGamificationProfile] = useState(null);
   const [portfolio, setPortfolio] = useState(null);
   const [marketOverview, setMarketOverview] = useState(null);
-  const [quests, setQuests] = useState({ daily: [], weekly: [] });
-  const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -29,19 +27,15 @@ const HubPage = () => {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       
-      const [profileRes, portfolioRes, marketRes, questsRes, leaderboardRes] = await Promise.all([
+      const [profileRes, portfolioRes, marketRes] = await Promise.all([
         axios.get(`${API}/v2/gamification/profile/${user.id}`, { headers }).catch(() => null),
         axios.get(`${API}/v2/trading/portfolio/${user.id}`, { headers }).catch(() => null),
         axios.get(`${API}/v2/trading/market/overview`, { headers }).catch(() => null),
-        axios.get(`${API}/v2/gamification/quests/${user.id}`, { headers }).catch(() => null),
-        axios.get(`${API}/v2/gamification/leaderboard?limit=5`, { headers }).catch(() => null)
       ]);
 
       if (profileRes?.data) setGamificationProfile(profileRes.data);
       if (portfolioRes?.data) setPortfolio(portfolioRes.data);
       if (marketRes?.data) setMarketOverview(marketRes.data);
-      if (questsRes?.data) setQuests(questsRes.data);
-      if (leaderboardRes?.data) setLeaderboard(leaderboardRes.data);
 
       // Update streak
       await axios.post(`${API}/v2/gamification/streak/${user.id}`, {}, { headers }).catch(() => null);
@@ -128,32 +122,9 @@ const HubPage = () => {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-6">
-            
-            {/* Left Column - Quests & Progress */}
+
+            {/* Left Column - Market & Portfolio */}
             <div className="lg:col-span-2 space-y-6">
-              
-              {/* Daily Quests */}
-              <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="daily-quests-section">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <Target className="w-5 h-5 text-primary" />
-                    {t('hub.dailyQuests')}
-                  </h2>
-                  <span className="text-sm text-gray-400">{t('hub.resetIn')} 14h</span>
-                </div>
-                
-                <div className="space-y-3" data-testid="quests-list">
-                  {quests.daily?.length > 0 ? quests.daily.map((quest) => (
-                    <QuestCard key={quest.id} quest={quest} />
-                  )) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Target className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                      <p>{t('quests.noQuests')}</p>
-                      <p className="text-sm">{t('quests.comeBackTomorrow')}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
 
               {/* Market Overview */}
               <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="market-overview-section">
@@ -234,9 +205,6 @@ const HubPage = () => {
               <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="quick-actions-section">
                 <h2 className="text-lg font-bold text-white mb-4">{t('hub.quickActions')}</h2>
                 <div className="space-y-3">
-                  <Link to="/crypto-quest" className="block" data-testid="action-crypto-quest">
-                    <ActionButton icon={Map} label="Crypto Quest" sublabel={t('quest.subtitle')} />
-                  </Link>
                   <Link to="/academy" className="block" data-testid="action-academy">
                     <ActionButton icon={BookOpen} label={t('hub.continueLearning')} sublabel={`23 ${t('hub.lessonsAvailable')}`} />
                   </Link>
@@ -246,30 +214,6 @@ const HubPage = () => {
                   <Link to="/simulator" className="block">
                     <ActionButton icon={BarChart3} label={t('hub.classicSimulator')} sublabel={t('hub.simpleMode')} />
                   </Link>
-                  <Link to="/leaderboard" className="block">
-                    <ActionButton icon={Trophy} label={t('nav.leaderboard')} sublabel={t('hub.viewAllPlayers')} />
-                  </Link>
-                </div>
-              </div>
-
-              {/* Top Players */}
-              <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="leaderboard-section">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    <Crown className="w-5 h-5 text-yellow-500" />
-                    {t('hub.topPlayers')}
-                  </h2>
-                  <Link to="/leaderboard">
-                    <Button variant="ghost" size="sm" className="text-primary text-xs">
-                      {t('hub.viewAll')}
-                    </Button>
-                  </Link>
-                </div>
-                
-                <div className="space-y-2">
-                  {leaderboard.slice(0, 5).map((player, index) => (
-                    <LeaderboardRow key={player.user_id} player={player} rank={index + 1} currentUserId={user?.id} />
-                  ))}
                 </div>
               </div>
 
@@ -339,37 +283,6 @@ const StatCard = ({ icon: Icon, label, value, color, testId }) => {
   );
 };
 
-const QuestCard = ({ quest }) => {
-  const { t } = useTranslation();
-  const progress = Math.min((quest.progress / quest.target) * 100, 100);
-  const name = quest.template_id
-    ? t(`quests.templates.${quest.template_id}.name`, { defaultValue: quest.name })
-    : quest.name;
-  const description = quest.template_id
-    ? t(`quests.templates.${quest.template_id}.desc`, { defaultValue: quest.description })
-    : quest.description;
-
-  return (
-    <div className={`p-4 rounded-lg border ${quest.completed ? 'bg-green-500/10 border-green-500/30' : 'bg-gray-800/50 border-gray-700'}`} data-testid="quest-card">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <Target className={`w-4 h-4 ${quest.completed ? 'text-green-500' : 'text-primary'}`} />
-          <span className="font-medium text-white">{name}</span>
-        </div>
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-yellow-500">{quest.coins_reward} 🪙</span>
-          <span className="text-primary">+{quest.xp_reward} XP</span>
-        </div>
-      </div>
-      <p className="text-sm text-gray-400 mb-2">{description}</p>
-      <div className="flex items-center gap-2">
-        <Progress value={progress} className="h-2 flex-1" />
-        <span className="text-sm text-gray-400">{quest.progress}/{quest.target}</span>
-      </div>
-    </div>
-  );
-};
-
 const CryptoCard = ({ symbol, data }) => {
   const isPositive = data.change_24h >= 0;
   
@@ -405,34 +318,5 @@ const ActionButton = ({ icon: Icon, label, sublabel }) => (
     <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-primary transition-colors" />
   </div>
 );
-
-const LeaderboardRow = ({ player, rank, currentUserId }) => {
-  const { t } = useTranslation();
-  const isCurrentUser = player.user_id === currentUserId;
-  const rankColors = {
-    1: 'text-yellow-500',
-    2: 'text-gray-400',
-    3: 'text-amber-600'
-  };
-
-  return (
-    <div className={`flex items-center gap-3 p-2 rounded-lg ${isCurrentUser ? 'bg-primary/10 border border-primary/30' : 'hover:bg-gray-800/50'} transition-colors`}>
-      <span className={`w-6 text-center font-bold ${rankColors[rank] || 'text-gray-500'}`}>
-        {rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : rank}
-      </span>
-      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white text-sm font-bold">
-        {player.name?.charAt(0) || 'U'}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-white truncate text-sm">{player.name}</p>
-        <p className="text-xs text-gray-500">{t('hub.levelShort')} {player.level}</p>
-      </div>
-      <div className="text-right">
-        <p className="font-bold text-primary text-sm">{player.xp_points?.toLocaleString()}</p>
-        <p className="text-xs text-gray-500">XP</p>
-      </div>
-    </div>
-  );
-};
 
 export default HubPage;

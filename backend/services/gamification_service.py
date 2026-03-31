@@ -4,7 +4,7 @@ Handles XP, levels, achievements, quests, and avatar system
 """
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import Dict, List, Optional
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import uuid
 import math
 
@@ -130,68 +130,6 @@ ACHIEVEMENTS = {
     }
 }
 
-# Quest templates
-QUEST_TEMPLATES = {
-    "daily": [
-        {
-            "id": "daily_lesson",
-            "name": "Leçon du Jour",
-            "description": "Complétez une leçon aujourd'hui",
-            "difficulty": "easy",
-            "target": 1,
-            "type": "lesson_complete",
-            "coins_reward": 10
-        },
-        {
-            "id": "daily_quiz",
-            "name": "Quiz Quotidien",
-            "description": "Réussissez un quiz avec 70%+",
-            "difficulty": "easy",
-            "target": 1,
-            "type": "quiz_pass",
-            "coins_reward": 15
-        },
-        {
-            "id": "daily_trade",
-            "name": "Trade du Jour",
-            "description": "Effectuez 3 trades dans l'arène",
-            "difficulty": "medium",
-            "target": 3,
-            "type": "trade_execute",
-            "coins_reward": 20
-        }
-    ],
-    "weekly": [
-        {
-            "id": "weekly_scholar",
-            "name": "Érudit de la Semaine",
-            "description": "Complétez 5 leçons cette semaine",
-            "difficulty": "medium",
-            "target": 5,
-            "type": "lesson_complete",
-            "coins_reward": 75
-        },
-        {
-            "id": "weekly_trader",
-            "name": "Trader de la Semaine",
-            "description": "Réalisez un profit de 500$ cette semaine",
-            "difficulty": "hard",
-            "target": 500,
-            "type": "profit_earned",
-            "coins_reward": 150
-        },
-        {
-            "id": "weekly_perfect",
-            "name": "Perfection Hebdo",
-            "description": "Obtenez 100% sur 3 quiz cette semaine",
-            "difficulty": "hard",
-            "target": 3,
-            "type": "perfect_quiz",
-            "coins_reward": 100
-        }
-    ]
-}
-
 # Avatar customization options
 AVATARS = {
     "base": [
@@ -264,14 +202,7 @@ class GamificationService:
         
         # Get user's achievements
         user_achievements = user.get("achievements", [])
-        
-        # Get active quests
-        active_quests = await self.db.user_quests.find({
-            "user_id": user_id,
-            "completed": False,
-            "expires_at": {"$gt": datetime.now(timezone.utc).isoformat()}
-        }, {"_id": 0}).to_list(20)
-        
+
         profile = {
             "user_id": user_id,
             "xp_points": xp,
@@ -286,7 +217,6 @@ class GamificationService:
             }),
             "achievements": user_achievements,
             "achievements_count": len(user_achievements),
-            "active_quests": active_quests,
             "stats": {
                 "lessons_completed": len(user.get("completed_lessons", [])),
                 "quizzes_completed": len(user.get("completed_quizzes", [])),
@@ -420,97 +350,6 @@ class GamificationService:
                 )
         
         return new_achievements
-    
-    async def generate_daily_quests(self, user_id: str) -> List[Dict]:
-        """Generate daily quests for a user"""
-        today = datetime.now(timezone.utc).date().isoformat()
-        
-        # Check if already generated today
-        existing = await self.db.user_quests.find_one({
-            "user_id": user_id,
-            "quest_type": "daily",
-            "generated_date": today
-        })
-        
-        if existing:
-            # Return existing daily quests
-            quests = await self.db.user_quests.find({
-                "user_id": user_id,
-                "quest_type": "daily",
-                "generated_date": today
-            }, {"_id": 0}).to_list(10)
-            return quests
-        
-        # Generate new daily quests
-        quests = []
-        for template in QUEST_TEMPLATES["daily"]:
-            quest = {
-                "id": str(uuid.uuid4()),
-                "user_id": user_id,
-                "quest_type": "daily",
-                "template_id": template["id"],
-                "name": template["name"],
-                "description": template["description"],
-                "difficulty": template["difficulty"],
-                "type": template["type"],
-                "target": template["target"],
-                "progress": 0,
-                "completed": False,
-                "coins_reward": template["coins_reward"],
-                "xp_reward": XP_REWARDS["quest_complete"](template["difficulty"]),
-                "generated_date": today,
-                "expires_at": (datetime.now(timezone.utc) + timedelta(days=1)).isoformat(),
-                "created_at": datetime.now(timezone.utc).isoformat()
-            }
-            quests.append(quest)
-        
-        if quests:
-            await self.db.user_quests.insert_many(quests)
-        
-        return quests
-    
-    async def update_quest_progress(self, user_id: str, quest_type: str, progress_amount: int = 1) -> List[Dict]:
-        """Update progress on quests matching a type"""
-        # Find active quests of this type
-        quests = await self.db.user_quests.find({
-            "user_id": user_id,
-            "type": quest_type,
-            "completed": False,
-            "expires_at": {"$gt": datetime.now(timezone.utc).isoformat()}
-        }, {"_id": 0}).to_list(20)
-        
-        completed_quests = []
-        
-        for quest in quests:
-            new_progress = quest["progress"] + progress_amount
-            completed = new_progress >= quest["target"]
-            
-            update_data = {"$set": {"progress": min(new_progress, quest["target"])}}
-            
-            if completed and not quest["completed"]:
-                update_data["$set"]["completed"] = True
-                update_data["$set"]["completed_at"] = datetime.now(timezone.utc).isoformat()
-                
-                # Award rewards
-                await self.db.users.update_one(
-                    {"id": user_id},
-                    {
-                        "$inc": {
-                            "xp_points": quest["xp_reward"],
-                            "coins": quest["coins_reward"]
-                        }
-                    }
-                )
-                
-                completed_quests.append({
-                    **quest,
-                    "progress": quest["target"],
-                    "completed": True
-                })
-            
-            await self.db.user_quests.update_one({"id": quest["id"]}, update_data)
-        
-        return completed_quests
     
     async def get_available_avatar_items(self, user_id: str) -> Dict:
         """Get all avatar items available to a user"""
@@ -647,37 +486,6 @@ class GamificationService:
             "streak_updated": True,
             "xp_earned": streak_xp
         }
-    
-    async def get_leaderboard(self, limit: int = 50) -> List[Dict]:
-        """Get gamification leaderboard"""
-        users = await self.db.users.find(
-            {},
-            {
-                "_id": 0,
-                "id": 1,
-                "full_name": 1,
-                "xp_points": 1,
-                "avatar": 1,
-                "streak_days": 1,
-                "achievements": 1
-            }
-        ).sort("xp_points", -1).limit(limit).to_list(limit)
-        
-        leaderboard = []
-        for i, user in enumerate(users):
-            xp = user.get("xp_points", 0)
-            leaderboard.append({
-                "rank": i + 1,
-                "user_id": user["id"],
-                "name": user["full_name"],
-                "xp_points": xp,
-                "level": self.calculate_level(xp),
-                "avatar": user.get("avatar", {}),
-                "streak_days": user.get("streak_days", 0),
-                "achievements_count": len(user.get("achievements", []))
-            })
-        
-        return leaderboard
     
     def get_all_achievements(self) -> List[Dict]:
         """Get all available achievements"""

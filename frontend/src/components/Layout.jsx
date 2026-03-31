@@ -4,24 +4,19 @@ import { useAuth } from '../App';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  GraduationCap, 
-  Menu, 
-  X, 
-  User, 
-  LogOut, 
+  GraduationCap,
+  Menu,
+  X,
+  User,
+  LogOut,
   LayoutDashboard,
   BookOpen,
-  Trophy,
   Bot,
   TrendingUp,
   Award,
-  CreditCard,
   Gamepad2,
   BarChart3,
-  Map,
   Store,
-  Shield,
-  Users,
   UserCircle
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -61,14 +56,12 @@ export const Layout = ({ children }) => {
   const userLinks = [
     { to: '/hub', label: t('nav.hub'), icon: Gamepad2 },
     { to: '/market-intelligence', label: t('nav.marketIntel', 'Market Intel'), icon: BarChart3, highlight: true },
-    { to: '/crypto-quest', label: 'Crypto Quest', icon: Map },
     { to: '/trading-arena', label: t('nav.tradingArena'), icon: TrendingUp },
     { to: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
     { to: '/mentor', label: t('nav.aiMentor'), icon: Bot },
     { to: '/shop', label: t('nav.shop', 'Shop'), icon: Store },
     { to: '/profile', label: t('nav.profile', 'Profile'), icon: UserCircle },
     { to: '/simulator', label: t('nav.simulator'), icon: TrendingUp },
-    { to: '/leaderboard', label: t('nav.leaderboard'), icon: Trophy },
     { to: '/certificates', label: t('nav.certificates'), icon: Award },
   ];
 

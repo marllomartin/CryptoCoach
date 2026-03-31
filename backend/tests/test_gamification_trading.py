@@ -71,7 +71,6 @@ class TestGamificationProfile:
         assert "avatar" in data
         assert "achievements" in data
         assert "achievements_count" in data
-        assert "active_quests" in data
         assert "stats" in data
         
     def test_gamification_profile_level_progress_structure(self, authenticated_client, test_user_auth):
@@ -125,54 +124,6 @@ class TestGamificationProfile:
         assert response.status_code == 404
 
 
-class TestGamificationQuests:
-    """Tests for GET /api/v2/gamification/quests/{user_id}"""
-    
-    def test_get_user_quests(self, authenticated_client, test_user_auth):
-        """Test fetching user quests"""
-        user_id = test_user_auth['user_id']
-        response = authenticated_client.get(f"{BASE_URL}/api/v2/gamification/quests/{user_id}")
-        
-        assert response.status_code == 200
-        data = response.json()
-        
-        assert "daily" in data
-        assert "weekly" in data
-        assert isinstance(data["daily"], list)
-        assert isinstance(data["weekly"], list)
-        
-    def test_daily_quest_structure(self, authenticated_client, test_user_auth):
-        """Test daily quest has correct structure"""
-        user_id = test_user_auth['user_id']
-        response = authenticated_client.get(f"{BASE_URL}/api/v2/gamification/quests/{user_id}")
-        
-        assert response.status_code == 200
-        data = response.json()
-        
-        if len(data["daily"]) > 0:
-            quest = data["daily"][0]
-            assert "id" in quest
-            assert "name" in quest
-            assert "description" in quest
-            assert "difficulty" in quest
-            assert "target" in quest
-            assert "progress" in quest
-            assert "completed" in quest
-            assert "coins_reward" in quest
-            assert "xp_reward" in quest
-            
-    def test_daily_quests_generated(self, authenticated_client, test_user_auth):
-        """Test that daily quests are auto-generated"""
-        user_id = test_user_auth['user_id']
-        response = authenticated_client.get(f"{BASE_URL}/api/v2/gamification/quests/{user_id}")
-        
-        assert response.status_code == 200
-        data = response.json()
-        
-        # Should have 3 daily quests (lesson, quiz, trade)
-        assert len(data["daily"]) == 3
-
-
 class TestGamificationAchievements:
     """Tests for GET /api/v2/gamification/achievements"""
     
@@ -194,27 +145,6 @@ class TestGamificationAchievements:
         assert "icon" in achievement
         assert "xp_reward" in achievement
         assert "condition" in achievement
-
-
-class TestGamificationLeaderboard:
-    """Tests for GET /api/v2/gamification/leaderboard"""
-    
-    def test_get_leaderboard(self, api_client):
-        """Test fetching gamification leaderboard"""
-        response = api_client.get(f"{BASE_URL}/api/v2/gamification/leaderboard")
-        
-        assert response.status_code == 200
-        data = response.json()
-        
-        assert isinstance(data, list)
-        
-        if len(data) > 0:
-            entry = data[0]
-            assert "rank" in entry
-            assert "user_id" in entry
-            assert "name" in entry
-            assert "xp_points" in entry
-            assert "level" in entry
 
 
 class TestTradingMarketPrices:

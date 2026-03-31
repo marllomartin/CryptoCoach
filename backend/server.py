@@ -42,7 +42,6 @@ from security import (
 # Import v2 routers for the new ecosystem
 from routes.gamification import router as gamification_router
 from routes.trading_arena import router as trading_router
-from routes.crypto_quest import router as quest_router
 from routes.media import media_router
 from routes.premium import premium_router
 from routes.market_intelligence import market_router, newsletter_router, set_database as set_newsletter_db
@@ -1000,27 +999,6 @@ async def execute_trade(trade: Trade, current_user: dict = Depends(get_current_u
     })
     
     return {"balance": new_balance, "portfolio": portfolio, "trade": trade.model_dump()}
-
-# ==================== LEADERBOARD ROUTES ====================
-
-@api_router.get("/leaderboard")
-async def get_leaderboard():
-    users = await db.users.find(
-        {},
-        {"_id": 0, "id": 1, "full_name": 1, "xp_points": 1, "completed_lessons": 1, "certificates": 1, "streak_days": 1}
-    ).sort("xp_points", -1).to_list(50)
-    
-    leaderboard = []
-    for i, user in enumerate(users):
-        leaderboard.append({
-            "rank": i + 1,
-            "name": user["full_name"],
-            "xp_points": user.get("xp_points", 0),
-            "lessons_completed": len(user.get("completed_lessons", [])),
-            "certificates": len(user.get("certificates", [])),
-            "streak_days": user.get("streak_days", 0)
-        })
-    return leaderboard
 
 # ==================== CONTACT ROUTE ====================
 
@@ -4163,7 +4141,6 @@ app.include_router(api_router)
 # Include v2 routers for TheCryptoCoach 2.0 ecosystem
 app.include_router(gamification_router)
 app.include_router(trading_router)
-app.include_router(quest_router)
 app.include_router(media_router)
 app.include_router(premium_router)
 app.include_router(market_router)

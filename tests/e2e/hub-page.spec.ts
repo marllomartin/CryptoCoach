@@ -44,32 +44,6 @@ test.describe('Hub Page - Gamification Features', () => {
     await expect(page.getByTestId('stat-achievements')).toBeVisible();
   });
 
-  test('displays daily quests section', async ({ page }) => {
-    await page.goto('/hub', { waitUntil: 'domcontentloaded' });
-    await waitForAppReady(page);
-    
-    await expect(page.getByTestId('daily-quests-section')).toBeVisible();
-    
-    // Should have quest cards (3 daily quests)
-    await expect(page.getByTestId('quests-list')).toBeVisible();
-  });
-
-  test('displays quests with progress and rewards', async ({ page }) => {
-    await page.goto('/hub', { waitUntil: 'domcontentloaded' });
-    await waitForAppReady(page);
-    
-    // Wait for quests to load
-    await expect(page.getByTestId('quests-list')).toBeVisible();
-    
-    // Check quest cards are present
-    const questCards = page.getByTestId('quest-card');
-    const count = await questCards.count();
-    expect(count).toBeGreaterThan(0);
-    
-    // Each quest should have name, description, progress
-    await expect(questCards.first()).toContainText(/Leçon|Quiz|Trade/);
-  });
-
   test('displays market overview section with crypto prices', async ({ page }) => {
     await page.goto('/hub', { waitUntil: 'domcontentloaded' });
     await waitForAppReady(page);
@@ -96,9 +70,9 @@ test.describe('Hub Page - Gamification Features', () => {
   test('displays quick actions with links', async ({ page }) => {
     await page.goto('/hub', { waitUntil: 'domcontentloaded' });
     await waitForAppReady(page);
-    
+
     await expect(page.getByTestId('quick-actions-section')).toBeVisible();
-    
+
     // Check action links exist
     await expect(page.getByTestId('action-academy')).toBeVisible();
     await expect(page.getByTestId('action-trading-arena')).toBeVisible();
@@ -112,13 +86,6 @@ test.describe('Hub Page - Gamification Features', () => {
     
     await expect(page).toHaveURL(/\/trading-arena/);
     await expect(page.getByTestId('trading-arena-page')).toBeVisible();
-  });
-
-  test('displays leaderboard section with top players', async ({ page }) => {
-    await page.goto('/hub', { waitUntil: 'domcontentloaded' });
-    await waitForAppReady(page);
-    
-    await expect(page.getByTestId('leaderboard-section')).toBeVisible();
   });
 
   test('displays achievements section with progress', async ({ page }) => {
