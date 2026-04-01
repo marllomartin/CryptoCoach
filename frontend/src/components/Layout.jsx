@@ -244,39 +244,39 @@ export const Layout = ({ children }) => {
                 <span className="font-heading font-bold text-xl">TheCryptoCoach.io</span>
               </Link>
               <p className="text-slate-400 text-sm max-w-md">
-                Your trusted source for cryptocurrency education. Master blockchain, DeFi, and digital assets with expert-led courses and certifications.
+                {t('footer.description')}
               </p>
             </div>
 
             {/* Quick Links */}
             <div>
-              <h4 className="font-heading font-semibold mb-4">Learn</h4>
+              <h4 className="font-heading font-semibold mb-4">{t('footer.learn')}</h4>
               <ul className="space-y-2">
-                <li><Link to="/academy" className="text-slate-400 hover:text-primary text-sm">Academy</Link></li>
-                <li><Link to="/glossary" className="text-slate-400 hover:text-primary text-sm">Glossary</Link></li>
-                <li><Link to="/blog" className="text-slate-400 hover:text-primary text-sm">Insights</Link></li>
-                <li><Link to="/simulator" className="text-slate-400 hover:text-primary text-sm">Trading Simulator</Link></li>
+                <li><Link to="/academy" className="text-slate-400 hover:text-primary text-sm">{t('nav.academy')}</Link></li>
+                <li><Link to="/glossary" className="text-slate-400 hover:text-primary text-sm">{t('nav.glossary')}</Link></li>
+                <li><Link to="/blog" className="text-slate-400 hover:text-primary text-sm">{t('nav.insights')}</Link></li>
+                <li><Link to="/simulator" className="text-slate-400 hover:text-primary text-sm">{t('nav.simulator')}</Link></li>
               </ul>
             </div>
 
             {/* Legal */}
             <div>
-              <h4 className="font-heading font-semibold mb-4">Legal</h4>
+              <h4 className="font-heading font-semibold mb-4">{t('footer.legal')}</h4>
               <ul className="space-y-2">
-                <li><Link to="/terms" className="text-slate-400 hover:text-primary text-sm">Terms of Service</Link></li>
-                <li><Link to="/privacy" className="text-slate-400 hover:text-primary text-sm">Privacy Policy</Link></li>
-                <li><Link to="/disclaimer" className="text-slate-400 hover:text-primary text-sm">Risk Disclaimer</Link></li>
-                <li><Link to="/contact" className="text-slate-400 hover:text-primary text-sm">Contact Us</Link></li>
+                <li><Link to="/terms" className="text-slate-400 hover:text-primary text-sm">{t('footer.termsOfService')}</Link></li>
+                <li><Link to="/privacy" className="text-slate-400 hover:text-primary text-sm">{t('footer.privacyPolicy')}</Link></li>
+                <li><Link to="/disclaimer" className="text-slate-400 hover:text-primary text-sm">{t('footer.riskDisclaimer')}</Link></li>
+                <li><Link to="/contact" className="text-slate-400 hover:text-primary text-sm">{t('footer.contactUs')}</Link></li>
               </ul>
             </div>
           </div>
 
           <div className="border-t border-border mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-slate-500 text-sm">
-              © {new Date().getFullYear()} TheCryptoCoach.io. All rights reserved.
+              © {new Date().getFullYear()} TheCryptoCoach.io. {t('footer.allRights')}
             </p>
             <p className="text-slate-500 text-xs">
-              Cryptocurrency investments carry risk. This platform provides education, not financial advice.
+              {t('footer.riskNote')}
             </p>
           </div>
         </div>
