@@ -100,7 +100,7 @@ export default function GlossaryPage() {
                     : 'bg-muted text-slate-400 hover:bg-muted/80'
                 }`}
               >
-                {category}
+                {category === 'All' ? t('glossary.all') : category}
               </button>
             ))}
           </div>

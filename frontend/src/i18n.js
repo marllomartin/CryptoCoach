@@ -249,7 +249,8 @@ const resources = {
         searchPlaceholder: 'Search terms...',
         noResultsTitle: 'No terms found',
         noResultsDesc: 'Try adjusting your search or filter',
-        termCount: '{{count}} terms in glossary'
+        termCount: '{{count}} terms in glossary',
+        all: 'All'
       },
       // Market Intelligence Page
       market: {
@@ -1468,7 +1469,8 @@ const resources = {
         searchPlaceholder: 'Rechercher des termes...',
         noResultsTitle: 'Aucun terme trouvé',
         noResultsDesc: 'Essayez d\'ajuster votre recherche ou filtre',
-        termCount: '{{count}} termes dans le glossaire'
+        termCount: '{{count}} termes dans le glossaire',
+        all: 'Tous'
       },
       // Market Intelligence Page
       market: {
@@ -3354,7 +3356,8 @@ const resources = {
         searchPlaceholder: 'البحث عن مصطلحات...',
         noResultsTitle: 'لم يتم العثور على مصطلحات',
         noResultsDesc: 'حاول تعديل بحثك أو الفلتر',
-        termCount: '{{count}} مصطلح في القاموس'
+        termCount: '{{count}} مصطلح في القاموس',
+        all: 'الكل'
       },
       // Market Intelligence Page
       market: {
@@ -3906,7 +3909,8 @@ const resources = {
         searchPlaceholder: 'Pesquisar termos...',
         noResultsTitle: 'Nenhum termo encontrado',
         noResultsDesc: 'Tente ajustar sua pesquisa ou filtro',
-        termCount: '{{count}} termos no glossário'
+        termCount: '{{count}} termos no glossário',
+        all: 'Todos'
       },
       // Market Intelligence Page
       market: {
