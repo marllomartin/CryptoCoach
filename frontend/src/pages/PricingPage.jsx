@@ -188,32 +188,28 @@ const PricingPage = () => {
             </div>
             
             {/* Billing Toggle */}
-            <div className="mt-8 inline-flex items-center gap-4 p-1.5 bg-muted rounded-full">
-              <button
-                onClick={() => setIsAnnual(false)}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                  !isAnnual ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {t('pricing.monthly')}
-              </button>
-              <button
-                onClick={() => setIsAnnual(true)}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
-                  isAnnual ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {t('pricing.annual')}
-                <span className="px-2 py-0.5 bg-green-500 text-white rounded-full text-xs">
-                  -33%
-                </span>
-              </button>
-            </div>
-
-            {/* Trial info */}
-            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full">
-              <Star className="w-4 h-4 text-green-400" />
-              <span className="text-sm text-green-400">{t('pricing.freeTrialBadge')}</span>
+            <div className="mt-8 flex justify-center">
+              <div className="inline-flex items-center gap-4 p-1.5 bg-muted rounded-full">
+                <button
+                  onClick={() => setIsAnnual(false)}
+                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                    !isAnnual ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {t('pricing.monthly')}
+                </button>
+                <button
+                  onClick={() => setIsAnnual(true)}
+                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+                    isAnnual ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {t('pricing.annual')}
+                  <span className="px-2 py-0.5 bg-green-500 text-white rounded-full text-xs">
+                    -33%
+                  </span>
+                </button>
+              </div>
             </div>
           </motion.div>
 
