@@ -255,21 +255,20 @@ const PricingPage = () => {
                     </div>
                   )}
 
-                  {tier.bestValue && !tier.popular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium px-4 py-1 rounded-full whitespace-nowrap">
-                        {t('pricing.bestValue')}
-                      </span>
+                  {(tier.bestValue && !tier.popular) || isCurrentTier ? (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                      {tier.bestValue && !tier.popular && (
+                        <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium px-4 py-1 rounded-full whitespace-nowrap">
+                          {t('pricing.bestValue')}
+                        </span>
+                      )}
+                      {isCurrentTier && (
+                        <span className="bg-green-500 text-white text-sm font-medium px-3 py-1 rounded-full whitespace-nowrap">
+                          {t('pricing.currentPlanBadge')}
+                        </span>
+                      )}
                     </div>
-                  )}
-
-                  {isCurrentTier && (
-                    <div className="absolute -top-4 right-4">
-                      <span className="bg-green-500 text-white text-sm font-medium px-3 py-1 rounded-full">
-                        {t('pricing.currentPlanBadge')}
-                      </span>
-                    </div>
-                  )}
+                  ) : null}
 
                   <div className="mb-6">
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
