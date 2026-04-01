@@ -69,9 +69,9 @@ export const Layout = ({ children }) => {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-16 gap-4 min-w-0">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2 shrink-0">
               <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
                 <GraduationCap className="w-6 h-6 text-white" />
               </div>
@@ -79,43 +79,45 @@ export const Layout = ({ children }) => {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-6 shrink min-w-0 overflow-hidden">
               {navLinks.map(link => (
-                <NavLink key={link.to} to={link.to}>{link.label}</NavLink>
+                <NavLink key={link.to} to={link.to}>
+                  <span className="whitespace-nowrap">{link.label}</span>
+                </NavLink>
               ))}
             </div>
 
             {/* Desktop Auth */}
-            <div className="hidden md:flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-2 shrink-0">
               <LanguageSwitcher variant="minimal" />
               {user ? (
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                   <Link to="/simulator">
-                    <Button variant="outline" size="sm" className="text-primary border-primary/50 hover:bg-primary/10">
-                      <TrendingUp className="w-4 h-4 mr-2" />
+                    <Button variant="outline" size="sm" className="whitespace-nowrap text-primary border-primary/50 hover:bg-primary/10">
+                      <TrendingUp className="w-4 h-4 mr-2 shrink-0" />
                       {t('nav.simulator')}
                     </Button>
                   </Link>
                   {['admin', 'moderator'].includes(user.role) && (
                     <Link to="/admin">
-                      <Button size="sm" className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white border-0">
-                        <Shield className="w-4 h-4 mr-2" />
+                      <Button variant="outline" size="sm" className="whitespace-nowrap text-fuchsia-400 border-fuchsia-500/50 hover:bg-fuchsia-500/10 bg-gradient-to-r from-fuchsia-500/5 to-purple-500/5">
+                        <Shield className="w-4 h-4 mr-2 shrink-0" />
                         {t('admin.title')}
                       </Button>
                     </Link>
                   )}
                   <NotificationBell />
                   <Link to="/profile">
-                    <Button variant="ghost" size="sm" className="text-slate-300">
-                      <User className="w-4 h-4 mr-2" />
-                      {user.full_name}
+                    <Button variant="ghost" size="sm" className="whitespace-nowrap text-slate-300">
+                      <User className="w-4 h-4 mr-2 shrink-0" />
+                      <span className="max-w-[120px] truncate">{user.full_name}</span>
                     </Button>
                   </Link>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={logout}
-                    className="text-slate-400 hover:text-white"
+                    className="text-slate-400 hover:text-white shrink-0"
                   >
                     <LogOut className="w-4 h-4" />
                   </Button>
