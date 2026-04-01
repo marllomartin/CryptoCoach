@@ -1056,6 +1056,170 @@ const resources = {
         lessons: '{{completed}}/{{total}} lessons',
         streak: '{{days}}d',
         badges: '{{count}} badges'
+      },
+      // Admin Panel
+      admin: {
+        accessDenied: 'Administrator access required',
+        title: 'Administrator Panel',
+        subtitle: 'Manage your CryptoCoach platform',
+        refresh: 'Refresh',
+        tabs: {
+          dashboard: 'Dashboard',
+          analytics: 'Analytics',
+          courses: 'Courses',
+          users: 'Users',
+          newsletter: 'Newsletter',
+          blog: 'Blog',
+          media: 'Media'
+        },
+        errors: {
+          loadingStats: 'Error loading statistics',
+          loadingCourses: 'Error loading courses',
+          loadingLessons: 'Error loading lessons',
+          loadingUsers: 'Error loading users',
+          loadingArticles: 'Error loading articles',
+          loadingData: 'Error loading data',
+          audioGeneration: 'Audio generation error',
+          imageGeneration: 'Image generation error',
+          generationError: 'Generation error',
+          updateError: 'Update error',
+          creationError: 'Creation error',
+          deletionError: 'Deletion error',
+          sendError: 'Send error'
+        },
+        dashboard: {
+          stats: {
+            users: 'Users',
+            newUsers: 'New (30d)',
+            courses: 'Courses',
+            lessons: 'Lessons',
+            articles: 'Articles',
+            transactions: 'Transactions'
+          },
+          subscriptionBreakdown: 'Subscription Breakdown'
+        },
+        courses: {
+          title: 'Courses',
+          lessonsTitle: 'Lessons',
+          addLesson: 'New lesson',
+          selectCourse: 'Select a course to view its lessons',
+          noLessons: 'No lessons',
+          levelInfo: 'Level {{level}} • {{count}} lessons',
+          noAudio: 'No audio',
+          noImage: 'No image'
+        },
+        users: {
+          title: 'Users ({{total}})',
+          search: 'Search...',
+          subscriptionUpdated: 'Subscription updated',
+          tableHeaders: {
+            email: 'Email',
+            name: 'Name',
+            subscription: 'Subscription',
+            xp: 'XP',
+            registration: 'Registration',
+            actions: 'Actions'
+          }
+        },
+        blog: {
+          title: 'Blog articles ({{count}})',
+          newPost: 'New article',
+          created: 'Article created',
+          deleted: 'Article deleted',
+          deleteConfirm: 'Delete this article?',
+          publish: 'Publish',
+          cancel: 'Cancel',
+          form: {
+            title: 'Title',
+            slug: 'Slug',
+            excerpt: 'Excerpt',
+            content: 'Content (Markdown)',
+            category: 'Category'
+          }
+        },
+        newsletter: {
+          stats: {
+            totalSubscribers: 'Total Subscribers',
+            activeSubscribers: 'Active Subscribers',
+            newsletters: 'Newsletters',
+            sent: 'Sent'
+          },
+          management: 'Newsletter Management',
+          newNewsletter: 'New Newsletter',
+          createTitle: 'Create a Newsletter',
+          language: 'Language:',
+          allLanguages: 'All languages',
+          generateWithAI: 'Generate with AI',
+          subjectPlaceholder: 'Newsletter subject',
+          contentPlaceholder: 'Newsletter content (Markdown supported)',
+          sendImmediately: 'Send immediately after creation',
+          createAndSend: 'Create & Send',
+          createDraft: 'Create Draft',
+          cancel: 'Cancel',
+          history: 'Newsletter History',
+          noNewsletters: 'No newsletter created',
+          emptyMessage: 'Create your first newsletter to engage your subscribers',
+          statusSent: 'Sent',
+          statusDraft: 'Draft',
+          recipients: '{{count}} recipients',
+          send: 'Send',
+          subscribersTitle: 'Subscriber List ({{active}} active)',
+          noSubscribers: 'No subscribers yet',
+          moreSubscribers: '+{{count}} more subscribers',
+          contentGenerated: 'Content generated successfully!',
+          templateUsed: 'Template used (insufficient AI budget)',
+          fillAllFields: 'Please fill in all fields',
+          createdAndSent: 'Newsletter created and sent!',
+          created: 'Newsletter created!',
+          sent: 'Newsletter sent!',
+          tableHeaders: {
+            email: 'Email',
+            language: 'Language',
+            registrationDate: 'Registration date',
+            interests: 'Interests'
+          }
+        },
+        media: {
+          stats: {
+            totalLessons: 'Total lessons',
+            audiosGenerated: 'Audios generated',
+            videosUploaded: 'Videos uploaded',
+            mediaCoverage: 'Media coverage (EN)'
+          },
+          configuration: 'Configuration',
+          ttsVoice: 'TTS Voice',
+          workingLanguage: 'Working language',
+          audioGeneration: 'Audio Generation (TTS)',
+          generateAllAudios: 'Generate all audios',
+          ttsDescription: 'TTS narration for 23 lessons in {{language}}',
+          inProgress: 'In progress...',
+          generateAudioBtn: 'Generate Audio',
+          progress: 'Progress',
+          currentlyProcessing: 'Processing:',
+          videoManagement: 'Video Management',
+          hide: 'Hide',
+          show: 'Show',
+          customVideoUpload: 'Custom video upload',
+          customVideoDesc: 'Upload your own videos for each lesson. Videos will be associated with the selected language ({{language}}).',
+          mp4Recommended: 'MP4 recommended',
+          maxSize: 'Max 500MB',
+          idealResolution: '1080p ideal',
+          tip: 'Tip:',
+          tipContent: 'Use the lesson list below to upload one video per lesson. The upload button appears next to each lesson.',
+          lessonsAndMedia: 'Lessons & Media',
+          audio: 'Audio',
+          video: 'Video',
+          generateAudio: 'Generate audio',
+          uploadVideoFor: 'Upload video ({{language}})',
+          audioStarted: 'Audio generation in progress...',
+          audioStartedFor: 'Generating audio for {{lessonId}}...',
+          audioSuccess: 'Audio generated successfully!',
+          imageStarted: 'Image generation in progress...',
+          imageSuccess: 'Image generated successfully!',
+          batchStarted: 'Batch audio generation started...',
+          batchAudioComplete: 'Audio generation complete!',
+          videoUploaded: 'Video uploaded successfully!'
+        }
       }
     }
   },
@@ -2111,6 +2275,170 @@ const resources = {
         lessons: '{{completed}}/{{total}} leçons',
         streak: '{{days}}j',
         badges: '{{count}} badges'
+      },
+      // Admin Panel
+      admin: {
+        accessDenied: 'Accès administrateur requis',
+        title: 'Panel Administrateur',
+        subtitle: 'Gérez votre plateforme CryptoCoach',
+        refresh: 'Actualiser',
+        tabs: {
+          dashboard: 'Dashboard',
+          analytics: 'Analytics',
+          courses: 'Cours',
+          users: 'Utilisateurs',
+          newsletter: 'Newsletter',
+          blog: 'Blog',
+          media: 'Média'
+        },
+        errors: {
+          loadingStats: 'Erreur de chargement des statistiques',
+          loadingCourses: 'Erreur de chargement des cours',
+          loadingLessons: 'Erreur de chargement des leçons',
+          loadingUsers: 'Erreur de chargement des utilisateurs',
+          loadingArticles: 'Erreur de chargement des articles',
+          loadingData: 'Erreur de chargement des données',
+          audioGeneration: 'Erreur de génération audio',
+          imageGeneration: 'Erreur de génération image',
+          generationError: 'Erreur de génération',
+          updateError: 'Erreur de mise à jour',
+          creationError: 'Erreur de création',
+          deletionError: 'Erreur de suppression',
+          sendError: "Erreur d'envoi"
+        },
+        dashboard: {
+          stats: {
+            users: 'Utilisateurs',
+            newUsers: 'Nouveaux (30j)',
+            courses: 'Cours',
+            lessons: 'Leçons',
+            articles: 'Articles',
+            transactions: 'Transactions'
+          },
+          subscriptionBreakdown: 'Répartition des abonnements'
+        },
+        courses: {
+          title: 'Cours',
+          lessonsTitle: 'Leçons',
+          addLesson: 'Nouvelle leçon',
+          selectCourse: 'Sélectionnez un cours pour voir ses leçons',
+          noLessons: 'Aucune leçon',
+          levelInfo: 'Niveau {{level}} • {{count}} leçons',
+          noAudio: "Pas d'audio",
+          noImage: "Pas d'image"
+        },
+        users: {
+          title: 'Utilisateurs ({{total}})',
+          search: 'Rechercher...',
+          subscriptionUpdated: 'Abonnement mis à jour',
+          tableHeaders: {
+            email: 'Email',
+            name: 'Nom',
+            subscription: 'Abonnement',
+            xp: 'XP',
+            registration: 'Inscription',
+            actions: 'Actions'
+          }
+        },
+        blog: {
+          title: 'Articles de blog ({{count}})',
+          newPost: 'Nouvel article',
+          created: 'Article créé',
+          deleted: 'Article supprimé',
+          deleteConfirm: 'Supprimer cet article ?',
+          publish: 'Publier',
+          cancel: 'Annuler',
+          form: {
+            title: 'Titre',
+            slug: 'Slug',
+            excerpt: 'Extrait',
+            content: 'Contenu (Markdown)',
+            category: 'Catégorie'
+          }
+        },
+        newsletter: {
+          stats: {
+            totalSubscribers: 'Total Abonnés',
+            activeSubscribers: 'Abonnés Actifs',
+            newsletters: 'Newsletters',
+            sent: 'Envoyées'
+          },
+          management: 'Gestion des Newsletters',
+          newNewsletter: 'Nouvelle Newsletter',
+          createTitle: 'Créer une Newsletter',
+          language: 'Langue:',
+          allLanguages: 'Toutes les langues',
+          generateWithAI: 'Générer avec IA',
+          subjectPlaceholder: 'Sujet de la newsletter',
+          contentPlaceholder: 'Contenu de la newsletter (Markdown supporté)',
+          sendImmediately: 'Envoyer immédiatement après création',
+          createAndSend: 'Créer & Envoyer',
+          createDraft: 'Créer Brouillon',
+          cancel: 'Annuler',
+          history: 'Historique des Newsletters',
+          noNewsletters: 'Aucune newsletter créée',
+          emptyMessage: 'Créez votre première newsletter pour engager vos abonnés',
+          statusSent: 'Envoyée',
+          statusDraft: 'Brouillon',
+          recipients: '{{count}} destinataires',
+          send: 'Envoyer',
+          subscribersTitle: 'Liste des Abonnés ({{active}} actifs)',
+          noSubscribers: 'Aucun abonné pour le moment',
+          moreSubscribers: '+{{count}} autres abonnés',
+          contentGenerated: 'Contenu généré avec succès!',
+          templateUsed: 'Template utilisé (budget IA insuffisant)',
+          fillAllFields: 'Veuillez remplir tous les champs',
+          createdAndSent: 'Newsletter créée et envoyée!',
+          created: 'Newsletter créée!',
+          sent: 'Newsletter envoyée!',
+          tableHeaders: {
+            email: 'Email',
+            language: 'Langue',
+            registrationDate: "Date d'inscription",
+            interests: 'Intérêts'
+          }
+        },
+        media: {
+          stats: {
+            totalLessons: 'Leçons totales',
+            audiosGenerated: 'Audios générés',
+            videosUploaded: 'Vidéos uploadées',
+            mediaCoverage: 'Couverture média (EN)'
+          },
+          configuration: 'Configuration',
+          ttsVoice: 'Voix TTS',
+          workingLanguage: 'Langue de travail',
+          audioGeneration: 'Génération Audio (TTS)',
+          generateAllAudios: 'Générer tous les audios',
+          ttsDescription: 'Narration TTS pour les 23 leçons en {{language}}',
+          inProgress: 'En cours...',
+          generateAudioBtn: 'Générer Audio',
+          progress: 'Progression',
+          currentlyProcessing: 'En cours:',
+          videoManagement: 'Gestion des Vidéos',
+          hide: 'Masquer',
+          show: 'Afficher',
+          customVideoUpload: 'Upload de vidéos personnalisées',
+          customVideoDesc: 'Uploadez vos propres vidéos pour chaque leçon. Les vidéos seront associées à la langue sélectionnée ({{language}}).',
+          mp4Recommended: 'MP4 recommandé',
+          maxSize: 'Max 500MB',
+          idealResolution: '1080p idéal',
+          tip: 'Conseil:',
+          tipContent: "Utilisez la liste des leçons ci-dessous pour uploader une vidéo par leçon. Le bouton d'upload apparaît à côté de chaque leçon.",
+          lessonsAndMedia: 'Leçons & Médias',
+          audio: 'Audio',
+          video: 'Vidéo',
+          generateAudio: 'Générer audio',
+          uploadVideoFor: 'Uploader vidéo ({{language}})',
+          audioStarted: 'Génération audio en cours...',
+          audioStartedFor: 'Génération audio pour {{lessonId}}...',
+          audioSuccess: 'Audio généré avec succès!',
+          imageStarted: 'Génération image en cours...',
+          imageSuccess: 'Image générée avec succès!',
+          batchStarted: 'Génération batch audio démarrée...',
+          batchAudioComplete: 'Génération audio terminée!',
+          videoUploaded: 'Vidéo uploadée avec succès!'
+        }
       }
     }
   },
@@ -3166,6 +3494,170 @@ const resources = {
         lessons: '{{completed}}/{{total}} درس',
         streak: '{{days}}ي',
         badges: '{{count}} شارة'
+      },
+      // Admin Panel
+      admin: {
+        accessDenied: 'مطلوب صلاحيات المشرف',
+        title: 'لوحة تحكم المشرف',
+        subtitle: 'إدارة منصة CryptoCoach الخاصة بك',
+        refresh: 'تحديث',
+        tabs: {
+          dashboard: 'لوحة التحكم',
+          analytics: 'التحليلات',
+          courses: 'الدورات',
+          users: 'المستخدمون',
+          newsletter: 'النشرة الإخبارية',
+          blog: 'المدونة',
+          media: 'الوسائط'
+        },
+        errors: {
+          loadingStats: 'خطأ في تحميل الإحصائيات',
+          loadingCourses: 'خطأ في تحميل الدورات',
+          loadingLessons: 'خطأ في تحميل الدروس',
+          loadingUsers: 'خطأ في تحميل المستخدمين',
+          loadingArticles: 'خطأ في تحميل المقالات',
+          loadingData: 'خطأ في تحميل البيانات',
+          audioGeneration: 'خطأ في إنشاء الصوت',
+          imageGeneration: 'خطأ في إنشاء الصورة',
+          generationError: 'خطأ في الإنشاء',
+          updateError: 'خطأ في التحديث',
+          creationError: 'خطأ في الإنشاء',
+          deletionError: 'خطأ في الحذف',
+          sendError: 'خطأ في الإرسال'
+        },
+        dashboard: {
+          stats: {
+            users: 'المستخدمون',
+            newUsers: 'جدد (30 يوم)',
+            courses: 'الدورات',
+            lessons: 'الدروس',
+            articles: 'المقالات',
+            transactions: 'المعاملات'
+          },
+          subscriptionBreakdown: 'توزيع الاشتراكات'
+        },
+        courses: {
+          title: 'الدورات',
+          lessonsTitle: 'الدروس',
+          addLesson: 'درس جديد',
+          selectCourse: 'اختر دورة لعرض دروسها',
+          noLessons: 'لا توجد دروس',
+          levelInfo: 'المستوى {{level}} • {{count}} دروس',
+          noAudio: 'لا يوجد صوت',
+          noImage: 'لا توجد صورة'
+        },
+        users: {
+          title: 'المستخدمون ({{total}})',
+          search: 'بحث...',
+          subscriptionUpdated: 'تم تحديث الاشتراك',
+          tableHeaders: {
+            email: 'البريد الإلكتروني',
+            name: 'الاسم',
+            subscription: 'الاشتراك',
+            xp: 'XP',
+            registration: 'تاريخ التسجيل',
+            actions: 'الإجراءات'
+          }
+        },
+        blog: {
+          title: 'مقالات المدونة ({{count}})',
+          newPost: 'مقال جديد',
+          created: 'تم إنشاء المقال',
+          deleted: 'تم حذف المقال',
+          deleteConfirm: 'هل تريد حذف هذا المقال؟',
+          publish: 'نشر',
+          cancel: 'إلغاء',
+          form: {
+            title: 'العنوان',
+            slug: 'الرابط المختصر',
+            excerpt: 'مقتطف',
+            content: 'المحتوى (Markdown)',
+            category: 'الفئة'
+          }
+        },
+        newsletter: {
+          stats: {
+            totalSubscribers: 'إجمالي المشتركين',
+            activeSubscribers: 'المشتركون النشطون',
+            newsletters: 'النشرات الإخبارية',
+            sent: 'المرسلة'
+          },
+          management: 'إدارة النشرات الإخبارية',
+          newNewsletter: 'نشرة إخبارية جديدة',
+          createTitle: 'إنشاء نشرة إخبارية',
+          language: 'اللغة:',
+          allLanguages: 'جميع اللغات',
+          generateWithAI: 'إنشاء بالذكاء الاصطناعي',
+          subjectPlaceholder: 'موضوع النشرة الإخبارية',
+          contentPlaceholder: 'محتوى النشرة الإخبارية (Markdown مدعوم)',
+          sendImmediately: 'إرسال فوري بعد الإنشاء',
+          createAndSend: 'إنشاء وإرسال',
+          createDraft: 'إنشاء مسودة',
+          cancel: 'إلغاء',
+          history: 'سجل النشرات الإخبارية',
+          noNewsletters: 'لم يتم إنشاء أي نشرة إخبارية',
+          emptyMessage: 'أنشئ نشرتك الإخبارية الأولى للتواصل مع مشتركيك',
+          statusSent: 'مرسلة',
+          statusDraft: 'مسودة',
+          recipients: '{{count}} مستلم',
+          send: 'إرسال',
+          subscribersTitle: 'قائمة المشتركين ({{active}} نشط)',
+          noSubscribers: 'لا يوجد مشتركون بعد',
+          moreSubscribers: '+{{count}} مشترك آخر',
+          contentGenerated: 'تم إنشاء المحتوى بنجاح!',
+          templateUsed: 'تم استخدام القالب (ميزانية الذكاء الاصطناعي غير كافية)',
+          fillAllFields: 'يرجى ملء جميع الحقول',
+          createdAndSent: 'تم إنشاء النشرة الإخبارية وإرسالها!',
+          created: 'تم إنشاء النشرة الإخبارية!',
+          sent: 'تم إرسال النشرة الإخبارية!',
+          tableHeaders: {
+            email: 'البريد الإلكتروني',
+            language: 'اللغة',
+            registrationDate: 'تاريخ التسجيل',
+            interests: 'الاهتمامات'
+          }
+        },
+        media: {
+          stats: {
+            totalLessons: 'إجمالي الدروس',
+            audiosGenerated: 'الصوتيات المنشأة',
+            videosUploaded: 'الفيديوهات المرفوعة',
+            mediaCoverage: 'تغطية الوسائط (EN)'
+          },
+          configuration: 'الإعدادات',
+          ttsVoice: 'صوت TTS',
+          workingLanguage: 'لغة العمل',
+          audioGeneration: 'إنشاء الصوت (TTS)',
+          generateAllAudios: 'إنشاء جميع الصوتيات',
+          ttsDescription: 'تعليق صوتي TTS لـ 23 درسًا بـ {{language}}',
+          inProgress: 'جارٍ التنفيذ...',
+          generateAudioBtn: 'إنشاء الصوت',
+          progress: 'التقدم',
+          currentlyProcessing: 'جارٍ المعالجة:',
+          videoManagement: 'إدارة الفيديوهات',
+          hide: 'إخفاء',
+          show: 'إظهار',
+          customVideoUpload: 'رفع فيديوهات مخصصة',
+          customVideoDesc: 'ارفع فيديوهاتك الخاصة لكل درس. سيتم ربط الفيديوهات باللغة المحددة ({{language}}).',
+          mp4Recommended: 'MP4 موصى به',
+          maxSize: 'الحد الأقصى 500 ميغابايت',
+          idealResolution: '1080p مثالي',
+          tip: 'نصيحة:',
+          tipContent: 'استخدم قائمة الدروس أدناه لرفع فيديو لكل درس. يظهر زر الرفع بجانب كل درس.',
+          lessonsAndMedia: 'الدروس والوسائط',
+          audio: 'صوت',
+          video: 'فيديو',
+          generateAudio: 'إنشاء الصوت',
+          uploadVideoFor: 'رفع فيديو ({{language}})',
+          audioStarted: 'جارٍ إنشاء الصوت...',
+          audioStartedFor: 'إنشاء صوت للدرس {{lessonId}}...',
+          audioSuccess: 'تم إنشاء الصوت بنجاح!',
+          imageStarted: 'جارٍ إنشاء الصورة...',
+          imageSuccess: 'تم إنشاء الصورة بنجاح!',
+          batchStarted: 'بدأ إنشاء الصوت للدُفعة...',
+          batchAudioComplete: 'اكتمل إنشاء الصوت!',
+          videoUploaded: 'تم رفع الفيديو بنجاح!'
+        }
       }
     }
   },
@@ -4221,6 +4713,170 @@ const resources = {
         lessons: '{{completed}}/{{total}} aulas',
         streak: '{{days}}d',
         badges: '{{count}} conquistas'
+      },
+      // Admin Panel
+      admin: {
+        accessDenied: 'Acesso de administrador necessário',
+        title: 'Painel Administrativo',
+        subtitle: 'Gerencie sua plataforma CryptoCoach',
+        refresh: 'Atualizar',
+        tabs: {
+          dashboard: 'Dashboard',
+          analytics: 'Analytics',
+          courses: 'Cursos',
+          users: 'Usuários',
+          newsletter: 'Newsletter',
+          blog: 'Blog',
+          media: 'Mídia'
+        },
+        errors: {
+          loadingStats: 'Erro ao carregar estatísticas',
+          loadingCourses: 'Erro ao carregar cursos',
+          loadingLessons: 'Erro ao carregar aulas',
+          loadingUsers: 'Erro ao carregar usuários',
+          loadingArticles: 'Erro ao carregar artigos',
+          loadingData: 'Erro ao carregar dados',
+          audioGeneration: 'Erro na geração de áudio',
+          imageGeneration: 'Erro na geração de imagem',
+          generationError: 'Erro na geração',
+          updateError: 'Erro na atualização',
+          creationError: 'Erro na criação',
+          deletionError: 'Erro na exclusão',
+          sendError: 'Erro no envio'
+        },
+        dashboard: {
+          stats: {
+            users: 'Usuários',
+            newUsers: 'Novos (30d)',
+            courses: 'Cursos',
+            lessons: 'Aulas',
+            articles: 'Artigos',
+            transactions: 'Transações'
+          },
+          subscriptionBreakdown: 'Distribuição de Assinaturas'
+        },
+        courses: {
+          title: 'Cursos',
+          lessonsTitle: 'Aulas',
+          addLesson: 'Nova aula',
+          selectCourse: 'Selecione um curso para ver suas aulas',
+          noLessons: 'Nenhuma aula',
+          levelInfo: 'Nível {{level}} • {{count}} aulas',
+          noAudio: 'Sem áudio',
+          noImage: 'Sem imagem'
+        },
+        users: {
+          title: 'Usuários ({{total}})',
+          search: 'Pesquisar...',
+          subscriptionUpdated: 'Assinatura atualizada',
+          tableHeaders: {
+            email: 'Email',
+            name: 'Nome',
+            subscription: 'Assinatura',
+            xp: 'XP',
+            registration: 'Cadastro',
+            actions: 'Ações'
+          }
+        },
+        blog: {
+          title: 'Artigos do blog ({{count}})',
+          newPost: 'Novo artigo',
+          created: 'Artigo criado',
+          deleted: 'Artigo excluído',
+          deleteConfirm: 'Excluir este artigo?',
+          publish: 'Publicar',
+          cancel: 'Cancelar',
+          form: {
+            title: 'Título',
+            slug: 'Slug',
+            excerpt: 'Resumo',
+            content: 'Conteúdo (Markdown)',
+            category: 'Categoria'
+          }
+        },
+        newsletter: {
+          stats: {
+            totalSubscribers: 'Total de Assinantes',
+            activeSubscribers: 'Assinantes Ativos',
+            newsletters: 'Newsletters',
+            sent: 'Enviadas'
+          },
+          management: 'Gestão de Newsletters',
+          newNewsletter: 'Nova Newsletter',
+          createTitle: 'Criar uma Newsletter',
+          language: 'Idioma:',
+          allLanguages: 'Todos os idiomas',
+          generateWithAI: 'Gerar com IA',
+          subjectPlaceholder: 'Assunto da newsletter',
+          contentPlaceholder: 'Conteúdo da newsletter (Markdown suportado)',
+          sendImmediately: 'Enviar imediatamente após a criação',
+          createAndSend: 'Criar & Enviar',
+          createDraft: 'Criar Rascunho',
+          cancel: 'Cancelar',
+          history: 'Histórico de Newsletters',
+          noNewsletters: 'Nenhuma newsletter criada',
+          emptyMessage: 'Crie sua primeira newsletter para engajar seus assinantes',
+          statusSent: 'Enviada',
+          statusDraft: 'Rascunho',
+          recipients: '{{count}} destinatários',
+          send: 'Enviar',
+          subscribersTitle: 'Lista de Assinantes ({{active}} ativos)',
+          noSubscribers: 'Nenhum assinante por enquanto',
+          moreSubscribers: '+{{count}} outros assinantes',
+          contentGenerated: 'Conteúdo gerado com sucesso!',
+          templateUsed: 'Template usado (orçamento de IA insuficiente)',
+          fillAllFields: 'Por favor, preencha todos os campos',
+          createdAndSent: 'Newsletter criada e enviada!',
+          created: 'Newsletter criada!',
+          sent: 'Newsletter enviada!',
+          tableHeaders: {
+            email: 'Email',
+            language: 'Idioma',
+            registrationDate: 'Data de cadastro',
+            interests: 'Interesses'
+          }
+        },
+        media: {
+          stats: {
+            totalLessons: 'Total de aulas',
+            audiosGenerated: 'Áudios gerados',
+            videosUploaded: 'Vídeos enviados',
+            mediaCoverage: 'Cobertura de mídia (EN)'
+          },
+          configuration: 'Configuração',
+          ttsVoice: 'Voz TTS',
+          workingLanguage: 'Idioma de trabalho',
+          audioGeneration: 'Geração de Áudio (TTS)',
+          generateAllAudios: 'Gerar todos os áudios',
+          ttsDescription: 'Narração TTS para as 23 aulas em {{language}}',
+          inProgress: 'Em andamento...',
+          generateAudioBtn: 'Gerar Áudio',
+          progress: 'Progresso',
+          currentlyProcessing: 'Processando:',
+          videoManagement: 'Gestão de Vídeos',
+          hide: 'Ocultar',
+          show: 'Mostrar',
+          customVideoUpload: 'Upload de vídeos personalizados',
+          customVideoDesc: 'Faça upload dos seus próprios vídeos para cada aula. Os vídeos serão associados ao idioma selecionado ({{language}}).',
+          mp4Recommended: 'MP4 recomendado',
+          maxSize: 'Máx 500MB',
+          idealResolution: '1080p ideal',
+          tip: 'Dica:',
+          tipContent: 'Use a lista de aulas abaixo para fazer upload de um vídeo por aula. O botão de upload aparece ao lado de cada aula.',
+          lessonsAndMedia: 'Aulas & Mídia',
+          audio: 'Áudio',
+          video: 'Vídeo',
+          generateAudio: 'Gerar áudio',
+          uploadVideoFor: 'Enviar vídeo ({{language}})',
+          audioStarted: 'Geração de áudio em andamento...',
+          audioStartedFor: 'Gerando áudio para {{lessonId}}...',
+          audioSuccess: 'Áudio gerado com sucesso!',
+          imageStarted: 'Geração de imagem em andamento...',
+          imageSuccess: 'Imagem gerada com sucesso!',
+          batchStarted: 'Geração de áudio em lote iniciada...',
+          batchAudioComplete: 'Geração de áudio concluída!',
+          videoUploaded: 'Vídeo enviado com sucesso!'
+        }
       }
     }
   }

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API } from '../App';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -25,6 +26,7 @@ import {
 } from 'lucide-react';
 
 export default function NewsletterAdminTab({ token }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [subscribers, setSubscribers] = useState({ total: 0, active: 0, list: [] });
   const [newsletters, setNewsletters] = useState([]);
@@ -60,7 +62,7 @@ export default function NewsletterAdminTab({ token }) {
       });
       setNewsletters(newsRes.data.newsletters || []);
     } catch (error) {
-      toast.error('Erreur de chargement des données');
+      toast.error(t('admin.errors.loadingData'));
     } finally {
       setLoading(false);
     }
@@ -83,13 +85,13 @@ export default function NewsletterAdminTab({ token }) {
           subject: res.data.generated.subject,
           content: res.data.generated.content
         }));
-        toast.success('Contenu généré avec succès!');
+        toast.success(t('admin.newsletter.contentGenerated'));
         if (!res.data.ai_used) {
-          toast.info('Template utilisé (budget IA insuffisant)');
+          toast.info(t('admin.newsletter.templateUsed'));
         }
       }
     } catch (error) {
-      toast.error('Erreur de génération');
+      toast.error(t('admin.errors.generationError'));
     } finally {
       setGenerating(false);
     }
@@ -97,7 +99,7 @@ export default function NewsletterAdminTab({ token }) {
 
   const createNewsletter = async () => {
     if (!formData.subject || !formData.content) {
-      toast.error('Veuillez remplir tous les champs');
+      toast.error(t('admin.newsletter.fillAllFields'));
       return;
     }
 
@@ -106,13 +108,13 @@ export default function NewsletterAdminTab({ token }) {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
-        toast.success(formData.send_immediately ? 'Newsletter créée et envoyée!' : 'Newsletter créée!');
+        toast.success(formData.send_immediately ? t('admin.newsletter.createdAndSent') : t('admin.newsletter.created'));
         setShowCreateForm(false);
         setFormData({ subject: '', content: '', language: 'en', send_immediately: false });
         fetchData();
       }
     } catch (error) {
-      toast.error('Erreur de création');
+      toast.error(t('admin.errors.creationError'));
     }
   };
 
@@ -122,10 +124,10 @@ export default function NewsletterAdminTab({ token }) {
       await axios.post(`${API}/newsletter/send/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success('Newsletter envoyée!');
+      toast.success(t('admin.newsletter.sent'));
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Erreur d\'envoi');
+      toast.error(error.response?.data?.detail || t('admin.errors.sendError'));
     } finally {
       setSending(null);
     }
@@ -151,7 +153,7 @@ export default function NewsletterAdminTab({ token }) {
               </div>
               <div>
                 <p className="text-3xl font-bold">{subscribers.total}</p>
-                <p className="text-sm text-slate-400">Total Abonnés</p>
+                <p className="text-sm text-slate-400">{t('admin.newsletter.stats.totalSubscribers')}</p>
               </div>
             </div>
           </CardContent>
@@ -165,7 +167,7 @@ export default function NewsletterAdminTab({ token }) {
               </div>
               <div>
                 <p className="text-3xl font-bold">{subscribers.active}</p>
-                <p className="text-sm text-slate-400">Abonnés Actifs</p>
+                <p className="text-sm text-slate-400">{t('admin.newsletter.stats.activeSubscribers')}</p>
               </div>
             </div>
           </CardContent>
@@ -179,7 +181,7 @@ export default function NewsletterAdminTab({ token }) {
               </div>
               <div>
                 <p className="text-3xl font-bold">{newsletters.length}</p>
-                <p className="text-sm text-slate-400">Newsletters</p>
+                <p className="text-sm text-slate-400">{t('admin.newsletter.stats.newsletters')}</p>
               </div>
             </div>
           </CardContent>
@@ -195,7 +197,7 @@ export default function NewsletterAdminTab({ token }) {
                 <p className="text-3xl font-bold">
                   {newsletters.filter(n => n.sent).length}
                 </p>
-                <p className="text-sm text-slate-400">Envoyées</p>
+                <p className="text-sm text-slate-400">{t('admin.newsletter.stats.sent')}</p>
               </div>
             </div>
           </CardContent>
@@ -204,10 +206,10 @@ export default function NewsletterAdminTab({ token }) {
 
       {/* Create Newsletter Button */}
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Gestion des Newsletters</h2>
+        <h2 className="text-xl font-bold">{t('admin.newsletter.management')}</h2>
         <Button onClick={() => setShowCreateForm(!showCreateForm)}>
           <Plus className="w-4 h-4 mr-2" />
-          Nouvelle Newsletter
+          {t('admin.newsletter.newNewsletter')}
         </Button>
       </div>
 
@@ -221,13 +223,13 @@ export default function NewsletterAdminTab({ token }) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-primary" />
-                Créer une Newsletter
+                {t('admin.newsletter.createTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Language Selection */}
               <div className="flex items-center gap-4">
-                <label className="text-sm text-slate-400">Langue:</label>
+                <label className="text-sm text-slate-400">{t('admin.newsletter.language')}</label>
                 <select
                   value={formData.language}
                   onChange={(e) => setFormData(prev => ({ ...prev, language: e.target.value }))}
@@ -236,7 +238,7 @@ export default function NewsletterAdminTab({ token }) {
                   <option value="en">English</option>
                   <option value="fr">Français</option>
                   <option value="ar">العربية</option>
-                  <option value="all">Toutes les langues</option>
+                  <option value="all">{t('admin.newsletter.allLanguages')}</option>
                 </select>
                 
                 <Button
@@ -250,19 +252,19 @@ export default function NewsletterAdminTab({ token }) {
                   ) : (
                     <Sparkles className="w-4 h-4 mr-2" />
                   )}
-                  Générer avec IA
+                  {t('admin.newsletter.generateWithAI')}
                 </Button>
               </div>
 
               <Input
-                placeholder="Sujet de la newsletter"
+                placeholder={t('admin.newsletter.subjectPlaceholder')}
                 value={formData.subject}
                 onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
                 data-testid="newsletter-subject-input"
               />
 
               <Textarea
-                placeholder="Contenu de la newsletter (Markdown supporté)"
+                placeholder={t('admin.newsletter.contentPlaceholder')}
                 value={formData.content}
                 onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
                 rows={12}
@@ -279,7 +281,7 @@ export default function NewsletterAdminTab({ token }) {
                   className="rounded border-border"
                 />
                 <label htmlFor="send_immediately" className="text-sm text-slate-400">
-                  Envoyer immédiatement après création
+                  {t('admin.newsletter.sendImmediately')}
                 </label>
               </div>
 
@@ -288,17 +290,17 @@ export default function NewsletterAdminTab({ token }) {
                   {formData.send_immediately ? (
                     <>
                       <Send className="w-4 h-4 mr-2" />
-                      Créer & Envoyer
+                      {t('admin.newsletter.createAndSend')}
                     </>
                   ) : (
                     <>
                       <Plus className="w-4 h-4 mr-2" />
-                      Créer Brouillon
+                      {t('admin.newsletter.createDraft')}
                     </>
                   )}
                 </Button>
                 <Button variant="outline" onClick={() => setShowCreateForm(false)}>
-                  Annuler
+                  {t('admin.newsletter.cancel')}
                 </Button>
               </div>
             </CardContent>
@@ -310,7 +312,7 @@ export default function NewsletterAdminTab({ token }) {
       <Card className="bg-card border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Historique des Newsletters</CardTitle>
+            <CardTitle>{t('admin.newsletter.history')}</CardTitle>
             <Button variant="outline" size="sm" onClick={fetchData}>
               <RefreshCw className="w-4 h-4" />
             </Button>
@@ -320,8 +322,8 @@ export default function NewsletterAdminTab({ token }) {
           {newsletters.length === 0 ? (
             <div className="text-center py-12 text-slate-400">
               <Mail className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>Aucune newsletter créée</p>
-              <p className="text-sm">Créez votre première newsletter pour engager vos abonnés</p>
+              <p>{t('admin.newsletter.noNewsletters')}</p>
+              <p className="text-sm">{t('admin.newsletter.emptyMessage')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -337,7 +339,7 @@ export default function NewsletterAdminTab({ token }) {
                           ? 'bg-green-500/20 text-green-400' 
                           : 'bg-yellow-500/20 text-yellow-400'
                       }`}>
-                        {newsletter.sent ? 'Envoyée' : 'Brouillon'}
+                        {newsletter.sent ? t('admin.newsletter.statusSent') : t('admin.newsletter.statusDraft')}
                       </span>
                       <span className="px-2 py-0.5 rounded text-xs bg-blue-500/20 text-blue-400">
                         {newsletter.language === 'all' ? 'Multi' : newsletter.language.toUpperCase()}
@@ -352,7 +354,7 @@ export default function NewsletterAdminTab({ token }) {
                       {newsletter.sent && (
                         <span className="flex items-center gap-1">
                           <Users className="w-3 h-3" />
-                          {newsletter.recipients_count} destinataires
+                          {t('admin.newsletter.recipients', { count: newsletter.recipients_count })}
                         </span>
                       )}
                     </div>
@@ -371,7 +373,7 @@ export default function NewsletterAdminTab({ token }) {
                         ) : (
                           <>
                             <Send className="w-4 h-4 mr-1" />
-                            Envoyer
+                            {t('admin.newsletter.send')}
                           </>
                         )}
                       </Button>
@@ -392,24 +394,24 @@ export default function NewsletterAdminTab({ token }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-5 h-5 text-blue-500" />
-            Liste des Abonnés ({subscribers.active} actifs)
+            {t('admin.newsletter.subscribersTitle', { active: subscribers.active })}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {subscribers.list.length === 0 ? (
             <div className="text-center py-8 text-slate-400">
               <Users className="w-10 h-10 mx-auto mb-3 opacity-50" />
-              <p>Aucun abonné pour le moment</p>
+              <p>{t('admin.newsletter.noSubscribers')}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Email</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Langue</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Date d'inscription</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Intérêts</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.newsletter.tableHeaders.email')}</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.newsletter.tableHeaders.language')}</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.newsletter.tableHeaders.registrationDate')}</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.newsletter.tableHeaders.interests')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -439,7 +441,7 @@ export default function NewsletterAdminTab({ token }) {
               </table>
               {subscribers.list.length > 20 && (
                 <p className="text-center text-sm text-slate-500 mt-4">
-                  +{subscribers.list.length - 20} autres abonnés
+                  {t('admin.newsletter.moreSubscribers', { count: subscribers.list.length - 20 })}
                 </p>
               )}
             </div>

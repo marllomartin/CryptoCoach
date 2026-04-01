@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API, useAuth } from '../App';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import Layout from '../components/Layout';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -35,6 +36,7 @@ import NewsletterAdminTab from '../components/NewsletterAdminTab';
 export default function AdminPage() {
   const navigate = useNavigate();
   const { user, token } = useAuth();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -47,14 +49,14 @@ export default function AdminPage() {
     }
 
     if (!['admin', 'moderator'].includes(user.role)) {
-      toast.error('Accès administrateur requis');
+      toast.error(t('admin.accessDenied'));
       navigate('/');
       return;
     }
-    
+
     fetchStats();
   }, [user, navigate]);
-  
+
   const fetchStats = async () => {
     try {
       const response = await axios.get(`${API}/admin/stats`, {
@@ -62,7 +64,7 @@ export default function AdminPage() {
       });
       setStats(response.data);
     } catch (error) {
-      toast.error('Erreur de chargement des statistiques');
+      toast.error(t('admin.errors.loadingStats'));
     } finally {
       setLoading(false);
     }
@@ -87,13 +89,13 @@ export default function AdminPage() {
             <div>
               <h1 className="font-heading text-3xl font-bold flex items-center gap-3">
                 <Shield className="w-8 h-8 text-primary" />
-                Panel Administrateur
+                {t('admin.title')}
               </h1>
-              <p className="text-slate-400 mt-1">Gérez votre plateforme CryptoCoach</p>
+              <p className="text-slate-400 mt-1">{t('admin.subtitle')}</p>
             </div>
             <Button onClick={fetchStats} variant="outline" size="sm">
               <RefreshCw className="w-4 h-4 mr-2" />
-              Actualiser
+              {t('admin.refresh')}
             </Button>
           </div>
           
@@ -102,31 +104,31 @@ export default function AdminPage() {
             <TabsList className="grid grid-cols-7 w-full mb-8">
               <TabsTrigger value="dashboard" className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4" />
-                Dashboard
+                {t('admin.tabs.dashboard')}
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4" />
-                Analytics
+                {t('admin.tabs.analytics')}
               </TabsTrigger>
               <TabsTrigger value="courses" className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4" />
-                Cours
+                {t('admin.tabs.courses')}
               </TabsTrigger>
               <TabsTrigger value="users" className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                Utilisateurs
+                {t('admin.tabs.users')}
               </TabsTrigger>
               <TabsTrigger value="newsletter" className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
-                Newsletter
+                {t('admin.tabs.newsletter')}
               </TabsTrigger>
               <TabsTrigger value="blog" className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
-                Blog
+                {t('admin.tabs.blog')}
               </TabsTrigger>
               <TabsTrigger value="media" className="flex items-center gap-2">
                 <Volume2 className="w-4 h-4" />
-                Média
+                {t('admin.tabs.media')}
               </TabsTrigger>
             </TabsList>
             
@@ -166,15 +168,16 @@ export default function AdminPage() {
 
 // Dashboard Tab Component
 function DashboardTab({ stats }) {
+  const { t } = useTranslation();
   if (!stats) return null;
-  
+
   const statCards = [
-    { label: 'Utilisateurs', value: stats.total_users, icon: Users, color: 'text-blue-500' },
-    { label: 'Nouveaux (30j)', value: stats.recent_signups, icon: Plus, color: 'text-green-500' },
-    { label: 'Cours', value: stats.courses_count, icon: BookOpen, color: 'text-purple-500' },
-    { label: 'Leçons', value: stats.lessons_count, icon: FileText, color: 'text-orange-500' },
-    { label: 'Articles', value: stats.blog_posts_count, icon: FileText, color: 'text-pink-500' },
-    { label: 'Transactions', value: stats.paid_transactions, icon: Crown, color: 'text-yellow-500' },
+    { label: t('admin.dashboard.stats.users'), value: stats.total_users, icon: Users, color: 'text-blue-500' },
+    { label: t('admin.dashboard.stats.newUsers'), value: stats.recent_signups, icon: Plus, color: 'text-green-500' },
+    { label: t('admin.dashboard.stats.courses'), value: stats.courses_count, icon: BookOpen, color: 'text-purple-500' },
+    { label: t('admin.dashboard.stats.lessons'), value: stats.lessons_count, icon: FileText, color: 'text-orange-500' },
+    { label: t('admin.dashboard.stats.articles'), value: stats.blog_posts_count, icon: FileText, color: 'text-pink-500' },
+    { label: t('admin.dashboard.stats.transactions'), value: stats.paid_transactions, icon: Crown, color: 'text-yellow-500' },
   ];
   
   return (
@@ -202,7 +205,7 @@ function DashboardTab({ stats }) {
       {/* Subscription Breakdown */}
       <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-lg">Répartition des abonnements</CardTitle>
+          <CardTitle className="text-lg">{t('admin.dashboard.subscriptionBreakdown')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-4 gap-4">
@@ -221,16 +224,17 @@ function DashboardTab({ stats }) {
 
 // Courses Tab Component
 function CoursesTab({ token }) {
+  const { t } = useTranslation();
   const [courses, setCourses] = useState([]);
   const [lessons, setLessons] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editingLesson, setEditingLesson] = useState(null);
-  
+
   useEffect(() => {
     fetchCourses();
   }, []);
-  
+
   const fetchCourses = async () => {
     try {
       const response = await axios.get(`${API}/admin/courses`, {
@@ -238,12 +242,12 @@ function CoursesTab({ token }) {
       });
       setCourses(response.data.courses);
     } catch (error) {
-      toast.error('Erreur de chargement des cours');
+      toast.error(t('admin.errors.loadingCourses'));
     } finally {
       setLoading(false);
     }
   };
-  
+
   const fetchLessons = async (courseId) => {
     try {
       const response = await axios.get(`${API}/admin/lessons?course_id=${courseId}`, {
@@ -252,45 +256,45 @@ function CoursesTab({ token }) {
       setLessons(response.data.lessons);
       setSelectedCourse(courseId);
     } catch (error) {
-      toast.error('Erreur de chargement des leçons');
+      toast.error(t('admin.errors.loadingLessons'));
     }
   };
-  
+
   const generateAudio = async (lessonId) => {
     try {
-      toast.info('Génération audio en cours...');
+      toast.info(t('admin.media.audioStarted'));
       const response = await axios.post(
         `${API}/admin/generate-audio/${lessonId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (response.data.status === 'success') {
-        toast.success('Audio généré avec succès!');
+        toast.success(t('admin.media.audioSuccess'));
         fetchLessons(selectedCourse);
       } else {
         toast.error('Erreur: ' + response.data.error);
       }
     } catch (error) {
-      toast.error('Erreur de génération audio');
+      toast.error(t('admin.errors.audioGeneration'));
     }
   };
-  
+
   const generateImage = async (lessonId) => {
     try {
-      toast.info('Génération image en cours...');
+      toast.info(t('admin.media.imageStarted'));
       const response = await axios.post(
         `${API}/admin/generate-image/${lessonId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (response.data.status === 'success') {
-        toast.success('Image générée avec succès!');
+        toast.success(t('admin.media.imageSuccess'));
         fetchLessons(selectedCourse);
       } else {
         toast.error('Erreur: ' + response.data.error);
       }
     } catch (error) {
-      toast.error('Erreur de génération image');
+      toast.error(t('admin.errors.imageGeneration'));
     }
   };
   
@@ -304,7 +308,7 @@ function CoursesTab({ token }) {
       <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="text-lg flex items-center justify-between">
-            Cours
+            {t('admin.courses.title')}
             <Button size="sm" variant="outline">
               <Plus className="w-4 h-4" />
             </Button>
@@ -323,21 +327,21 @@ function CoursesTab({ token }) {
             >
               <p className="font-medium">{course.title}</p>
               <p className="text-xs text-slate-400">
-                Niveau {course.level} • {course.lessons_count} leçons
+                {t('admin.courses.levelInfo', { level: course.level, count: course.lessons_count })}
               </p>
             </div>
           ))}
         </CardContent>
       </Card>
-      
+
       {/* Lessons List */}
       <Card className="bg-card border-border lg:col-span-2">
         <CardHeader>
           <CardTitle className="text-lg flex items-center justify-between">
-            Leçons {selectedCourse && `(${lessons.length})`}
+            {t('admin.courses.lessonsTitle')} {selectedCourse && `(${lessons.length})`}
             {selectedCourse && (
               <Button size="sm" variant="outline">
-                <Plus className="w-4 h-4 mr-1" /> Nouvelle leçon
+                <Plus className="w-4 h-4 mr-1" /> {t('admin.courses.addLesson')}
               </Button>
             )}
           </CardTitle>
@@ -345,10 +349,10 @@ function CoursesTab({ token }) {
         <CardContent>
           {!selectedCourse ? (
             <p className="text-slate-400 text-center py-8">
-              Sélectionnez un cours pour voir ses leçons
+              {t('admin.courses.selectCourse')}
             </p>
           ) : lessons.length === 0 ? (
-            <p className="text-slate-400 text-center py-8">Aucune leçon</p>
+            <p className="text-slate-400 text-center py-8">{t('admin.courses.noLessons')}</p>
           ) : (
             <div className="space-y-3">
               {lessons.sort((a, b) => a.order - b.order).map((lesson) => (
@@ -360,9 +364,9 @@ function CoursesTab({ token }) {
                     <div className="flex-1">
                       <p className="font-medium">{lesson.order + 1}. {lesson.title}</p>
                       <p className="text-xs text-slate-400 mt-1">
-                        {lesson.duration_minutes} min • 
-                        {lesson.audio_full ? ' 🔊 Audio' : ' ⚪ Pas d\'audio'} •
-                        {lesson.hero_image ? ' 🖼️ Image' : ' ⚪ Pas d\'image'}
+                        {lesson.duration_minutes} min •
+                        {lesson.audio_full ? ` 🔊 ${t('admin.media.audio')}` : ` ⚪ ${t('admin.courses.noAudio')}`} •
+                        {lesson.hero_image ? ` 🖼️ ${t('admin.media.video')}` : ` ⚪ ${t('admin.courses.noImage')}`}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -370,7 +374,7 @@ function CoursesTab({ token }) {
                         size="sm"
                         variant="ghost"
                         onClick={() => generateAudio(lesson.id)}
-                        title="Générer audio"
+                        title={t('admin.media.generateAudio')}
                       >
                         <Volume2 className="w-4 h-4" />
                       </Button>
@@ -378,7 +382,7 @@ function CoursesTab({ token }) {
                         size="sm"
                         variant="ghost"
                         onClick={() => generateImage(lesson.id)}
-                        title="Générer image"
+                        title={t('admin.media.generateAudio')}
                       >
                         <Image className="w-4 h-4" />
                       </Button>
@@ -421,15 +425,16 @@ function CoursesTab({ token }) {
 
 // Users Tab Component
 function UsersTab({ token }) {
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [total, setTotal] = useState(0);
-  
+
   useEffect(() => {
     fetchUsers();
   }, [search]);
-  
+
   const fetchUsers = async () => {
     try {
       const response = await axios.get(
@@ -439,12 +444,12 @@ function UsersTab({ token }) {
       setUsers(response.data.users);
       setTotal(response.data.total);
     } catch (error) {
-      toast.error('Erreur de chargement des utilisateurs');
+      toast.error(t('admin.errors.loadingUsers'));
     } finally {
       setLoading(false);
     }
   };
-  
+
   const updateUserTier = async (userId, tier) => {
     try {
       await axios.put(
@@ -452,10 +457,10 @@ function UsersTab({ token }) {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success('Abonnement mis à jour');
+      toast.success(t('admin.users.subscriptionUpdated'));
       fetchUsers();
     } catch (error) {
-      toast.error('Erreur de mise à jour');
+      toast.error(t('admin.errors.updateError'));
     }
   };
   
@@ -470,11 +475,11 @@ function UsersTab({ token }) {
     <Card className="bg-card border-border">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Utilisateurs ({total})</CardTitle>
+          <CardTitle className="text-lg">{t('admin.users.title', { total })}</CardTitle>
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
-              placeholder="Rechercher..."
+              placeholder={t('admin.users.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -490,12 +495,12 @@ function UsersTab({ token }) {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Email</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Nom</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Abonnement</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">XP</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Inscription</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Actions</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.email')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.name')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.subscription')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.xp')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.registration')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -537,6 +542,7 @@ function UsersTab({ token }) {
 
 // Blog Tab Component
 function BlogTab({ token }) {
+  const { t } = useTranslation();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -548,11 +554,11 @@ function BlogTab({ token }) {
     category: 'Education',
     tags: []
   });
-  
+
   useEffect(() => {
     fetchPosts();
   }, []);
-  
+
   const fetchPosts = async () => {
     try {
       const response = await axios.get(`${API}/admin/blog`, {
@@ -560,12 +566,12 @@ function BlogTab({ token }) {
       });
       setPosts(response.data.posts);
     } catch (error) {
-      toast.error('Erreur de chargement des articles');
+      toast.error(t('admin.errors.loadingArticles'));
     } finally {
       setLoading(false);
     }
   };
-  
+
   const createPost = async () => {
     try {
       await axios.post(
@@ -576,35 +582,35 @@ function BlogTab({ token }) {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-      toast.success('Article créé');
+      toast.success(t('admin.blog.created'));
       setShowForm(false);
       setFormData({ title: '', slug: '', excerpt: '', content: '', category: 'Education', tags: [] });
       fetchPosts();
     } catch (error) {
-      toast.error('Erreur de création');
+      toast.error(t('admin.errors.creationError'));
     }
   };
-  
+
   const deletePost = async (postId) => {
-    if (!confirm('Supprimer cet article ?')) return;
+    if (!confirm(t('admin.blog.deleteConfirm'))) return;
     try {
       await axios.delete(`${API}/admin/blog/${postId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success('Article supprimé');
+      toast.success(t('admin.blog.deleted'));
       fetchPosts();
     } catch (error) {
-      toast.error('Erreur de suppression');
+      toast.error(t('admin.errors.deletionError'));
     }
   };
   
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Articles de blog ({posts.length})</h2>
+        <h2 className="text-xl font-bold">{t('admin.blog.title', { count: posts.length })}</h2>
         <Button onClick={() => setShowForm(!showForm)}>
           <Plus className="w-4 h-4 mr-2" />
-          Nouvel article
+          {t('admin.blog.newPost')}
         </Button>
       </div>
       
@@ -612,34 +618,34 @@ function BlogTab({ token }) {
         <Card className="bg-card border-border">
           <CardContent className="p-6 space-y-4">
             <Input
-              placeholder="Titre"
+              placeholder={t('admin.blog.form.title')}
               value={formData.title}
               onChange={(e) => setFormData({...formData, title: e.target.value, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})}
             />
             <Input
-              placeholder="Slug"
+              placeholder={t('admin.blog.form.slug')}
               value={formData.slug}
               onChange={(e) => setFormData({...formData, slug: e.target.value})}
             />
             <Input
-              placeholder="Extrait"
+              placeholder={t('admin.blog.form.excerpt')}
               value={formData.excerpt}
               onChange={(e) => setFormData({...formData, excerpt: e.target.value})}
             />
             <Textarea
-              placeholder="Contenu (Markdown)"
+              placeholder={t('admin.blog.form.content')}
               value={formData.content}
               onChange={(e) => setFormData({...formData, content: e.target.value})}
               rows={10}
             />
             <Input
-              placeholder="Catégorie"
+              placeholder={t('admin.blog.form.category')}
               value={formData.category}
               onChange={(e) => setFormData({...formData, category: e.target.value})}
             />
             <div className="flex gap-2">
-              <Button onClick={createPost}>Publier</Button>
-              <Button variant="outline" onClick={() => setShowForm(false)}>Annuler</Button>
+              <Button onClick={createPost}>{t('admin.blog.publish')}</Button>
+              <Button variant="outline" onClick={() => setShowForm(false)}>{t('admin.blog.cancel')}</Button>
             </div>
           </CardContent>
         </Card>
@@ -670,6 +676,7 @@ function BlogTab({ token }) {
 
 // Media Management Tab - Audio Generation + Video Upload
 function MediaTab({ token }) {
+  const { t } = useTranslation();
   const [generatingAudio, setGeneratingAudio] = useState(false);
   const [lessons, setLessons] = useState([]);
   const [mediaStatus, setMediaStatus] = useState(null);
@@ -700,7 +707,7 @@ function MediaTab({ token }) {
       setLessons(lessonsRes.data.lessons);
       setMediaStatus(statusRes.data);
     } catch (error) {
-      toast.error('Erreur de chargement des données');
+      toast.error(t('admin.errors.loadingData'));
     } finally {
       setLoading(false);
     }
@@ -728,7 +735,7 @@ function MediaTab({ token }) {
           setPollingInterval(null);
         }
         fetchData();
-        toast.success('Génération audio terminée!');
+        toast.success(t('admin.media.batchAudioComplete'));
       }
     } catch (error) {
       console.error('Error fetching generation status:', error);
@@ -737,20 +744,20 @@ function MediaTab({ token }) {
   
   const generateSingleAudio = async (lessonId) => {
     try {
-      toast.info(`Génération audio pour ${lessonId}...`);
+      toast.info(t('admin.media.audioStartedFor', { lessonId }));
       await axios.post(`${API}/media/generate-audio`, {
         lesson_id: lessonId,
         language: selectedLanguage,
         voice: selectedVoice,
         model: 'tts-1-hd'
       });
-      toast.success('Audio généré avec succès!');
+      toast.success(t('admin.media.audioSuccess'));
       fetchData();
     } catch (error) {
       toast.error(`Erreur: ${error.response?.data?.detail || error.message}`);
     }
   };
-  
+
   const startBatchAudioGeneration = async () => {
     try {
       setGeneratingAudio(true);
@@ -758,7 +765,7 @@ function MediaTab({ token }) {
         language: selectedLanguage,
         voice: selectedVoice
       });
-      toast.info('Génération batch audio démarrée...');
+      toast.info(t('admin.media.batchStarted'));
       
       // Start polling for status
       const interval = setInterval(fetchGenerationStatus, 3000);
@@ -785,7 +792,7 @@ function MediaTab({ token }) {
           Authorization: `Bearer ${token}`
         }
       });
-      toast.success('Vidéo uploadée avec succès!');
+      toast.success(t('admin.media.videoUploaded'));
       fetchData();
     } catch (error) {
       toast.error(`Erreur upload: ${error.response?.data?.detail || error.message}`);
@@ -824,7 +831,7 @@ function MediaTab({ token }) {
               </div>
               <div>
                 <p className="text-3xl font-bold">{mediaStatus?.total_lessons || 0}</p>
-                <p className="text-sm text-slate-400">Leçons totales</p>
+                <p className="text-sm text-slate-400">{t('admin.media.stats.totalLessons')}</p>
               </div>
             </div>
           </CardContent>
@@ -843,7 +850,7 @@ function MediaTab({ token }) {
                    (mediaStatus?.audio_generated?.fr?.length || 0) + 
                    (mediaStatus?.audio_generated?.ar?.length || 0)}
                 </p>
-                <p className="text-sm text-slate-400">Audios générés</p>
+                <p className="text-sm text-slate-400">{t('admin.media.stats.audiosGenerated')}</p>
                 <div className="flex gap-2 mt-1">
                   <span className="text-xs px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">
                     EN: {mediaStatus?.audio_generated?.en?.length || 0}
@@ -871,7 +878,7 @@ function MediaTab({ token }) {
                 <p className="text-3xl font-bold">
                   {videoStats.en + videoStats.fr + videoStats.ar}
                 </p>
-                <p className="text-sm text-slate-400">Vidéos uploadées</p>
+                <p className="text-sm text-slate-400">{t('admin.media.stats.videosUploaded')}</p>
                 <div className="flex gap-2 mt-1">
                   <span className="text-xs px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">
                     EN: {videoStats.en}
@@ -899,7 +906,7 @@ function MediaTab({ token }) {
                 <p className="text-3xl font-bold">
                   {Math.round(((mediaStatus?.audio_generated?.en?.length || 0) / (mediaStatus?.total_lessons || 1)) * 100)}%
                 </p>
-                <p className="text-sm text-slate-400">Couverture média (EN)</p>
+                <p className="text-sm text-slate-400">{t('admin.media.stats.mediaCoverage')}</p>
               </div>
             </div>
           </CardContent>
@@ -911,13 +918,13 @@ function MediaTab({ token }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="w-5 h-5" />
-            Configuration
+            {t('admin.media.configuration')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium mb-2">Voix TTS</label>
+              <label className="block text-sm font-medium mb-2">{t('admin.media.ttsVoice')}</label>
               <select 
                 value={selectedVoice} 
                 onChange={(e) => setSelectedVoice(e.target.value)}
@@ -933,7 +940,7 @@ function MediaTab({ token }) {
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-2">Langue de travail</label>
+              <label className="block text-sm font-medium mb-2">{t('admin.media.workingLanguage')}</label>
               <select 
                 value={selectedLanguage} 
                 onChange={(e) => setSelectedLanguage(e.target.value)}
@@ -954,16 +961,16 @@ function MediaTab({ token }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Volume2 className="w-5 h-5 text-green-500" />
-            Génération Audio (TTS)
+            {t('admin.media.audioGeneration')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="p-6 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/20">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h3 className="font-bold text-lg">Générer tous les audios</h3>
+                <h3 className="font-bold text-lg">{t('admin.media.generateAllAudios')}</h3>
                 <p className="text-sm text-slate-400">
-                  Narration TTS pour les 23 leçons en {languageNames[selectedLanguage]}
+                  {t('admin.media.ttsDescription', { language: languageNames[selectedLanguage] })}
                 </p>
               </div>
               <Button 
@@ -976,12 +983,12 @@ function MediaTab({ token }) {
                 {generatingAudio ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    En cours...
+                    {t('admin.media.inProgress')}
                   </>
                 ) : (
                   <>
                     <Volume2 className="w-5 h-5 mr-2" />
-                    Générer Audio
+                    {t('admin.media.generateAudioBtn')}
                   </>
                 )}
               </Button>
@@ -991,7 +998,7 @@ function MediaTab({ token }) {
             {generatingAudio && generationStatus?.audio && (
               <div className="mt-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Progression</span>
+                  <span>{t('admin.media.progress')}</span>
                   <span>{generationStatus.audio.completed?.length || 0} / {generationStatus.audio.total || 23}</span>
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -1004,7 +1011,7 @@ function MediaTab({ token }) {
                 </div>
                 {generationStatus.audio.current_lesson && (
                   <p className="text-sm text-slate-400">
-                    En cours: {generationStatus.audio.current_lesson}
+                    {t('admin.media.currentlyProcessing')} {generationStatus.audio.current_lesson}
                   </p>
                 )}
               </div>
@@ -1019,15 +1026,15 @@ function MediaTab({ token }) {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Image className="w-5 h-5 text-purple-500" />
-              Gestion des Vidéos
+              {t('admin.media.videoManagement')}
             </CardTitle>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => setShowVideoSection(!showVideoSection)}
               data-testid="toggle-video-section"
             >
-              {showVideoSection ? 'Masquer' : 'Afficher'}
+              {showVideoSection ? t('admin.media.hide') : t('admin.media.show')}
             </Button>
           </div>
         </CardHeader>
@@ -1039,14 +1046,14 @@ function MediaTab({ token }) {
                   <Image className="w-8 h-8 text-purple-400" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-1">Upload de vidéos personnalisées</h3>
+                  <h3 className="font-bold text-lg mb-1">{t('admin.media.customVideoUpload')}</h3>
                   <p className="text-sm text-slate-400 mb-3">
-                    Uploadez vos propres vidéos pour chaque leçon. Les vidéos seront associées à la langue sélectionnée ({languageNames[selectedLanguage]}).
+                    {t('admin.media.customVideoDesc', { language: languageNames[selectedLanguage] })}
                   </p>
                   <div className="flex flex-wrap gap-2 text-xs">
-                    <span className="px-2 py-1 rounded-full bg-purple-500/20 text-purple-300">MP4 recommandé</span>
-                    <span className="px-2 py-1 rounded-full bg-purple-500/20 text-purple-300">Max 500MB</span>
-                    <span className="px-2 py-1 rounded-full bg-purple-500/20 text-purple-300">1080p idéal</span>
+                    <span className="px-2 py-1 rounded-full bg-purple-500/20 text-purple-300">{t('admin.media.mp4Recommended')}</span>
+                    <span className="px-2 py-1 rounded-full bg-purple-500/20 text-purple-300">{t('admin.media.maxSize')}</span>
+                    <span className="px-2 py-1 rounded-full bg-purple-500/20 text-purple-300">{t('admin.media.idealResolution')}</span>
                   </div>
                 </div>
               </div>
@@ -1054,8 +1061,7 @@ function MediaTab({ token }) {
             
             <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
               <p className="text-sm text-blue-400">
-                <strong>Conseil:</strong> Utilisez la liste des leçons ci-dessous pour uploader une vidéo par leçon. 
-                Le bouton d'upload apparaît à côté de chaque leçon.
+                <strong>{t('admin.media.tip')}</strong> {t('admin.media.tipContent')}
               </p>
             </div>
           </CardContent>
@@ -1066,13 +1072,13 @@ function MediaTab({ token }) {
       <Card className="bg-card border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Leçons & Médias</CardTitle>
+            <CardTitle>{t('admin.media.lessonsAndMedia')}</CardTitle>
             <div className="flex items-center gap-2 text-xs">
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-green-500"></span> Audio
+                <span className="w-2 h-2 rounded-full bg-green-500"></span> {t('admin.media.audio')}
               </span>
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-purple-500"></span> Vidéo
+                <span className="w-2 h-2 rounded-full bg-purple-500"></span> {t('admin.media.video')}
               </span>
             </div>
           </div>
@@ -1129,12 +1135,12 @@ function MediaTab({ token }) {
                   
                   {/* Action buttons */}
                   <div className="flex items-center gap-2">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={() => generateSingleAudio(lesson.id)}
                       disabled={generatingAudio}
-                      title="Générer audio"
+                      title={t('admin.media.generateAudio')}
                       className="h-9 px-3"
                     >
                       <Volume2 className="w-4 h-4" />
@@ -1153,7 +1159,7 @@ function MediaTab({ token }) {
                         size="sm" 
                         variant="outline"
                         className={`h-9 px-3 ${uploadingVideo === lesson.id ? 'animate-pulse' : ''}`}
-                        title={`Uploader vidéo (${selectedLanguage.toUpperCase()})`}
+                        title={t('admin.media.uploadVideoFor', { language: selectedLanguage.toUpperCase() })}
                         asChild
                       >
                         <span>
