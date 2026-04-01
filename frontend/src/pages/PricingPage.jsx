@@ -257,7 +257,7 @@ const PricingPage = () => {
 
                   {tier.bestValue && !tier.popular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium px-4 py-1 rounded-full">
+                      <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium px-4 py-1 rounded-full whitespace-nowrap">
                         {t('pricing.bestValue')}
                       </span>
                     </div>
