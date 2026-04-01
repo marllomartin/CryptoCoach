@@ -24,7 +24,8 @@ export default function QuizPage() {
   const { lessonId } = useParams();
   const navigate = useNavigate();
   const { token, refreshUser } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.split('-')[0] || 'en';
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -36,7 +37,7 @@ export default function QuizPage() {
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const response = await axios.get(`${API}/lessons/${lessonId}/quiz`);
+        const response = await axios.get(`${API}/lessons/${lessonId}/quiz?lang=${lang}`);
         setQuiz(response.data);
       } catch (e) {
         console.error('Failed to fetch quiz', e);
@@ -58,7 +59,8 @@ export default function QuizPage() {
     try {
       const response = await axios.post(`${API}/quizzes/submit`, {
         quiz_id: quiz.id,
-        answers
+        answers,
+        lang
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });

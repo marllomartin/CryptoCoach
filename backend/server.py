@@ -348,9 +348,31 @@ def validate_translations(translations: dict, entity: str = "course"):
         if not str(title).strip():
             raise HTTPException(status_code=400, detail=f"Title is required for language '{lang}'")
 
+def localize_quiz(quiz: dict, lang: str = "en") -> dict:
+    """Flatten multilingual quiz questions to a single language.
+    Falls back to English for questions that lack a given language."""
+    localized = []
+    for q in quiz.get("questions", []):
+        if "translations" in q:
+            t = q["translations"].get(lang) or q["translations"].get("en", {})
+            idx = q.get("correct_answer_index", 0)
+            options = t.get("options", [])
+            localized.append({
+                "id": q["id"],
+                "question": t.get("question", ""),
+                "question_type": q.get("question_type", "multiple_choice"),
+                "options": options,
+                "correct_answer": options[idx] if idx < len(options) else "",
+                "explanation": t.get("explanation", "")
+            })
+        else:
+            localized.append(q)
+    return {**quiz, "questions": localized}
+
 class QuizSubmission(BaseModel):
     quiz_id: str
     answers: Dict[str, str]
+    lang: str = "en"
 
 class ExamSubmission(BaseModel):
     exam_id: str
@@ -810,11 +832,11 @@ def calculate_level(xp: int) -> int:
 # ==================== QUIZ ROUTES ====================
 
 @api_router.get("/lessons/{lesson_id}/quiz", response_model=Quiz)
-async def get_lesson_quiz(lesson_id: str):
+async def get_lesson_quiz(lesson_id: str, lang: str = "en"):
     quiz = await db.quizzes.find_one({"lesson_id": lesson_id}, {"_id": 0})
     if not quiz:
         quiz = await create_quiz_for_lesson(lesson_id)
-    return quiz
+    return localize_quiz(quiz, lang)
 
 @api_router.post("/quizzes/submit")
 async def submit_quiz(submission: QuizSubmission, current_user: dict = Depends(get_current_user)):
@@ -825,17 +847,26 @@ async def submit_quiz(submission: QuizSubmission, current_user: dict = Depends(g
     correct_count = 0
     total = len(quiz["questions"])
     results = []
-    
+
     for q in quiz["questions"]:
         user_answer = submission.answers.get(q["id"], "")
-        is_correct = user_answer == q["correct_answer"]
+        if "translations" in q:
+            t = q["translations"].get(submission.lang) or q["translations"].get("en", {})
+            options = t.get("options", [])
+            idx = q.get("correct_answer_index", 0)
+            correct = options[idx] if idx < len(options) else ""
+            exp = t.get("explanation", "")
+        else:
+            correct = q["correct_answer"]
+            exp = q["explanation"]
+        is_correct = user_answer == correct
         if is_correct:
             correct_count += 1
         results.append({
             "question_id": q["id"],
             "correct": is_correct,
-            "correct_answer": q["correct_answer"],
-            "explanation": q["explanation"]
+            "correct_answer": correct,
+            "explanation": exp
         })
     
     score = round((correct_count / total) * 100, 1)
@@ -2502,33 +2533,218 @@ Rather than all-at-once:
         await db.lessons.insert_one(lesson)
 
 async def create_quiz_for_lesson(lesson_id: str) -> dict:
-    quiz_templates = {
+    # Multilingual templates for trial lessons (lessons 1–3).
+    # Each question uses correct_answer_index (0-based) and a translations dict.
+    multilingual_templates = {
         "course-foundations-lesson-1": [
-            {"q": "What is the primary purpose of blockchain technology?", "type": "multiple_choice", "options": ["To replace all banks", "To create a distributed, immutable ledger", "To make computers faster", "To store images"], "answer": "To create a distributed, immutable ledger", "exp": "Blockchain's core innovation is providing a distributed ledger that's immutable and doesn't require trusted intermediaries."},
-            {"q": "Blocks in a blockchain are connected using:", "type": "multiple_choice", "options": ["Physical cables", "Cryptographic hashes", "Email links", "USB connections"], "answer": "Cryptographic hashes", "exp": "Each block contains the cryptographic hash of the previous block, creating an unbreakable chain."},
-            {"q": "A blockchain requires a central authority to function.", "type": "true_false", "options": ["True", "False"], "answer": "False", "exp": "Blockchain is decentralized by design, operating through consensus among many nodes without central authority."},
-            {"q": "What is a node in blockchain terminology?", "type": "multiple_choice", "options": ["A type of cryptocurrency", "A computer that maintains a copy of the blockchain", "A transaction fee", "A wallet address"], "answer": "A computer that maintains a copy of the blockchain", "exp": "Nodes are computers that validate transactions and maintain copies of the blockchain."},
-            {"q": "What makes blockchain transactions immutable?", "type": "multiple_choice", "options": ["Government regulations", "Cryptographic linking of blocks", "Password protection", "Cloud storage"], "answer": "Cryptographic linking of blocks", "exp": "Once data is added to the blockchain, the cryptographic links make it virtually impossible to alter without detection."},
-            {"q": "Which best describes consensus in blockchain?", "type": "multiple_choice", "options": ["A voting app", "Agreement mechanism ensuring all copies match", "A type of coin", "Network speed"], "answer": "Agreement mechanism ensuring all copies match", "exp": "Consensus mechanisms ensure all nodes agree on the state of the blockchain."},
-            {"q": "Blockchain data is stored:", "type": "multiple_choice", "options": ["In a single database", "Across thousands of computers", "Only in the cloud", "On USB drives"], "answer": "Across thousands of computers", "exp": "Blockchain is distributed across many nodes worldwide for redundancy and security."}
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "What is the primary purpose of blockchain technology?", "options": ["To replace all banks", "To create a distributed, immutable ledger", "To make computers faster", "To store images"], "explanation": "Blockchain's core innovation is providing a distributed ledger that's immutable and doesn't require trusted intermediaries."},
+                    "fr": {"question": "Quel est l'objectif principal de la technologie blockchain ?", "options": ["Remplacer toutes les banques", "Créer un registre distribué et immuable", "Accélérer les ordinateurs", "Stocker des images"], "explanation": "L'innovation centrale de la blockchain est de fournir un registre distribué immuable qui ne nécessite pas d'intermédiaires de confiance."},
+                    "pt": {"question": "Qual é o principal objetivo da tecnologia blockchain?", "options": ["Substituir todos os bancos", "Criar um registro distribuído e imutável", "Tornar os computadores mais rápidos", "Armazenar imagens"], "explanation": "A principal inovação do blockchain é fornecer um registro distribuído imutável que não requer intermediários confiáveis."},
+                    "ar": {"question": "ما الهدف الأساسي من تقنية البلوكتشين؟", "options": ["استبدال جميع البنوك", "إنشاء دفتر أستاذ موزع وغير قابل للتغيير", "تسريع أجهزة الكمبيوتر", "تخزين الصور"], "explanation": "الابتكار الجوهري للبلوكتشين هو توفير دفتر أستاذ موزع غير قابل للتغيير لا يحتاج إلى وسطاء موثوقين."},
+                },
+            },
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "Blocks in a blockchain are connected using:", "options": ["Physical cables", "Cryptographic hashes", "Email links", "USB connections"], "explanation": "Each block contains the cryptographic hash of the previous block, creating an unbreakable chain."},
+                    "fr": {"question": "Les blocs d'une blockchain sont reliés par :", "options": ["Des câbles physiques", "Des hachages cryptographiques", "Des liens e-mail", "Des connexions USB"], "explanation": "Chaque bloc contient le hachage cryptographique du bloc précédent, créant une chaîne inviolable."},
+                    "pt": {"question": "Os blocos em um blockchain são conectados usando:", "options": ["Cabos físicos", "Hashes criptográficos", "Links de e-mail", "Conexões USB"], "explanation": "Cada bloco contém o hash criptográfico do bloco anterior, criando uma corrente inquebrável."},
+                    "ar": {"question": "يتم ربط الكتل في البلوكتشين باستخدام:", "options": ["كابلات مادية", "هاشات تشفيرية", "روابط بريد إلكتروني", "اتصالات USB"], "explanation": "يحتوي كل كتلة على الهاش التشفيري للكتلة السابقة، مما يخلق سلسلة غير قابلة للكسر."},
+                },
+            },
+            {
+                "type": "true_false", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "A blockchain requires a central authority to function.", "options": ["True", "False"], "explanation": "Blockchain is decentralized by design, operating through consensus among many nodes without central authority."},
+                    "fr": {"question": "Un blockchain nécessite une autorité centrale pour fonctionner.", "options": ["Vrai", "Faux"], "explanation": "La blockchain est décentralisée par conception, fonctionnant par consensus entre de nombreux nœuds sans autorité centrale."},
+                    "pt": {"question": "Um blockchain requer uma autoridade central para funcionar.", "options": ["Verdadeiro", "Falso"], "explanation": "O blockchain é descentralizado por design, operando por consenso entre muitos nós sem autoridade central."},
+                    "ar": {"question": "يحتاج البلوكتشين إلى سلطة مركزية للعمل.", "options": ["صحيح", "خطأ"], "explanation": "البلوكتشين لامركزي بطبيعته، يعمل من خلال التوافق بين العقد دون أي سلطة مركزية."},
+                },
+            },
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "What is a node in blockchain terminology?", "options": ["A type of cryptocurrency", "A computer that maintains a copy of the blockchain", "A transaction fee", "A wallet address"], "explanation": "Nodes are computers that validate transactions and maintain copies of the blockchain."},
+                    "fr": {"question": "Qu'est-ce qu'un nœud dans la terminologie blockchain ?", "options": ["Un type de cryptomonnaie", "Un ordinateur qui maintient une copie de la blockchain", "Des frais de transaction", "Une adresse de portefeuille"], "explanation": "Les nœuds sont des ordinateurs qui valident les transactions et maintiennent des copies de la blockchain."},
+                    "pt": {"question": "O que é um nó na terminologia blockchain?", "options": ["Um tipo de criptomoeda", "Um computador que mantém uma cópia do blockchain", "Uma taxa de transação", "Um endereço de carteira"], "explanation": "Os nós são computadores que validam transações e mantêm cópias do blockchain."},
+                    "ar": {"question": "ما المقصود بالعقدة في مصطلحات البلوكتشين؟", "options": ["نوع من العملات المشفرة", "جهاز كمبيوتر يحتفظ بنسخة من البلوكتشين", "رسوم معاملة", "عنوان محفظة"], "explanation": "العقد هي أجهزة كمبيوتر تتحقق من المعاملات وتحتفظ بنسخ من البلوكتشين."},
+                },
+            },
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "What makes blockchain transactions immutable?", "options": ["Government regulations", "Cryptographic linking of blocks", "Password protection", "Cloud storage"], "explanation": "Once data is added to the blockchain, the cryptographic links make it virtually impossible to alter without detection."},
+                    "fr": {"question": "Qu'est-ce qui rend les transactions blockchain immuables ?", "options": ["Les réglementations gouvernementales", "La liaison cryptographique des blocs", "La protection par mot de passe", "Le stockage en nuage"], "explanation": "Une fois les données ajoutées à la blockchain, les liens cryptographiques rendent pratiquement impossible toute modification sans détection."},
+                    "pt": {"question": "O que torna as transações blockchain imutáveis?", "options": ["Regulamentações governamentais", "Vinculação criptográfica dos blocos", "Proteção por senha", "Armazenamento em nuvem"], "explanation": "Uma vez que os dados são adicionados ao blockchain, os vínculos criptográficos tornam praticamente impossível alterá-los sem detecção."},
+                    "ar": {"question": "ما الذي يجعل معاملات البلوكتشين غير قابلة للتغيير؟", "options": ["اللوائح الحكومية", "الربط التشفيري للكتل", "حماية كلمة المرور", "التخزين السحابي"], "explanation": "بمجرد إضافة البيانات إلى البلوكتشين، يجعل الربط التشفيري تعديلها دون اكتشاف أمراً شبه مستحيل."},
+                },
+            },
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "Which best describes consensus in blockchain?", "options": ["A voting app", "Agreement mechanism ensuring all copies match", "A type of coin", "Network speed"], "explanation": "Consensus mechanisms ensure all nodes agree on the state of the blockchain."},
+                    "fr": {"question": "Qu'est-ce qui décrit le mieux le consensus dans la blockchain ?", "options": ["Une application de vote", "Un mécanisme d'accord garantissant que toutes les copies correspondent", "Un type de monnaie", "La vitesse du réseau"], "explanation": "Les mécanismes de consensus garantissent que tous les nœuds s'accordent sur l'état de la blockchain."},
+                    "pt": {"question": "O que melhor descreve o consenso no blockchain?", "options": ["Um aplicativo de votação", "Mecanismo de acordo garantindo que todas as cópias correspondam", "Um tipo de moeda", "Velocidade da rede"], "explanation": "Os mecanismos de consenso garantem que todos os nós concordem com o estado do blockchain."},
+                    "ar": {"question": "أي من الخيارات يصف التوافق في البلوكتشين بشكل أفضل؟", "options": ["تطبيق تصويت", "آلية اتفاق تضمن تطابق جميع النسخ", "نوع من العملات", "سرعة الشبكة"], "explanation": "تضمن آليات التوافق أن جميع العقد تتفق على حالة البلوكتشين."},
+                },
+            },
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "Blockchain data is stored:", "options": ["In a single database", "Across thousands of computers", "Only in the cloud", "On USB drives"], "explanation": "Blockchain is distributed across many nodes worldwide for redundancy and security."},
+                    "fr": {"question": "Les données blockchain sont stockées :", "options": ["Dans une seule base de données", "Sur des milliers d'ordinateurs", "Uniquement dans le nuage", "Sur des clés USB"], "explanation": "La blockchain est distribuée sur de nombreux nœuds dans le monde pour la redondance et la sécurité."},
+                    "pt": {"question": "Os dados do blockchain são armazenados:", "options": ["Em um único banco de dados", "Em milhares de computadores", "Apenas na nuvem", "Em pendrives"], "explanation": "O blockchain é distribuído por muitos nós em todo o mundo para redundância e segurança."},
+                    "ar": {"question": "يتم تخزين بيانات البلوكتشين:", "options": ["في قاعدة بيانات واحدة", "عبر آلاف أجهزة الكمبيوتر", "في السحابة فقط", "على محركات USB"], "explanation": "يتم توزيع البلوكتشين عبر العديد من العقد حول العالم للتكرار والأمان."},
+                },
+            },
         ],
         "course-foundations-lesson-2": [
-            {"q": "Who created Bitcoin?", "type": "multiple_choice", "options": ["Vitalik Buterin", "Satoshi Nakamoto", "Elon Musk", "Mark Zuckerberg"], "answer": "Satoshi Nakamoto", "exp": "Bitcoin was created by an anonymous person or group using the pseudonym Satoshi Nakamoto."},
-            {"q": "What is the maximum supply of Bitcoin?", "type": "multiple_choice", "options": ["Unlimited", "21 million", "100 million", "1 billion"], "answer": "21 million", "exp": "Bitcoin has a fixed maximum supply of 21 million coins, programmed into the protocol."},
-            {"q": "Bitcoin was created in response to:", "type": "multiple_choice", "options": ["Social media needs", "The 2008 financial crisis", "Gaming requirements", "Email limitations"], "answer": "The 2008 financial crisis", "exp": "Bitcoin was created in 2009 as a response to the 2008 financial crisis and centralized banking failures."},
-            {"q": "The smallest unit of Bitcoin is called:", "type": "multiple_choice", "options": ["Satoshi", "Wei", "Gwei", "Bit"], "answer": "Satoshi", "exp": "A satoshi is the smallest unit of Bitcoin, equal to 0.00000001 BTC."},
-            {"q": "Bitcoin is often called 'digital gold' because:", "type": "multiple_choice", "options": ["It's yellow colored", "It's scarce, durable, and portable", "It was invented by gold miners", "It can be converted to physical gold"], "answer": "It's scarce, durable, and portable", "exp": "Like gold, Bitcoin is scarce (limited supply), durable (exists as long as the network), and portable (can be sent anywhere)."},
-            {"q": "Bitcoin transactions are recorded on:", "type": "multiple_choice", "options": ["Private servers", "A public blockchain", "Paper ledgers", "Email"], "answer": "A public blockchain", "exp": "Every Bitcoin transaction is recorded on the public blockchain for anyone to verify."},
-            {"q": "Bitcoin can be controlled by governments.", "type": "true_false", "options": ["True", "False"], "answer": "False", "exp": "Bitcoin is decentralized and censorship-resistant, making it difficult for any single entity to control."}
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "Who created Bitcoin?", "options": ["Vitalik Buterin", "Satoshi Nakamoto", "Elon Musk", "Mark Zuckerberg"], "explanation": "Bitcoin was created by an anonymous person or group using the pseudonym Satoshi Nakamoto."},
+                    "fr": {"question": "Qui a créé Bitcoin ?", "options": ["Vitalik Buterin", "Satoshi Nakamoto", "Elon Musk", "Mark Zuckerberg"], "explanation": "Bitcoin a été créé par une personne ou un groupe anonyme utilisant le pseudonyme Satoshi Nakamoto."},
+                    "pt": {"question": "Quem criou o Bitcoin?", "options": ["Vitalik Buterin", "Satoshi Nakamoto", "Elon Musk", "Mark Zuckerberg"], "explanation": "O Bitcoin foi criado por uma pessoa ou grupo anônimo usando o pseudônimo Satoshi Nakamoto."},
+                    "ar": {"question": "من أنشأ البيتكوين؟", "options": ["فيتاليك بوتيرين", "ساتوشي ناكاموتو", "إيلون ماسك", "مارك زوكربرغ"], "explanation": "أُنشئ البيتكوين من قبل شخص أو مجموعة مجهولة الهوية تستخدم اسماً مستعاراً هو ساتوشي ناكاموتو."},
+                },
+            },
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "What is the maximum supply of Bitcoin?", "options": ["Unlimited", "21 million", "100 million", "1 billion"], "explanation": "Bitcoin has a fixed maximum supply of 21 million coins, programmed into the protocol."},
+                    "fr": {"question": "Quelle est l'offre maximale de Bitcoin ?", "options": ["Illimitée", "21 millions", "100 millions", "1 milliard"], "explanation": "Bitcoin a une offre maximale fixe de 21 millions de pièces, programmée dans le protocole."},
+                    "pt": {"question": "Qual é a oferta máxima de Bitcoin?", "options": ["Ilimitada", "21 milhões", "100 milhões", "1 bilhão"], "explanation": "O Bitcoin tem uma oferta máxima fixa de 21 milhões de moedas, programada no protocolo."},
+                    "ar": {"question": "ما هو الحد الأقصى لعرض البيتكوين؟", "options": ["غير محدود", "21 مليون", "100 مليون", "مليار"], "explanation": "يمتلك البيتكوين حداً أقصى ثابتاً للعرض يبلغ 21 مليون عملة، مبرمجاً في البروتوكول."},
+                },
+            },
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "Bitcoin was created in response to:", "options": ["Social media needs", "The 2008 financial crisis", "Gaming requirements", "Email limitations"], "explanation": "Bitcoin was created in 2009 as a response to the 2008 financial crisis and centralized banking failures."},
+                    "fr": {"question": "Bitcoin a été créé en réponse à :", "options": ["Les besoins des réseaux sociaux", "La crise financière de 2008", "Les exigences du jeu vidéo", "Les limitations de l'e-mail"], "explanation": "Bitcoin a été créé en 2009 en réponse à la crise financière de 2008 et aux défaillances bancaires centralisées."},
+                    "pt": {"question": "O Bitcoin foi criado em resposta a:", "options": ["Necessidades de redes sociais", "A crise financeira de 2008", "Requisitos de jogos", "Limitações do e-mail"], "explanation": "O Bitcoin foi criado em 2009 em resposta à crise financeira de 2008 e às falhas bancárias centralizadas."},
+                    "ar": {"question": "أُنشئ البيتكوين استجابةً لـ:", "options": ["احتياجات وسائل التواصل الاجتماعي", "الأزمة المالية عام 2008", "متطلبات الألعاب", "قيود البريد الإلكتروني"], "explanation": "أُنشئ البيتكوين عام 2009 استجابةً للأزمة المالية لعام 2008 وإخفاقات البنوك المركزية."},
+                },
+            },
+            {
+                "type": "multiple_choice", "correct_answer_index": 0,
+                "translations": {
+                    "en": {"question": "The smallest unit of Bitcoin is called:", "options": ["Satoshi", "Wei", "Gwei", "Bit"], "explanation": "A satoshi is the smallest unit of Bitcoin, equal to 0.00000001 BTC."},
+                    "fr": {"question": "La plus petite unité de Bitcoin s'appelle :", "options": ["Satoshi", "Wei", "Gwei", "Bit"], "explanation": "Un satoshi est la plus petite unité de Bitcoin, égale à 0,00000001 BTC."},
+                    "pt": {"question": "A menor unidade do Bitcoin é chamada de:", "options": ["Satoshi", "Wei", "Gwei", "Bit"], "explanation": "Um satoshi é a menor unidade do Bitcoin, igual a 0,00000001 BTC."},
+                    "ar": {"question": "أصغر وحدة للبيتكوين تسمى:", "options": ["ساتوشي", "ويي", "غواي", "بت"], "explanation": "الساتوشي هو أصغر وحدة للبيتكوين، يساوي 0.00000001 بيتكوين."},
+                },
+            },
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "Bitcoin is often called 'digital gold' because:", "options": ["It's yellow colored", "It's scarce, durable, and portable", "It was invented by gold miners", "It can be converted to physical gold"], "explanation": "Like gold, Bitcoin is scarce (limited supply), durable (exists as long as the network), and portable (can be sent anywhere)."},
+                    "fr": {"question": "Bitcoin est souvent appelé 'l'or numérique' parce que :", "options": ["Il est de couleur jaune", "Il est rare, durable et portable", "Il a été inventé par des mineurs d'or", "Il peut être converti en or physique"], "explanation": "Comme l'or, Bitcoin est rare (offre limitée), durable (existe tant que le réseau fonctionne) et portable (peut être envoyé partout)."},
+                    "pt": {"question": "O Bitcoin é frequentemente chamado de 'ouro digital' porque:", "options": ["É de cor amarela", "É escasso, durável e portátil", "Foi inventado por mineradores de ouro", "Pode ser convertido em ouro físico"], "explanation": "Como o ouro, o Bitcoin é escasso (oferta limitada), durável (existe enquanto a rede funcionar) e portátil (pode ser enviado para qualquer lugar)."},
+                    "ar": {"question": "كثيراً ما يُسمى البيتكوين 'الذهب الرقمي' لأنه:", "options": ["لونه أصفر", "نادر ومتين وقابل للحمل", "اخترعه عمال مناجم الذهب", "يمكن تحويله إلى ذهب مادي"], "explanation": "مثل الذهب، البيتكوين نادر (عرض محدود) ومتين (موجود طالما الشبكة تعمل) وقابل للحمل (يمكن إرساله في أي مكان)."},
+                },
+            },
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "Bitcoin transactions are recorded on:", "options": ["Private servers", "A public blockchain", "Paper ledgers", "Email"], "explanation": "Every Bitcoin transaction is recorded on the public blockchain for anyone to verify."},
+                    "fr": {"question": "Les transactions Bitcoin sont enregistrées sur :", "options": ["Des serveurs privés", "Une blockchain publique", "Des registres papier", "L'e-mail"], "explanation": "Chaque transaction Bitcoin est enregistrée sur la blockchain publique, vérifiable par tous."},
+                    "pt": {"question": "As transações Bitcoin são registradas em:", "options": ["Servidores privados", "Um blockchain público", "Livros-razão em papel", "E-mail"], "explanation": "Cada transação de Bitcoin é registrada no blockchain público para qualquer pessoa verificar."},
+                    "ar": {"question": "يتم تسجيل معاملات البيتكوين على:", "options": ["خوادم خاصة", "بلوكتشين عام", "دفاتر ورقية", "البريد الإلكتروني"], "explanation": "كل معاملة بيتكوين مسجلة على البلوكتشين العام ليتمكن الجميع من التحقق منها."},
+                },
+            },
+            {
+                "type": "true_false", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "Bitcoin can be controlled by governments.", "options": ["True", "False"], "explanation": "Bitcoin is decentralized and censorship-resistant, making it difficult for any single entity to control."},
+                    "fr": {"question": "Bitcoin peut être contrôlé par les gouvernements.", "options": ["Vrai", "Faux"], "explanation": "Bitcoin est décentralisé et résistant à la censure, ce qui rend difficile pour toute entité de le contrôler."},
+                    "pt": {"question": "O Bitcoin pode ser controlado por governos.", "options": ["Verdadeiro", "Falso"], "explanation": "O Bitcoin é descentralizado e resistente à censura, tornando difícil para qualquer entidade controlá-lo."},
+                    "ar": {"question": "يمكن للحكومات السيطرة على البيتكوين.", "options": ["صحيح", "خطأ"], "explanation": "البيتكوين لامركزي ومقاوم للرقابة، مما يجعل من الصعب على أي جهة واحدة السيطرة عليه."},
+                },
+            },
         ],
         "course-foundations-lesson-3": [
-            {"q": "What is a public key used for?", "type": "multiple_choice", "options": ["Spending cryptocurrency", "Receiving cryptocurrency", "Mining", "Creating tokens"], "answer": "Receiving cryptocurrency", "exp": "A public key (or address derived from it) is shared to receive funds."},
-            {"q": "Your private key should:", "type": "multiple_choice", "options": ["Be shared with friends", "Never be shared with anyone", "Be posted on social media", "Be given to exchanges"], "answer": "Never be shared with anyone", "exp": "Your private key controls your funds—never share it with anyone."},
-            {"q": "What consensus mechanism does Bitcoin use?", "type": "multiple_choice", "options": ["Proof of Stake", "Proof of Work", "Proof of Authority", "Proof of History"], "answer": "Proof of Work", "exp": "Bitcoin uses Proof of Work where miners compete to solve mathematical puzzles."},
-            {"q": "What happens after 6 confirmations on Bitcoin?", "type": "multiple_choice", "options": ["Transaction is deleted", "Transaction is considered final", "Coins are doubled", "Mining stops"], "answer": "Transaction is considered final", "exp": "6 confirmations (about 1 hour) is generally considered final for Bitcoin transactions."},
-            {"q": "Miners are rewarded with:", "type": "multiple_choice", "options": ["Only transaction fees", "Only new bitcoins", "Both new bitcoins and transaction fees", "Nothing"], "answer": "Both new bitcoins and transaction fees", "exp": "Miners receive block rewards (new bitcoins) plus transaction fees for successfully mining a block."},
-            {"q": "Proof of Stake is more energy-efficient than Proof of Work.", "type": "true_false", "options": ["True", "False"], "answer": "True", "exp": "PoS doesn't require massive computing power like PoW, making it much more energy efficient."}
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "What is a public key used for?", "options": ["Spending cryptocurrency", "Receiving cryptocurrency", "Mining", "Creating tokens"], "explanation": "A public key (or address derived from it) is shared to receive funds."},
+                    "fr": {"question": "À quoi sert une clé publique ?", "options": ["Dépenser des cryptomonnaies", "Recevoir des cryptomonnaies", "Miner", "Créer des tokens"], "explanation": "Une clé publique (ou l'adresse qui en est dérivée) est partagée pour recevoir des fonds."},
+                    "pt": {"question": "Para que serve uma chave pública?", "options": ["Gastar criptomoedas", "Receber criptomoedas", "Minerar", "Criar tokens"], "explanation": "Uma chave pública (ou endereço derivado dela) é compartilhada para receber fundos."},
+                    "ar": {"question": "ما استخدام المفتاح العام؟", "options": ["إنفاق العملات المشفرة", "استقبال العملات المشفرة", "التعدين", "إنشاء التوكنات"], "explanation": "يُشارك المفتاح العام (أو العنوان المشتق منه) لاستقبال الأموال."},
+                },
+            },
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "Your private key should:", "options": ["Be shared with friends", "Never be shared with anyone", "Be posted on social media", "Be given to exchanges"], "explanation": "Your private key controls your funds—never share it with anyone."},
+                    "fr": {"question": "Votre clé privée doit :", "options": ["Être partagée avec des amis", "Ne jamais être partagée avec qui que ce soit", "Être publiée sur les réseaux sociaux", "Être donnée aux exchanges"], "explanation": "Votre clé privée contrôle vos fonds — ne la partagez jamais avec personne."},
+                    "pt": {"question": "Sua chave privada deve:", "options": ["Ser compartilhada com amigos", "Nunca ser compartilhada com ninguém", "Ser postada nas redes sociais", "Ser dada a exchanges"], "explanation": "Sua chave privada controla seus fundos — nunca a compartilhe com ninguém."},
+                    "ar": {"question": "مفتاحك الخاص يجب أن:", "options": ["يُشارك مع الأصدقاء", "لا يُشارك مع أي أحد أبداً", "يُنشر على وسائل التواصل الاجتماعي", "يُعطى للبورصات"], "explanation": "مفتاحك الخاص يتحكم في أموالك — لا تشاركه مع أي شخص أبداً."},
+                },
+            },
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "What consensus mechanism does Bitcoin use?", "options": ["Proof of Stake", "Proof of Work", "Proof of Authority", "Proof of History"], "explanation": "Bitcoin uses Proof of Work where miners compete to solve mathematical puzzles."},
+                    "fr": {"question": "Quel mécanisme de consensus Bitcoin utilise-t-il ?", "options": ["Preuve d'enjeu", "Preuve de travail", "Preuve d'autorité", "Preuve d'historique"], "explanation": "Bitcoin utilise la preuve de travail où les mineurs s'affrontent pour résoudre des puzzles mathématiques."},
+                    "pt": {"question": "Qual mecanismo de consenso o Bitcoin usa?", "options": ["Prova de Participação", "Prova de Trabalho", "Prova de Autoridade", "Prova de Histórico"], "explanation": "O Bitcoin usa a Prova de Trabalho, onde os mineradores competem para resolver quebra-cabeças matemáticos."},
+                    "ar": {"question": "ما آلية التوافق التي يستخدمها البيتكوين؟", "options": ["إثبات الحصة", "إثبات العمل", "إثبات السلطة", "إثبات التاريخ"], "explanation": "يستخدم البيتكوين إثبات العمل حيث يتنافس المعدّنون لحل ألغاز رياضية."},
+                },
+            },
+            {
+                "type": "multiple_choice", "correct_answer_index": 1,
+                "translations": {
+                    "en": {"question": "What happens after 6 confirmations on Bitcoin?", "options": ["Transaction is deleted", "Transaction is considered final", "Coins are doubled", "Mining stops"], "explanation": "6 confirmations (about 1 hour) is generally considered final for Bitcoin transactions."},
+                    "fr": {"question": "Que se passe-t-il après 6 confirmations sur Bitcoin ?", "options": ["La transaction est supprimée", "La transaction est considérée comme finale", "Les pièces sont doublées", "Le minage s'arrête"], "explanation": "6 confirmations (environ 1 heure) est généralement considéré comme final pour les transactions Bitcoin."},
+                    "pt": {"question": "O que acontece após 6 confirmações no Bitcoin?", "options": ["A transação é deletada", "A transação é considerada final", "As moedas são dobradas", "A mineração para"], "explanation": "6 confirmações (aproximadamente 1 hora) é geralmente considerado final para transações Bitcoin."},
+                    "ar": {"question": "ما الذي يحدث بعد 6 تأكيدات على البيتكوين؟", "options": ["يتم حذف المعاملة", "تُعتبر المعاملة نهائية", "تتضاعف العملات", "يتوقف التعدين"], "explanation": "6 تأكيدات (حوالي ساعة واحدة) تُعتبر عموماً نهائية لمعاملات البيتكوين."},
+                },
+            },
+            {
+                "type": "multiple_choice", "correct_answer_index": 2,
+                "translations": {
+                    "en": {"question": "Miners are rewarded with:", "options": ["Only transaction fees", "Only new bitcoins", "Both new bitcoins and transaction fees", "Nothing"], "explanation": "Miners receive block rewards (new bitcoins) plus transaction fees for successfully mining a block."},
+                    "fr": {"question": "Les mineurs sont récompensés par :", "options": ["Uniquement des frais de transaction", "Uniquement de nouveaux bitcoins", "Les deux : nouveaux bitcoins et frais de transaction", "Rien"], "explanation": "Les mineurs reçoivent des récompenses de bloc (nouveaux bitcoins) plus des frais de transaction pour chaque bloc miné avec succès."},
+                    "pt": {"question": "Os mineradores são recompensados com:", "options": ["Apenas taxas de transação", "Apenas novos bitcoins", "Ambos: novos bitcoins e taxas de transação", "Nada"], "explanation": "Os mineradores recebem recompensas de bloco (novos bitcoins) mais taxas de transação por cada bloco minerado com sucesso."},
+                    "ar": {"question": "يُكافأ المعدّنون بـ:", "options": ["رسوم المعاملات فقط", "بيتكوين جديد فقط", "كلاهما: بيتكوين جديد ورسوم المعاملات", "لا شيء"], "explanation": "يحصل المعدّنون على مكافآت الكتلة (بيتكوين جديد) بالإضافة إلى رسوم المعاملات مقابل تعدين كل كتلة بنجاح."},
+                },
+            },
+            {
+                "type": "true_false", "correct_answer_index": 0,
+                "translations": {
+                    "en": {"question": "Proof of Stake is more energy-efficient than Proof of Work.", "options": ["True", "False"], "explanation": "PoS doesn't require massive computing power like PoW, making it much more energy efficient."},
+                    "fr": {"question": "La preuve d'enjeu est plus économe en énergie que la preuve de travail.", "options": ["Vrai", "Faux"], "explanation": "Le PoS ne nécessite pas une puissance de calcul massive comme le PoW, ce qui le rend beaucoup plus économe en énergie."},
+                    "pt": {"question": "A Prova de Participação é mais eficiente em energia do que a Prova de Trabalho.", "options": ["Verdadeiro", "Falso"], "explanation": "O PoS não requer poder computacional massivo como o PoW, tornando-o muito mais eficiente em energia."},
+                    "ar": {"question": "إثبات الحصة أكثر كفاءة في استهلاك الطاقة من إثبات العمل.", "options": ["صحيح", "خطأ"], "explanation": "لا يتطلب PoS قوة حوسبة ضخمة مثل PoW، مما يجعله أكثر كفاءة في استهلاك الطاقة."},
+                },
+            },
         ],
+    }
+
+    # For trial lessons: build questions from multilingual templates
+    if lesson_id in multilingual_templates:
+        questions = []
+        for i, tpl in enumerate(multilingual_templates[lesson_id]):
+            questions.append({
+                "id": f"{lesson_id}-q{i+1}",
+                "question_type": tpl["type"],
+                "correct_answer_index": tpl["correct_answer_index"],
+                "translations": tpl["translations"],
+            })
+        quiz = {
+            "id": f"quiz-{lesson_id}",
+            "lesson_id": lesson_id,
+            "title": f"Quiz: Lesson {lesson_id.split('-lesson-')[-1]}",
+            "questions": questions,
+        }
+        await db.quizzes.insert_one(quiz)
+        return quiz
+
+    # For all other lessons: legacy English-only templates
+    quiz_templates = {
         "course-foundations-lesson-4": [
             {"q": "A crypto wallet actually stores:", "type": "multiple_choice", "options": ["Cryptocurrency coins", "Private keys", "Blockchain data", "Mining equipment"], "answer": "Private keys", "exp": "Wallets store private keys that control your cryptocurrency on the blockchain."},
             {"q": "Which is considered a 'hot wallet'?", "type": "multiple_choice", "options": ["Hardware wallet", "Paper wallet", "Mobile wallet app", "Steel plate backup"], "answer": "Mobile wallet app", "exp": "Hot wallets are connected to the internet, like mobile apps, desktop software, or web wallets."},
