@@ -251,6 +251,104 @@ class Quiz(BaseModel):
     title: str
     questions: List[QuizQuestion]
 
+# ==================== MULTI-LANGUAGE MODELS ====================
+
+SUPPORTED_LANGUAGES = ["en", "fr", "ar", "pt"]
+
+class CourseTranslation(BaseModel):
+    title: str
+    description: str = ""
+    topics: List[str] = []
+
+class CourseCreateRequest(BaseModel):
+    level: int
+    thumbnail: str = "https://images.unsplash.com/photo-1639825752750-5061ded5503b?w=800"
+    duration_hours: int = 0
+    translations: Dict[str, CourseTranslation]
+
+class CourseUpdateRequest(BaseModel):
+    level: Optional[int] = None
+    thumbnail: Optional[str] = None
+    duration_hours: Optional[int] = None
+    is_published: Optional[bool] = None
+    translations: Optional[Dict[str, CourseTranslation]] = None
+
+class LessonTranslation(BaseModel):
+    title: str
+    subtitle: str = ""
+    content: str = ""
+    learning_objectives: List[str] = []
+    examples: List[str] = []
+    summary: str = ""
+    recommended_readings: List[str] = []
+
+class LessonCreateRequest(BaseModel):
+    course_id: str
+    order: int = 0
+    duration_minutes: Optional[int] = None
+    translations: Dict[str, LessonTranslation]
+
+class LessonUpdateRequest(BaseModel):
+    order: Optional[int] = None
+    duration_minutes: Optional[int] = None
+    hero_image: Optional[str] = None
+    checkpoints: Optional[List[Dict]] = None
+    translations: Optional[Dict[str, LessonTranslation]] = None
+
+# ==================== LOCALIZATION HELPERS ====================
+
+def localize_course(course: dict, lang: str) -> Optional[dict]:
+    """Flatten course translations for a given language.
+    Returns None if the requested language has no usable content.
+    Falls back gracefully for legacy records without translations."""
+    translations = course.get("translations")
+    if not translations:
+        # Legacy record — return as-is (backward compat)
+        return course
+
+    trans = translations.get(lang)
+    if not trans or not trans.get("title", "").strip():
+        return None
+
+    result = {k: v for k, v in course.items() if k != "translations"}
+    result["title"] = trans.get("title", "")
+    result["description"] = trans.get("description", "")
+    result["topics"] = trans.get("topics", [])
+    return result
+
+def localize_lesson(lesson: dict, lang: str) -> Optional[dict]:
+    """Flatten lesson translations for a given language.
+    Returns None if the requested language has no usable content.
+    Falls back gracefully for legacy records without translations."""
+    translations = lesson.get("translations")
+    if not translations:
+        return lesson  # Legacy record — return as-is
+
+    trans = translations.get(lang)
+    if not trans or not trans.get("title", "").strip():
+        return None
+
+    result = {k: v for k, v in lesson.items() if k != "translations"}
+    result["title"] = trans.get("title", "")
+    result["subtitle"] = trans.get("subtitle", "")
+    result["content"] = trans.get("content", "")
+    result["learning_objectives"] = trans.get("learning_objectives", [])
+    result["examples"] = trans.get("examples", [])
+    result["summary"] = trans.get("summary", "")
+    result["recommended_readings"] = trans.get("recommended_readings", [])
+    return result
+
+def validate_translations(translations: dict, entity: str = "course"):
+    """Raise HTTPException if translations dict has invalid entries."""
+    if not translations:
+        raise HTTPException(status_code=400, detail=f"At least one language translation is required for {entity}")
+    for lang, trans in translations.items():
+        if lang not in SUPPORTED_LANGUAGES:
+            raise HTTPException(status_code=400, detail=f"Unsupported language '{lang}'. Supported: {SUPPORTED_LANGUAGES}")
+        title = trans.get("title", "") if isinstance(trans, dict) else getattr(trans, "title", "")
+        if not str(title).strip():
+            raise HTTPException(status_code=400, detail=f"Title is required for language '{lang}'")
+
 class QuizSubmission(BaseModel):
     quiz_id: str
     answers: Dict[str, str]
@@ -519,20 +617,28 @@ async def get_me(current_user: dict = Depends(get_current_user)):
 
 # ==================== COURSES ROUTES ====================
 
-@api_router.get("/courses", response_model=List[Course])
-async def get_courses():
+@api_router.get("/courses")
+async def get_courses(lang: str = "en"):
     courses = await db.courses.find({}, {"_id": 0}).to_list(100)
     if not courses:
         await seed_courses()
         courses = await db.courses.find({}, {"_id": 0}).to_list(100)
-    return courses
+    result = []
+    for course in courses:
+        localized = localize_course(course, lang)
+        if localized and localized.get("title"):
+            result.append(localized)
+    return result
 
-@api_router.get("/courses/{course_id}", response_model=Course)
-async def get_course(course_id: str):
+@api_router.get("/courses/{course_id}")
+async def get_course(course_id: str, lang: str = "en"):
     course = await db.courses.find_one({"id": course_id}, {"_id": 0})
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
-    return course
+    localized = localize_course(course, lang)
+    if not localized:
+        raise HTTPException(status_code=404, detail=f"Course not available in language '{lang}'")
+    return localized
 
 from services.lesson_images import get_lesson_images, LESSON_IMAGES
 from services.content_aggregator import get_localized_lesson, get_all_lessons_for_course, ALL_PREMIUM_LESSONS, get_premium_content_stats
@@ -564,14 +670,18 @@ async def get_course_lessons(course_id: str, lang: str = "en"):
     if not lessons:
         await seed_lessons(course_id)
         lessons = await db.lessons.find({"course_id": course_id}, {"_id": 0}).sort("order", 1).to_list(100)
-    
-    # Add images to each lesson
+
+    result = []
     for lesson in lessons:
-        images = get_lesson_images(lesson.get("id", ""))
-        lesson["hero_image"] = images.get("hero_image")
-        lesson["infographics"] = images.get("infographics", [])
-    
-    return lessons
+        localized = localize_lesson(lesson, lang)
+        if not localized:
+            continue
+        images = get_lesson_images(localized.get("id", ""))
+        localized["hero_image"] = images.get("hero_image")
+        localized["infographics"] = images.get("infographics", [])
+        result.append(localized)
+
+    return result
 
 @api_router.get("/lessons/{lesson_id}", response_model=Lesson)
 async def get_lesson(lesson_id: str, lang: str = "en"):
@@ -597,13 +707,17 @@ async def get_lesson(lesson_id: str, lang: str = "en"):
     lesson = await db.lessons.find_one({"id": lesson_id}, {"_id": 0})
     if not lesson:
         raise HTTPException(status_code=404, detail="Lesson not found")
-    
+
+    localized = localize_lesson(lesson, lang)
+    if not localized:
+        raise HTTPException(status_code=404, detail=f"Lesson not available in language '{lang}'")
+
     # Add images
     images = get_lesson_images(lesson_id)
-    lesson["hero_image"] = images.get("hero_image")
-    lesson["infographics"] = images.get("infographics", [])
-    
-    return lesson
+    localized["hero_image"] = images.get("hero_image")
+    localized["infographics"] = images.get("infographics", [])
+
+    return localized
 
 @api_router.get("/premium/stats")
 async def get_content_stats():
@@ -1028,33 +1142,96 @@ async def seed_courses():
     courses = [
         {
             "id": "course-foundations",
-            "title": "Crypto Foundations",
-            "description": "Master the fundamentals of blockchain technology and cryptocurrency. Learn what Bitcoin is, how wallets work, and the basics of secure crypto storage.",
             "level": 1,
             "thumbnail": "https://images.unsplash.com/photo-1639825752750-5061ded5503b?w=800",
             "lessons_count": 8,
             "duration_hours": 6,
-            "topics": ["Blockchain Basics", "Bitcoin", "Cryptocurrency", "Wallets", "Security", "Exchanges", "Stablecoins", "Buying Crypto"]
+            "is_published": True,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "translations": {
+                "en": {
+                    "title": "Crypto Foundations",
+                    "description": "Master the fundamentals of blockchain technology and cryptocurrency. Learn what Bitcoin is, how wallets work, and the basics of secure crypto storage.",
+                    "topics": ["Blockchain Basics", "Bitcoin", "Cryptocurrency", "Wallets", "Security", "Exchanges", "Stablecoins", "Buying Crypto"]
+                },
+                "fr": {
+                    "title": "Fondamentaux Crypto",
+                    "description": "Maîtrisez les bases de la technologie blockchain et des cryptomonnaies. Apprenez ce qu'est Bitcoin, comment fonctionnent les portefeuilles et les bases du stockage sécurisé.",
+                    "topics": ["Bases Blockchain", "Bitcoin", "Cryptomonnaie", "Portefeuilles", "Sécurité", "Exchanges", "Stablecoins", "Acheter des Cryptos"]
+                },
+                "ar": {
+                    "title": "أساسيات العملات المشفرة",
+                    "description": "أتقن أساسيات تقنية البلوكشين والعملات المشفرة. تعلم ما هو البيتكوين وكيف تعمل المحافظ وأساسيات التخزين الآمن.",
+                    "topics": ["أساسيات البلوكشين", "البيتكوين", "العملات المشفرة", "المحافظ", "الأمان", "المنصات", "العملات المستقرة", "شراء العملات"]
+                },
+                "pt": {
+                    "title": "Fundamentos Cripto",
+                    "description": "Domine os fundamentos da tecnologia blockchain e criptomoedas. Aprenda o que é Bitcoin, como funcionam as carteiras e os básicos de armazenamento seguro.",
+                    "topics": ["Básicos de Blockchain", "Bitcoin", "Criptomoeda", "Carteiras", "Segurança", "Exchanges", "Stablecoins", "Comprar Cripto"]
+                }
+            }
         },
         {
             "id": "course-investor",
-            "title": "Crypto Investor",
-            "description": "Advance your knowledge with altcoins, DeFi, NFTs, and market analysis. Learn to evaluate projects and manage portfolio risk.",
             "level": 2,
             "thumbnail": "https://images.unsplash.com/photo-1642790551116-18e150f248e5?w=800",
             "lessons_count": 8,
             "duration_hours": 10,
-            "topics": ["Altcoins", "Tokenomics", "DeFi", "NFTs", "Layer-2", "On-Chain Analysis", "Market Cycles", "Risk Management"]
+            "is_published": True,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "translations": {
+                "en": {
+                    "title": "Crypto Investor",
+                    "description": "Advance your knowledge with altcoins, DeFi, NFTs, and market analysis. Learn to evaluate projects and manage portfolio risk.",
+                    "topics": ["Altcoins", "Tokenomics", "DeFi", "NFTs", "Layer-2", "On-Chain Analysis", "Market Cycles", "Risk Management"]
+                },
+                "fr": {
+                    "title": "Investisseur Crypto",
+                    "description": "Approfondissez vos connaissances avec les altcoins, la DeFi, les NFTs et l'analyse de marché. Apprenez à évaluer les projets et à gérer le risque.",
+                    "topics": ["Altcoins", "Tokenomics", "DeFi", "NFTs", "Layer-2", "Analyse On-Chain", "Cycles de Marché", "Gestion des Risques"]
+                },
+                "ar": {
+                    "title": "مستثمر العملات المشفرة",
+                    "description": "طور معرفتك بالعملات البديلة والتمويل اللامركزي والنفتات وتحليل السوق. تعلم تقييم المشاريع وإدارة مخاطر المحفظة.",
+                    "topics": ["العملات البديلة", "الرمزيات", "التمويل اللامركزي", "النفتات", "الطبقة الثانية", "تحليل السلسلة", "دورات السوق", "إدارة المخاطر"]
+                },
+                "pt": {
+                    "title": "Investidor Cripto",
+                    "description": "Avance seu conhecimento com altcoins, DeFi, NFTs e análise de mercado. Aprenda a avaliar projetos e gerenciar riscos de portfólio.",
+                    "topics": ["Altcoins", "Tokenomics", "DeFi", "NFTs", "Layer-2", "Análise On-Chain", "Ciclos de Mercado", "Gestão de Risco"]
+                }
+            }
         },
         {
             "id": "course-strategist",
-            "title": "Advanced Crypto Strategist",
-            "description": "Master advanced trading strategies, portfolio management, and crypto macro analysis. Become an expert in evaluating opportunities.",
             "level": 3,
             "thumbnail": "https://images.unsplash.com/photo-1605792657660-596af9009e82?w=800",
             "lessons_count": 7,
             "duration_hours": 12,
-            "topics": ["Trading Strategies", "Market Psychology", "Portfolio Management", "Macro Trends", "On-Chain Analytics", "Project Evaluation", "Long-Term Investing"]
+            "is_published": True,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "translations": {
+                "en": {
+                    "title": "Advanced Crypto Strategist",
+                    "description": "Master advanced trading strategies, portfolio management, and crypto macro analysis. Become an expert in evaluating opportunities.",
+                    "topics": ["Trading Strategies", "Market Psychology", "Portfolio Management", "Macro Trends", "On-Chain Analytics", "Project Evaluation", "Long-Term Investing"]
+                },
+                "fr": {
+                    "title": "Stratège Crypto Avancé",
+                    "description": "Maîtrisez les stratégies de trading avancées, la gestion de portefeuille et l'analyse macro crypto. Devenez expert en évaluation d'opportunités.",
+                    "topics": ["Stratégies de Trading", "Psychologie de Marché", "Gestion de Portefeuille", "Tendances Macro", "Analytique On-Chain", "Évaluation de Projets", "Investissement Long Terme"]
+                },
+                "ar": {
+                    "title": "استراتيجي العملات المشفرة المتقدم",
+                    "description": "أتقن استراتيجيات التداول المتقدمة وإدارة المحفظة والتحليل الكلي للعملات المشفرة. كن خبيراً في تقييم الفرص.",
+                    "topics": ["استراتيجيات التداول", "علم نفس السوق", "إدارة المحفظة", "الاتجاهات الكلية", "تحليل السلسلة", "تقييم المشاريع", "الاستثمار طويل الأمد"]
+                },
+                "pt": {
+                    "title": "Estrategista Cripto Avançado",
+                    "description": "Domine estratégias avançadas de trading, gestão de portfólio e análise macro cripto. Torne-se especialista em avaliar oportunidades.",
+                    "topics": ["Estratégias de Trading", "Psicologia de Mercado", "Gestão de Portfólio", "Tendências Macro", "Análise On-Chain", "Avaliação de Projetos", "Investimento Longo Prazo"]
+                }
+            }
         }
     ]
     await db.courses.insert_many(courses)
@@ -3819,31 +3996,31 @@ async def update_user_admin(
 
 @api_router.get("/admin/courses")
 async def get_admin_courses(admin: dict = Depends(get_admin_user)):
-    """Get all courses for admin management"""
+    """Get all courses for admin management — returns full translations structure"""
     courses = await db.courses.find({}, {"_id": 0}).to_list(length=100)
     return {"courses": courses}
 
 @api_router.post("/admin/courses")
 async def create_course_admin(
-    title: str,
-    description: str,
-    level: int,
-    topics: List[str] = [],
+    request: CourseCreateRequest,
     admin: dict = Depends(get_admin_user)
 ):
-    """Create a new course"""
+    """Create a new course with multi-language translations"""
+    validate_translations({k: v.model_dump() for k, v in request.translations.items()}, "course")
+
     course_id = f"course-{uuid.uuid4().hex[:8]}"
+    # Derive display title from first available language for legacy fallback
+    first_lang = next(iter(request.translations))
+    first_trans = request.translations[first_lang]
     course = {
         "id": course_id,
-        "title": title,
-        "description": description,
-        "level": level,
-        "thumbnail": "https://images.unsplash.com/photo-1639825752750-5061ded5503b?w=800",
+        "level": request.level,
+        "thumbnail": request.thumbnail,
         "lessons_count": 0,
-        "duration_hours": 0,
-        "topics": topics,
+        "duration_hours": request.duration_hours,
         "is_published": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "translations": {k: v.model_dump() for k, v in request.translations.items()}
     }
     await db.courses.insert_one(course)
     del course["_id"]
@@ -3852,72 +4029,80 @@ async def create_course_admin(
 @api_router.put("/admin/courses/{course_id}")
 async def update_course_admin(
     course_id: str,
-    title: Optional[str] = None,
-    description: Optional[str] = None,
-    level: Optional[int] = None,
-    topics: Optional[List[str]] = None,
-    thumbnail: Optional[str] = None,
-    is_published: Optional[bool] = None,
+    request: CourseUpdateRequest,
     admin: dict = Depends(get_admin_user)
 ):
-    """Update a course"""
+    """Update a course — supports partial translation updates (merges into existing)"""
+    existing = await db.courses.find_one({"id": course_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Course not found")
+
     update_data = {}
-    if title: update_data["title"] = title
-    if description: update_data["description"] = description
-    if level: update_data["level"] = level
-    if topics: update_data["topics"] = topics
-    if thumbnail: update_data["thumbnail"] = thumbnail
-    if is_published is not None: update_data["is_published"] = is_published
-    
+    if request.level is not None:
+        update_data["level"] = request.level
+    if request.thumbnail is not None:
+        update_data["thumbnail"] = request.thumbnail
+    if request.duration_hours is not None:
+        update_data["duration_hours"] = request.duration_hours
+    if request.is_published is not None:
+        update_data["is_published"] = request.is_published
+
+    if request.translations is not None:
+        validate_translations({k: v.model_dump() for k, v in request.translations.items()}, "course")
+        existing_translations = existing.get("translations", {})
+        existing_translations.update({k: v.model_dump() for k, v in request.translations.items()})
+        update_data["translations"] = existing_translations
+
     if update_data:
         await db.courses.update_one({"id": course_id}, {"$set": update_data})
-    
-    return {"status": "success", "updated": update_data}
+
+    return {"status": "success", "updated": list(update_data.keys())}
 
 @api_router.delete("/admin/courses/{course_id}")
 async def delete_course_admin(course_id: str, admin: dict = Depends(get_admin_user)):
     """Delete a course and its lessons"""
     if admin["role"] != "admin":
         raise HTTPException(status_code=403, detail="Admin only action")
-    
+
     await db.courses.delete_one({"id": course_id})
     await db.lessons.delete_many({"course_id": course_id})
     await db.quizzes.delete_many({"course_id": course_id})
-    
+
     return {"status": "deleted"}
 
 @api_router.get("/admin/lessons")
 async def get_admin_lessons(course_id: Optional[str] = None, admin: dict = Depends(get_admin_user)):
-    """Get lessons for admin management"""
+    """Get lessons for admin management — returns full translations structure"""
     query = {"course_id": course_id} if course_id else {}
-    lessons = await db.lessons.find(query, {"_id": 0}).to_list(length=100)
+    lessons = await db.lessons.find(query, {"_id": 0}).sort("order", 1).to_list(length=100)
     return {"lessons": lessons}
 
 @api_router.post("/admin/lessons")
 async def create_lesson_admin(
-    course_id: str,
-    title: str,
-    content: str,
-    objectives: List[str] = [],
-    examples: List[str] = [],
-    summary: str = "",
-    readings: List[str] = [],
-    order: int = 0,
+    request: LessonCreateRequest,
     admin: dict = Depends(get_admin_user)
 ):
-    """Create a new lesson"""
+    """Create a new lesson with multi-language translations"""
+    validate_translations({k: v.model_dump() for k, v in request.translations.items()}, "lesson")
+
+    # Verify course exists
+    course = await db.courses.find_one({"id": request.course_id})
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    # Compute duration from the longest content translation
+    max_content_len = max(
+        (len(v.content) for v in request.translations.values() if v.content),
+        default=0
+    )
+    duration = request.duration_minutes if request.duration_minutes is not None else max(5, max_content_len // 500)
+
     lesson_id = f"lesson-{uuid.uuid4().hex[:8]}"
     lesson = {
         "id": lesson_id,
-        "course_id": course_id,
-        "title": title,
-        "order": order,
-        "learning_objectives": objectives,
-        "content": content,
-        "examples": examples,
-        "summary": summary,
-        "recommended_readings": readings,
-        "duration_minutes": max(5, len(content) // 500),
+        "course_id": request.course_id,
+        "order": request.order,
+        "duration_minutes": duration,
         "hero_image": None,
         "audio_intro": None,
         "audio_full": None,
@@ -3925,51 +4110,58 @@ async def create_lesson_admin(
         "infographics": [],
         "checkpoints": [],
         "interactive_elements": [],
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "translations": {k: v.model_dump() for k, v in request.translations.items()}
     }
     await db.lessons.insert_one(lesson)
-    
-    # Update course lesson count
+
     await db.courses.update_one(
-        {"id": course_id},
+        {"id": request.course_id},
         {"$inc": {"lessons_count": 1}}
     )
-    
+
     del lesson["_id"]
     return lesson
 
 @api_router.put("/admin/lessons/{lesson_id}")
 async def update_lesson_admin(
     lesson_id: str,
-    title: Optional[str] = None,
-    content: Optional[str] = None,
-    objectives: Optional[List[str]] = None,
-    examples: Optional[List[str]] = None,
-    summary: Optional[str] = None,
-    readings: Optional[List[str]] = None,
-    hero_image: Optional[str] = None,
-    checkpoints: Optional[List[Dict]] = None,
-    order: Optional[int] = None,
+    request: LessonUpdateRequest,
     admin: dict = Depends(get_admin_user)
 ):
-    """Update a lesson"""
+    """Update a lesson — supports partial translation updates (merges into existing)"""
+    existing = await db.lessons.find_one({"id": lesson_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+
     update_data = {}
-    if title: update_data["title"] = title
-    if content: 
-        update_data["content"] = content
-        update_data["duration_minutes"] = max(5, len(content) // 500)
-    if objectives: update_data["learning_objectives"] = objectives
-    if examples: update_data["examples"] = examples
-    if summary: update_data["summary"] = summary
-    if readings: update_data["recommended_readings"] = readings
-    if hero_image: update_data["hero_image"] = hero_image
-    if checkpoints: update_data["checkpoints"] = checkpoints
-    if order is not None: update_data["order"] = order
-    
+    if request.order is not None:
+        update_data["order"] = request.order
+    if request.duration_minutes is not None:
+        update_data["duration_minutes"] = request.duration_minutes
+    if request.hero_image is not None:
+        update_data["hero_image"] = request.hero_image
+    if request.checkpoints is not None:
+        update_data["checkpoints"] = request.checkpoints
+
+    if request.translations is not None:
+        validate_translations({k: v.model_dump() for k, v in request.translations.items()}, "lesson")
+        existing_translations = existing.get("translations", {})
+        existing_translations.update({k: v.model_dump() for k, v in request.translations.items()})
+        update_data["translations"] = existing_translations
+        # Recalculate duration from longest content if not explicitly set
+        if request.duration_minutes is None:
+            max_content_len = max(
+                (len(v.content) for v in request.translations.values() if v.content),
+                default=0
+            )
+            if max_content_len:
+                update_data["duration_minutes"] = max(5, max_content_len // 500)
+
     if update_data:
         await db.lessons.update_one({"id": lesson_id}, {"$set": update_data})
-    
-    return {"status": "success", "updated": update_data}
+
+    return {"status": "success", "updated": list(update_data.keys())}
 
 @api_router.delete("/admin/lessons/{lesson_id}")
 async def delete_lesson_admin(lesson_id: str, admin: dict = Depends(get_admin_user)):
@@ -3982,6 +4174,72 @@ async def delete_lesson_admin(lesson_id: str, admin: dict = Depends(get_admin_us
             {"$inc": {"lessons_count": -1}}
         )
     return {"status": "deleted"}
+
+# ==================== MIGRATION ROUTES ====================
+
+@api_router.post("/admin/migrate-translations")
+async def migrate_to_translations(
+    default_lang: str = "en",
+    admin: dict = Depends(get_admin_user)
+):
+    """Migrate existing single-language courses and lessons to the translations structure.
+    Idempotent: records already using translations are skipped."""
+    if admin["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin only action")
+
+    migrated_courses = 0
+    migrated_lessons = 0
+
+    # Migrate courses
+    async for course in db.courses.find({}):
+        if course.get("translations"):
+            continue  # Already migrated
+        translation = {
+            "title": course.get("title", ""),
+            "description": course.get("description", ""),
+            "topics": course.get("topics", [])
+        }
+        await db.courses.update_one(
+            {"_id": course["_id"]},
+            {
+                "$set": {"translations": {default_lang: translation}},
+                "$unset": {"title": "", "description": "", "topics": ""}
+            }
+        )
+        migrated_courses += 1
+
+    # Migrate lessons
+    async for lesson in db.lessons.find({}):
+        if lesson.get("translations"):
+            continue  # Already migrated
+        translation = {
+            "title": lesson.get("title", ""),
+            "subtitle": lesson.get("subtitle", ""),
+            "content": lesson.get("content", ""),
+            "learning_objectives": lesson.get("learning_objectives", []),
+            "examples": lesson.get("examples", []),
+            "summary": lesson.get("summary", ""),
+            "recommended_readings": lesson.get("recommended_readings", [])
+        }
+        await db.lessons.update_one(
+            {"_id": lesson["_id"]},
+            {
+                "$set": {"translations": {default_lang: translation}},
+                "$unset": {
+                    "title": "", "subtitle": "", "content": "",
+                    "learning_objectives": "", "examples": "",
+                    "summary": "", "recommended_readings": ""
+                }
+            }
+        )
+        migrated_lessons += 1
+
+    return {
+        "status": "success",
+        "migrated_courses": migrated_courses,
+        "migrated_lessons": migrated_lessons,
+        "default_language": default_lang
+    }
 
 # ==================== MEDIA GENERATION ROUTES ====================
 
