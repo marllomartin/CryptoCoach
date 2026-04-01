@@ -265,6 +265,7 @@ class GlossaryTerm(BaseModel):
     term: str
     definition: str
     category: str
+    language: str = "en"
 
 class BlogPost(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -879,11 +880,16 @@ async def verify_certificate(cert_id: str):
 # ==================== GLOSSARY ROUTES ====================
 
 @api_router.get("/glossary", response_model=List[GlossaryTerm])
-async def get_glossary():
-    terms = await db.glossary.find({}, {"_id": 0}).sort("term", 1).to_list(500)
-    if not terms:
+async def get_glossary(lang: str = "en"):
+    # If no multilingual data exists yet, drop old data and re-seed all languages
+    has_language_field = await db.glossary.find_one({"language": {"$exists": True}})
+    if not has_language_field:
+        await db.glossary.drop()
         await seed_glossary()
-        terms = await db.glossary.find({}, {"_id": 0}).sort("term", 1).to_list(500)
+    terms = await db.glossary.find({"language": lang}, {"_id": 0}).sort("term", 1).to_list(500)
+    if not terms:
+        # Fallback to English if requested language has no terms
+        terms = await db.glossary.find({"language": "en"}, {"_id": 0}).sort("term", 1).to_list(500)
     return terms
 
 # ==================== BLOG ROUTES ====================
@@ -2608,42 +2614,142 @@ async def create_exam_for_level(level: int) -> dict:
     return exam
 
 async def seed_glossary():
-    terms = [
-        {"term": "Blockchain", "definition": "A distributed digital ledger that records transactions across multiple computers in a way that prevents retroactive alteration.", "category": "Technology"},
-        {"term": "Bitcoin", "definition": "The first and most well-known cryptocurrency, created in 2009 by Satoshi Nakamoto as a peer-to-peer electronic cash system.", "category": "Cryptocurrency"},
-        {"term": "Smart Contract", "definition": "Self-executing contracts with the terms directly written into code, automatically enforcing and executing when conditions are met.", "category": "Technology"},
-        {"term": "Gas Fees", "definition": "Transaction fees paid to validators/miners for processing transactions on blockchain networks like Ethereum.", "category": "Transactions"},
-        {"term": "Mining", "definition": "The process of using computational power to validate transactions and create new blocks, earning cryptocurrency rewards.", "category": "Technology"},
-        {"term": "Staking", "definition": "Locking up cryptocurrency to support network operations (like validating transactions) in exchange for rewards.", "category": "DeFi"},
-        {"term": "Liquidity Pool", "definition": "A collection of funds locked in a smart contract, used to facilitate decentralized trading and lending.", "category": "DeFi"},
-        {"term": "Tokenomics", "definition": "The economic design of a cryptocurrency token, including supply, distribution, and incentive mechanisms.", "category": "Economics"},
-        {"term": "DeFi", "definition": "Decentralized Finance - financial services built on blockchain technology without traditional intermediaries.", "category": "DeFi"},
-        {"term": "NFT", "definition": "Non-Fungible Token - a unique digital asset on a blockchain representing ownership of specific items like art or collectibles.", "category": "Assets"},
-        {"term": "Wallet", "definition": "Software or hardware that stores private keys and allows users to send, receive, and manage cryptocurrency.", "category": "Security"},
-        {"term": "Private Key", "definition": "A secret cryptographic code that proves ownership and allows spending of cryptocurrency. Must be kept secure.", "category": "Security"},
-        {"term": "Public Key", "definition": "A cryptographic code derived from the private key that can be shared to receive cryptocurrency.", "category": "Security"},
-        {"term": "DEX", "definition": "Decentralized Exchange - a platform for trading cryptocurrency directly from user wallets without an intermediary.", "category": "Trading"},
-        {"term": "CEX", "definition": "Centralized Exchange - a traditional cryptocurrency exchange operated by a company that holds user funds.", "category": "Trading"},
-        {"term": "HODL", "definition": "A misspelling of 'hold' that became crypto slang for holding cryptocurrency long-term regardless of price movements.", "category": "Culture"},
-        {"term": "Whale", "definition": "An individual or entity holding a large amount of cryptocurrency, capable of influencing market prices.", "category": "Trading"},
-        {"term": "Altcoin", "definition": "Any cryptocurrency other than Bitcoin, including Ethereum, Solana, and thousands of others.", "category": "Cryptocurrency"},
-        {"term": "Stablecoin", "definition": "A cryptocurrency designed to maintain a stable value, typically pegged to fiat currency like the US dollar.", "category": "Cryptocurrency"},
-        {"term": "Layer 2", "definition": "Scaling solutions built on top of Layer 1 blockchains to increase transaction speed and reduce costs.", "category": "Technology"},
-        {"term": "Proof of Work", "definition": "A consensus mechanism where miners compete to solve complex puzzles to validate transactions and create blocks.", "category": "Technology"},
-        {"term": "Proof of Stake", "definition": "A consensus mechanism where validators are chosen to create blocks based on the amount of cryptocurrency they stake.", "category": "Technology"},
-        {"term": "Market Cap", "definition": "The total value of a cryptocurrency, calculated by multiplying the current price by the circulating supply.", "category": "Economics"},
-        {"term": "ATH", "definition": "All-Time High - the highest price a cryptocurrency has ever reached.", "category": "Trading"},
-        {"term": "FOMO", "definition": "Fear Of Missing Out - the anxiety that an exciting opportunity is being missed, often leading to impulsive buying.", "category": "Culture"},
-        {"term": "FUD", "definition": "Fear, Uncertainty, and Doubt - negative information spread to influence perception and price.", "category": "Culture"},
-        {"term": "Airdrop", "definition": "Free distribution of cryptocurrency tokens to wallet addresses, often for marketing or rewarding users.", "category": "Distribution"},
-        {"term": "Hard Fork", "definition": "A permanent divergence in a blockchain creating two separate chains, often due to protocol upgrades or disputes.", "category": "Technology"},
-        {"term": "Seed Phrase", "definition": "A series of words (usually 12-24) that can be used to recover a cryptocurrency wallet.", "category": "Security"},
-        {"term": "TVL", "definition": "Total Value Locked - the total amount of assets deposited in a DeFi protocol.", "category": "DeFi"}
-    ]
-    
-    for term in terms:
-        term["id"] = str(uuid.uuid4())
-        await db.glossary.insert_one(term)
+    terms_by_language = {
+        "en": [
+            {"term": "Blockchain", "definition": "A distributed digital ledger that records transactions across multiple computers in a way that prevents retroactive alteration.", "category": "Technology"},
+            {"term": "Bitcoin", "definition": "The first and most well-known cryptocurrency, created in 2009 by Satoshi Nakamoto as a peer-to-peer electronic cash system.", "category": "Cryptocurrency"},
+            {"term": "Smart Contract", "definition": "Self-executing contracts with the terms directly written into code, automatically enforcing and executing when conditions are met.", "category": "Technology"},
+            {"term": "Gas Fees", "definition": "Transaction fees paid to validators/miners for processing transactions on blockchain networks like Ethereum.", "category": "Transactions"},
+            {"term": "Mining", "definition": "The process of using computational power to validate transactions and create new blocks, earning cryptocurrency rewards.", "category": "Technology"},
+            {"term": "Staking", "definition": "Locking up cryptocurrency to support network operations (like validating transactions) in exchange for rewards.", "category": "DeFi"},
+            {"term": "Liquidity Pool", "definition": "A collection of funds locked in a smart contract, used to facilitate decentralized trading and lending.", "category": "DeFi"},
+            {"term": "Tokenomics", "definition": "The economic design of a cryptocurrency token, including supply, distribution, and incentive mechanisms.", "category": "Economics"},
+            {"term": "DeFi", "definition": "Decentralized Finance - financial services built on blockchain technology without traditional intermediaries.", "category": "DeFi"},
+            {"term": "NFT", "definition": "Non-Fungible Token - a unique digital asset on a blockchain representing ownership of specific items like art or collectibles.", "category": "Assets"},
+            {"term": "Wallet", "definition": "Software or hardware that stores private keys and allows users to send, receive, and manage cryptocurrency.", "category": "Security"},
+            {"term": "Private Key", "definition": "A secret cryptographic code that proves ownership and allows spending of cryptocurrency. Must be kept secure.", "category": "Security"},
+            {"term": "Public Key", "definition": "A cryptographic code derived from the private key that can be shared to receive cryptocurrency.", "category": "Security"},
+            {"term": "DEX", "definition": "Decentralized Exchange - a platform for trading cryptocurrency directly from user wallets without an intermediary.", "category": "Trading"},
+            {"term": "CEX", "definition": "Centralized Exchange - a traditional cryptocurrency exchange operated by a company that holds user funds.", "category": "Trading"},
+            {"term": "HODL", "definition": "A misspelling of 'hold' that became crypto slang for holding cryptocurrency long-term regardless of price movements.", "category": "Culture"},
+            {"term": "Whale", "definition": "An individual or entity holding a large amount of cryptocurrency, capable of influencing market prices.", "category": "Trading"},
+            {"term": "Altcoin", "definition": "Any cryptocurrency other than Bitcoin, including Ethereum, Solana, and thousands of others.", "category": "Cryptocurrency"},
+            {"term": "Stablecoin", "definition": "A cryptocurrency designed to maintain a stable value, typically pegged to fiat currency like the US dollar.", "category": "Cryptocurrency"},
+            {"term": "Layer 2", "definition": "Scaling solutions built on top of Layer 1 blockchains to increase transaction speed and reduce costs.", "category": "Technology"},
+            {"term": "Proof of Work", "definition": "A consensus mechanism where miners compete to solve complex puzzles to validate transactions and create blocks.", "category": "Technology"},
+            {"term": "Proof of Stake", "definition": "A consensus mechanism where validators are chosen to create blocks based on the amount of cryptocurrency they stake.", "category": "Technology"},
+            {"term": "Market Cap", "definition": "The total value of a cryptocurrency, calculated by multiplying the current price by the circulating supply.", "category": "Economics"},
+            {"term": "ATH", "definition": "All-Time High - the highest price a cryptocurrency has ever reached.", "category": "Trading"},
+            {"term": "FOMO", "definition": "Fear Of Missing Out - the anxiety that an exciting opportunity is being missed, often leading to impulsive buying.", "category": "Culture"},
+            {"term": "FUD", "definition": "Fear, Uncertainty, and Doubt - negative information spread to influence perception and price.", "category": "Culture"},
+            {"term": "Airdrop", "definition": "Free distribution of cryptocurrency tokens to wallet addresses, often for marketing or rewarding users.", "category": "Distribution"},
+            {"term": "Hard Fork", "definition": "A permanent divergence in a blockchain creating two separate chains, often due to protocol upgrades or disputes.", "category": "Technology"},
+            {"term": "Seed Phrase", "definition": "A series of words (usually 12-24) that can be used to recover a cryptocurrency wallet.", "category": "Security"},
+            {"term": "TVL", "definition": "Total Value Locked - the total amount of assets deposited in a DeFi protocol.", "category": "DeFi"},
+        ],
+        "fr": [
+            {"term": "Blockchain", "definition": "Un registre numérique distribué qui enregistre les transactions sur plusieurs ordinateurs de manière à empêcher toute modification rétroactive.", "category": "Technologie"},
+            {"term": "Bitcoin", "definition": "La première et la plus connue des cryptomonnaies, créée en 2009 par Satoshi Nakamoto comme système de paiement électronique pair-à-pair.", "category": "Cryptomonnaie"},
+            {"term": "Smart Contract", "definition": "Des contrats auto-exécutables dont les conditions sont directement écrites en code, s'appliquant automatiquement lorsque les conditions sont remplies.", "category": "Technologie"},
+            {"term": "Gas Fees", "definition": "Les frais de transaction payés aux validateurs/mineurs pour traiter les transactions sur des réseaux blockchain comme Ethereum.", "category": "Transactions"},
+            {"term": "Mining", "definition": "Le processus d'utilisation de la puissance de calcul pour valider les transactions et créer de nouveaux blocs, en gagnant des récompenses en cryptomonnaie.", "category": "Technologie"},
+            {"term": "Staking", "definition": "Bloquer des cryptomonnaies pour soutenir les opérations du réseau (comme la validation des transactions) en échange de récompenses.", "category": "DeFi"},
+            {"term": "Liquidity Pool", "definition": "Une collection de fonds bloqués dans un contrat intelligent, utilisés pour faciliter les échanges et prêts décentralisés.", "category": "DeFi"},
+            {"term": "Tokenomics", "definition": "La conception économique d'un token de cryptomonnaie, incluant l'offre, la distribution et les mécanismes d'incitation.", "category": "Économie"},
+            {"term": "DeFi", "definition": "Finance Décentralisée - des services financiers construits sur la technologie blockchain sans intermédiaires traditionnels.", "category": "DeFi"},
+            {"term": "NFT", "definition": "Token Non Fongible - un actif numérique unique sur une blockchain représentant la propriété d'éléments spécifiques comme l'art ou les objets de collection.", "category": "Actifs"},
+            {"term": "Wallet", "definition": "Logiciel ou matériel qui stocke les clés privées et permet aux utilisateurs d'envoyer, recevoir et gérer des cryptomonnaies.", "category": "Sécurité"},
+            {"term": "Private Key", "definition": "Un code cryptographique secret qui prouve la propriété et permet de dépenser des cryptomonnaies. Doit être gardé en sécurité.", "category": "Sécurité"},
+            {"term": "Public Key", "definition": "Un code cryptographique dérivé de la clé privée qui peut être partagé pour recevoir des cryptomonnaies.", "category": "Sécurité"},
+            {"term": "DEX", "definition": "Échange Décentralisé - une plateforme pour échanger des cryptomonnaies directement depuis les portefeuilles des utilisateurs sans intermédiaire.", "category": "Trading"},
+            {"term": "CEX", "definition": "Échange Centralisé - un échange de cryptomonnaies traditionnel exploité par une entreprise qui détient les fonds des utilisateurs.", "category": "Trading"},
+            {"term": "HODL", "definition": "Une faute d'orthographe de 'hold' devenue un argot crypto pour conserver des cryptomonnaies à long terme quelle que soit l'évolution des prix.", "category": "Culture"},
+            {"term": "Whale", "definition": "Un individu ou une entité détenant une grande quantité de cryptomonnaies, capable d'influencer les prix du marché.", "category": "Trading"},
+            {"term": "Altcoin", "definition": "Toute cryptomonnaie autre que le Bitcoin, incluant Ethereum, Solana et des milliers d'autres.", "category": "Cryptomonnaie"},
+            {"term": "Stablecoin", "definition": "Une cryptomonnaie conçue pour maintenir une valeur stable, généralement ancrée à une monnaie fiduciaire comme le dollar américain.", "category": "Cryptomonnaie"},
+            {"term": "Layer 2", "definition": "Des solutions de mise à l'échelle construites sur des blockchains de couche 1 pour augmenter la vitesse des transactions et réduire les coûts.", "category": "Technologie"},
+            {"term": "Proof of Work", "definition": "Un mécanisme de consensus où les mineurs s'affrontent pour résoudre des puzzles complexes afin de valider les transactions et créer des blocs.", "category": "Technologie"},
+            {"term": "Proof of Stake", "definition": "Un mécanisme de consensus où les validateurs sont choisis pour créer des blocs en fonction de la quantité de cryptomonnaies qu'ils misent.", "category": "Technologie"},
+            {"term": "Market Cap", "definition": "La valeur totale d'une cryptomonnaie, calculée en multipliant le prix actuel par l'offre en circulation.", "category": "Économie"},
+            {"term": "ATH", "definition": "All-Time High (Sommet Historique) - le prix le plus élevé qu'une cryptomonnaie ait jamais atteint.", "category": "Trading"},
+            {"term": "FOMO", "definition": "Fear Of Missing Out (Peur de Manquer) - l'anxiété de manquer une opportunité passionnante, menant souvent à des achats impulsifs.", "category": "Culture"},
+            {"term": "FUD", "definition": "Fear, Uncertainty, and Doubt (Peur, Incertitude et Doute) - des informations négatives diffusées pour influencer la perception et le prix.", "category": "Culture"},
+            {"term": "Airdrop", "definition": "Distribution gratuite de tokens de cryptomonnaie vers des adresses de portefeuille, souvent pour le marketing ou pour récompenser les utilisateurs.", "category": "Distribution"},
+            {"term": "Hard Fork", "definition": "Une divergence permanente dans une blockchain créant deux chaînes distinctes, souvent due à des mises à niveau de protocole ou des désaccords.", "category": "Technologie"},
+            {"term": "Seed Phrase", "definition": "Une série de mots (généralement 12 à 24) qui peut être utilisée pour récupérer un portefeuille de cryptomonnaie.", "category": "Sécurité"},
+            {"term": "TVL", "definition": "Total Value Locked (Valeur Totale Bloquée) - le montant total des actifs déposés dans un protocole DeFi.", "category": "DeFi"},
+        ],
+        "ar": [
+            {"term": "Blockchain", "definition": "سجل رقمي موزع يُسجّل المعاملات عبر أجهزة كمبيوتر متعددة بطريقة تمنع أي تعديل بأثر رجعي.", "category": "تكنولوجيا"},
+            {"term": "Bitcoin", "definition": "أول وأشهر عملة مشفرة، أُنشئت عام 2009 بواسطة ساتوشي ناكاموتو كنظام إلكتروني للمدفوعات من شخص لآخر.", "category": "عملة مشفرة"},
+            {"term": "Smart Contract", "definition": "عقود تنفذ نفسها تلقائيًا وشروطها مكتوبة مباشرةً في الكود، تُنفَّذ تلقائيًا عند استيفاء الشروط.", "category": "تكنولوجيا"},
+            {"term": "Gas Fees", "definition": "رسوم المعاملات المدفوعة للمدققين والمعدِّنين مقابل معالجة المعاملات على شبكات البلوكتشين مثل إيثيريوم.", "category": "المعاملات"},
+            {"term": "Mining", "definition": "عملية استخدام القوة الحسابية للتحقق من المعاملات وإنشاء كتل جديدة مقابل مكافآت بالعملات المشفرة.", "category": "تكنولوجيا"},
+            {"term": "Staking", "definition": "قفل العملات المشفرة لدعم عمليات الشبكة مثل التحقق من المعاملات مقابل مكافآت.", "category": "تمويل لامركزي"},
+            {"term": "Liquidity Pool", "definition": "مجموعة أموال مقفلة في عقد ذكي، تُستخدم لتسهيل التداول والإقراض اللامركزي.", "category": "تمويل لامركزي"},
+            {"term": "Tokenomics", "definition": "التصميم الاقتصادي لرمز العملة المشفرة، بما يشمل العرض والتوزيع وآليات الحوافز.", "category": "الاقتصاد"},
+            {"term": "DeFi", "definition": "التمويل اللامركزي - خدمات مالية مبنية على تقنية البلوكتشين دون وسطاء تقليديين.", "category": "تمويل لامركزي"},
+            {"term": "NFT", "definition": "رمز غير قابل للاستبدال - أصل رقمي فريد على البلوكتشين يمثل ملكية عناصر محددة كالفن أو المقتنيات.", "category": "الأصول"},
+            {"term": "Wallet", "definition": "برنامج أو جهاز يُخزّن المفاتيح الخاصة ويُتيح للمستخدمين إرسال واستقبال وإدارة العملات المشفرة.", "category": "الأمان"},
+            {"term": "Private Key", "definition": "رمز تشفير سري يُثبت الملكية ويُتيح إنفاق العملات المشفرة. يجب الحفاظ عليه آمنًا.", "category": "الأمان"},
+            {"term": "Public Key", "definition": "رمز تشفير مشتق من المفتاح الخاص يمكن مشاركته لاستقبال العملات المشفرة.", "category": "الأمان"},
+            {"term": "DEX", "definition": "بورصة لامركزية - منصة لتداول العملات المشفرة مباشرةً من محافظ المستخدمين دون وسيط.", "category": "التداول"},
+            {"term": "CEX", "definition": "بورصة مركزية - بورصة عملات مشفرة تقليدية تُدار من قِبل شركة تحتفظ بأموال المستخدمين.", "category": "التداول"},
+            {"term": "HODL", "definition": "خطأ إملائي لكلمة 'hold' أصبح مصطلحًا شائعًا للإشارة إلى الاحتفاظ بالعملات على المدى الطويل بصرف النظر عن تحركات الأسعار.", "category": "الثقافة"},
+            {"term": "Whale", "definition": "فرد أو كيان يمتلك كمية كبيرة من العملات المشفرة، قادر على التأثير في أسعار السوق.", "category": "التداول"},
+            {"term": "Altcoin", "definition": "أي عملة مشفرة غير البيتكوين، بما فيها إيثيريوم وسولانا وآلاف غيرها.", "category": "عملة مشفرة"},
+            {"term": "Stablecoin", "definition": "عملة مشفرة مصممة للحفاظ على قيمة مستقرة، عادةً مرتبطة بعملة ورقية كالدولار الأمريكي.", "category": "عملة مشفرة"},
+            {"term": "Layer 2", "definition": "حلول توسعية مبنية فوق بلوكتشينات الطبقة الأولى لزيادة سرعة المعاملات وتقليل التكاليف.", "category": "تكنولوجيا"},
+            {"term": "Proof of Work", "definition": "آلية توافق يتنافس فيها المعدِّنون لحل ألغاز معقدة للتحقق من المعاملات وإنشاء الكتل.", "category": "تكنولوجيا"},
+            {"term": "Proof of Stake", "definition": "آلية توافق يُختار فيها المدققون لإنشاء الكتل بناءً على كمية العملات المشفرة التي يضعونها كضمان.", "category": "تكنولوجيا"},
+            {"term": "Market Cap", "definition": "القيمة الإجمالية للعملة المشفرة، تُحسب بضرب السعر الحالي في الكمية المتداولة.", "category": "الاقتصاد"},
+            {"term": "ATH", "definition": "أعلى مستوى على الإطلاق - أعلى سعر وصلت إليه عملة مشفرة على مر التاريخ.", "category": "التداول"},
+            {"term": "FOMO", "definition": "الخوف من تفويت الفرصة - القلق من تفويت فرصة مثيرة، يؤدي في الغالب إلى الشراء الاندفاعي.", "category": "الثقافة"},
+            {"term": "FUD", "definition": "الخوف وعدم اليقين والشك - معلومات سلبية تُنشر للتأثير على التصورات والأسعار.", "category": "الثقافة"},
+            {"term": "Airdrop", "definition": "توزيع مجاني لرموز العملات المشفرة على عناوين المحافظ، غالبًا للتسويق أو مكافأة المستخدمين.", "category": "التوزيع"},
+            {"term": "Hard Fork", "definition": "انقسام دائم في بلوكتشين يُنشئ سلسلتين منفصلتين، غالبًا بسبب ترقيات البروتوكول أو الخلافات.", "category": "تكنولوجيا"},
+            {"term": "Seed Phrase", "definition": "سلسلة كلمات (عادةً 12 إلى 24) يمكن استخدامها لاسترداد محفظة العملات المشفرة.", "category": "الأمان"},
+            {"term": "TVL", "definition": "إجمالي القيمة المقفلة - المبلغ الإجمالي للأصول المودعة في بروتوكول تمويل لامركزي.", "category": "تمويل لامركزي"},
+        ],
+        "pt": [
+            {"term": "Blockchain", "definition": "Um livro-razão digital distribuído que registra transações em vários computadores de forma que impede alterações retroativas.", "category": "Tecnologia"},
+            {"term": "Bitcoin", "definition": "A primeira e mais conhecida criptomoeda, criada em 2009 por Satoshi Nakamoto como um sistema eletrônico de pagamentos ponto a ponto.", "category": "Criptomoeda"},
+            {"term": "Smart Contract", "definition": "Contratos autoexecutáveis com os termos escritos diretamente em código, executados automaticamente quando as condições são atendidas.", "category": "Tecnologia"},
+            {"term": "Gas Fees", "definition": "Taxas de transação pagas a validadores e mineradores pelo processamento de transações em redes blockchain como o Ethereum.", "category": "Transações"},
+            {"term": "Mining", "definition": "O processo de usar poder computacional para validar transações e criar novos blocos, ganhando recompensas em criptomoedas.", "category": "Tecnologia"},
+            {"term": "Staking", "definition": "Bloquear criptomoedas para apoiar as operações da rede, como validar transações, em troca de recompensas.", "category": "DeFi"},
+            {"term": "Liquidity Pool", "definition": "Uma coleção de fundos bloqueados em um contrato inteligente, usados para facilitar negociações e empréstimos descentralizados.", "category": "DeFi"},
+            {"term": "Tokenomics", "definition": "O design econômico de um token de criptomoeda, incluindo oferta, distribuição e mecanismos de incentivo.", "category": "Economia"},
+            {"term": "DeFi", "definition": "Finanças Descentralizadas - serviços financeiros construídos sobre tecnologia blockchain sem intermediários tradicionais.", "category": "DeFi"},
+            {"term": "NFT", "definition": "Token Não Fungível - um ativo digital único em uma blockchain que representa a propriedade de itens específicos como arte ou colecionáveis.", "category": "Ativos"},
+            {"term": "Wallet", "definition": "Software ou hardware que armazena chaves privadas e permite que os usuários enviem, recebam e gerenciem criptomoedas.", "category": "Segurança"},
+            {"term": "Private Key", "definition": "Um código criptográfico secreto que comprova a propriedade e permite gastar criptomoedas. Deve ser mantido seguro.", "category": "Segurança"},
+            {"term": "Public Key", "definition": "Um código criptográfico derivado da chave privada que pode ser compartilhado para receber criptomoedas.", "category": "Segurança"},
+            {"term": "DEX", "definition": "Exchange Descentralizada - uma plataforma para negociar criptomoedas diretamente das carteiras dos usuários sem intermediário.", "category": "Trading"},
+            {"term": "CEX", "definition": "Exchange Centralizada - uma exchange de criptomoedas tradicional operada por uma empresa que detém os fundos dos usuários.", "category": "Trading"},
+            {"term": "HODL", "definition": "Um erro de digitação de 'hold' que se tornou gíria cripto para manter criptomoedas a longo prazo independente das variações de preço.", "category": "Cultura"},
+            {"term": "Whale", "definition": "Um indivíduo ou entidade que detém grande quantidade de criptomoedas, capaz de influenciar os preços do mercado.", "category": "Trading"},
+            {"term": "Altcoin", "definition": "Qualquer criptomoeda que não seja o Bitcoin, incluindo Ethereum, Solana e milhares de outras.", "category": "Criptomoeda"},
+            {"term": "Stablecoin", "definition": "Uma criptomoeda projetada para manter um valor estável, geralmente atrelada a uma moeda fiduciária como o dólar americano.", "category": "Criptomoeda"},
+            {"term": "Layer 2", "definition": "Soluções de escalabilidade construídas sobre blockchains de Camada 1 para aumentar a velocidade de transações e reduzir custos.", "category": "Tecnologia"},
+            {"term": "Proof of Work", "definition": "Um mecanismo de consenso onde mineradores competem para resolver quebra-cabeças complexos para validar transações e criar blocos.", "category": "Tecnologia"},
+            {"term": "Proof of Stake", "definition": "Um mecanismo de consenso onde validadores são escolhidos para criar blocos com base na quantidade de criptomoedas que fazem stake.", "category": "Tecnologia"},
+            {"term": "Market Cap", "definition": "O valor total de uma criptomoeda, calculado multiplicando o preço atual pelo fornecimento circulante.", "category": "Economia"},
+            {"term": "ATH", "definition": "All-Time High (Máxima Histórica) - o preço mais alto que uma criptomoeda já atingiu.", "category": "Trading"},
+            {"term": "FOMO", "definition": "Fear Of Missing Out (Medo de Perder) - a ansiedade de perder uma oportunidade empolgante, frequentemente levando a compras impulsivas.", "category": "Cultura"},
+            {"term": "FUD", "definition": "Fear, Uncertainty, and Doubt (Medo, Incerteza e Dúvida) - informações negativas espalhadas para influenciar a percepção e o preço.", "category": "Cultura"},
+            {"term": "Airdrop", "definition": "Distribuição gratuita de tokens de criptomoeda para endereços de carteira, geralmente para marketing ou recompensa de usuários.", "category": "Distribuição"},
+            {"term": "Hard Fork", "definition": "Uma divergência permanente em uma blockchain criando duas cadeias separadas, geralmente devido a atualizações de protocolo ou disputas.", "category": "Tecnologia"},
+            {"term": "Seed Phrase", "definition": "Uma série de palavras (geralmente 12 a 24) que pode ser usada para recuperar uma carteira de criptomoedas.", "category": "Segurança"},
+            {"term": "TVL", "definition": "Total Value Locked (Valor Total Bloqueado) - o montante total de ativos depositados em um protocolo DeFi.", "category": "DeFi"},
+        ],
+    }
+
+    for language, terms in terms_by_language.items():
+        for term in terms:
+            term["id"] = str(uuid.uuid4())
+            term["language"] = language
+            await db.glossary.insert_one(term)
 
 async def seed_blog():
     posts = [

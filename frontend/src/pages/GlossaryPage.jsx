@@ -14,7 +14,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 
 export default function GlossaryPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [terms, setTerms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,7 +23,7 @@ export default function GlossaryPage() {
   useEffect(() => {
     const fetchGlossary = async () => {
       try {
-        const response = await axios.get(`${API}/glossary`);
+        const response = await axios.get(`${API}/glossary?lang=${i18n.language}`);
         setTerms(response.data);
       } catch (e) {
         console.error('Failed to fetch glossary', e);
@@ -31,8 +31,9 @@ export default function GlossaryPage() {
         setLoading(false);
       }
     };
+    setSelectedCategory('All');
     fetchGlossary();
-  }, []);
+  }, [i18n.language]);
 
   const categories = ['All', ...new Set(terms.map(t => t.category))];
 
