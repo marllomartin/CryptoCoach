@@ -137,7 +137,7 @@ export const Layout = ({ children }) => {
             </div>
 
             {/* Mobile Header Controls */}
-            <div className="md:hidden flex items-center gap-2">
+            <div className="md:hidden flex items-center gap-2 justify-self-end">
               <LanguageSwitcher variant="minimal" />
               <button
                 className="p-2 text-slate-300"
