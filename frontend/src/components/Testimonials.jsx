@@ -7,41 +7,44 @@ const TESTIMONIALS = [
   {
     id: 1,
     name: 'Alexandre M.',
-    role: { en: 'Software Developer', fr: 'Développeur', ar: 'مطور برمجيات' },
+    role: { en: 'Software Developer', fr: 'Développeur', ar: 'مطور برمجيات', pt: 'Desenvolvedor de Software' },
     avatar: 'AM',
     rating: 5,
     text: {
       en: "CryptoCoach transformed my understanding of crypto. The structured lessons and quizzes helped me go from zero to confidently managing my portfolio in just 2 months.",
       fr: "CryptoCoach a transformé ma compréhension de la crypto. Les leçons structurées et les quiz m'ont permis de passer de zéro à la gestion confiante de mon portefeuille en seulement 2 mois.",
-      ar: "غير CryptoCoach فهمي للعملات المشفرة. ساعدتني الدروس المنظمة والاختبارات على الانتقال من الصفر إلى إدارة محفظتي بثقة في شهرين فقط."
+      ar: "غير CryptoCoach فهمي للعملات المشفرة. ساعدتني الدروس المنظمة والاختبارات على الانتقال من الصفر إلى إدارة محفظتي بثقة في شهرين فقط.",
+      pt: "O CryptoCoach transformou minha compreensão sobre cripto. As aulas estruturadas e os quizzes me ajudaram a ir do zero até gerenciar meu portfólio com confiança em apenas 2 meses."
     },
-    highlight: { en: 'From zero to confident', fr: 'De zéro à confiant', ar: 'من الصفر إلى الثقة' }
+    highlight: { en: 'From zero to confident', fr: 'De zéro à confiant', ar: 'من الصفر إلى الثقة', pt: 'Do zero à confiança' }
   },
   {
     id: 2,
     name: 'Sophie L.',
-    role: { en: 'Marketing Manager', fr: 'Responsable Marketing', ar: 'مديرة تسويق' },
+    role: { en: 'Marketing Manager', fr: 'Responsable Marketing', ar: 'مديرة تسويق', pt: 'Gerente de Marketing' },
     avatar: 'SL',
     rating: 5,
     text: {
       en: "The AI mentor is incredible! Whenever I have a question about a concept, I get instant, clear explanations. It's like having a personal crypto tutor 24/7.",
       fr: "Le mentor IA est incroyable ! Chaque fois que j'ai une question sur un concept, j'obtiens des explications instantanées et claires. C'est comme avoir un tuteur crypto personnel 24/7.",
-      ar: "المرشد الذكي مذهل! كلما كان لدي سؤال حول مفهوم، أحصل على تفسيرات فورية وواضحة. إنه مثل وجود معلم عملات مشفرة شخصي على مدار الساعة."
+      ar: "المرشد الذكي مذهل! كلما كان لدي سؤال حول مفهوم، أحصل على تفسيرات فورية وواضحة. إنه مثل وجود معلم عملات مشفرة شخصي على مدار الساعة.",
+      pt: "O mentor com IA é incrível! Sempre que tenho uma dúvida sobre algum conceito, recebo explicações instantâneas e claras. É como ter um tutor de cripto pessoal disponível 24 horas por dia."
     },
-    highlight: { en: 'Personal tutor 24/7', fr: 'Tuteur personnel 24/7', ar: 'معلم شخصي 24/7' }
+    highlight: { en: 'Personal tutor 24/7', fr: 'Tuteur personnel 24/7', ar: 'معلم شخصي 24/7', pt: 'Tutor pessoal 24/7' }
   },
   {
     id: 3,
     name: 'Mohamed K.',
-    role: { en: 'Entrepreneur', fr: 'Entrepreneur', ar: 'رائد أعمال' },
+    role: { en: 'Entrepreneur', fr: 'Entrepreneur', ar: 'رائد أعمال', pt: 'Empreendedor' },
     avatar: 'MK',
     rating: 5,
     text: {
       en: "The trading simulator was a game-changer. I practiced strategies without risking real money, and when I started trading for real, I already knew what to do.",
       fr: "Le simulateur de trading a tout changé. J'ai pratiqué des stratégies sans risquer d'argent réel, et quand j'ai commencé à trader pour de vrai, je savais déjà quoi faire.",
-      ar: "كان محاكي التداول نقطة تحول. مارست الاستراتيجيات دون المخاطرة بأموال حقيقية، وعندما بدأت التداول الحقيقي، كنت أعرف بالفعل ما يجب فعله."
+      ar: "كان محاكي التداول نقطة تحول. مارست الاستراتيجيات دون المخاطرة بأموال حقيقية، وعندما بدأت التداول الحقيقي، كنت أعرف بالفعل ما يجب فعله.",
+      pt: "O simulador de trading foi um divisor de águas. Pratiquei estratégias sem arriscar dinheiro real e, quando comecei a operar de verdade, já sabia exatamente o que fazer."
     },
-    highlight: { en: 'Risk-free practice', fr: 'Pratique sans risque', ar: 'تدريب بدون مخاطر' }
+    highlight: { en: 'Risk-free practice', fr: 'Pratique sans risque', ar: 'تدريب بدون مخاطر', pt: 'Prática sem riscos' }
   }
 ];
 
@@ -49,7 +52,8 @@ export function Testimonials({ language = 'en' }) {
   const sectionTitle = {
     en: 'What our students say',
     fr: 'Ce que disent nos étudiants',
-    ar: 'ماذا يقول طلابنا'
+    ar: 'ماذا يقول طلابنا',
+    pt: 'O que nossos alunos dizem'
   };
   
   return (

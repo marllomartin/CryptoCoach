@@ -22,6 +22,12 @@ export function SocialProof({ stats, language = 'en' }) {
       courses: 'دورة مكتملة اليوم',
       online: 'متعلم متصل الآن',
       certificates: 'شهادة حصل عليها'
+    },
+    pt: {
+      students: 'alunos matriculados esta semana',
+      courses: 'cursos concluídos hoje',
+      online: 'aprendizes online agora',
+      certificates: 'certificados conquistados'
     }
   };
   
@@ -107,7 +113,8 @@ export function SocialProofMini({ language = 'en' }) {
   const labels = {
     en: 'students enrolled this week',
     fr: 'étudiants inscrits cette semaine',
-    ar: 'طالب مسجل هذا الأسبوع'
+    ar: 'طالب مسجل هذا الأسبوع',
+    pt: 'alunos matriculados esta semana'
   };
   
   return (

@@ -3671,7 +3671,7 @@ const resources = {
         academy: 'Academia',
         pricing: 'Planos',
         glossary: 'Glossário',
-        insights: 'Notícias',
+        insights: 'Blog',
         about: 'Sobre',
         signIn: 'Entrar',
         getStarted: 'Começar',
