@@ -69,9 +69,9 @@ export const Layout = ({ children }) => {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 gap-4 min-w-0">
+          <div className="grid grid-cols-[auto_1fr_auto] items-center h-16 gap-4">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 shrink-0">
+            <Link to="/" className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
                 <GraduationCap className="w-6 h-6 text-white" />
               </div>
@@ -79,7 +79,7 @@ export const Layout = ({ children }) => {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-6 shrink min-w-0 overflow-hidden">
+            <div className="hidden md:flex items-center justify-center gap-6">
               {navLinks.map(link => (
                 <NavLink key={link.to} to={link.to}>
                   <span className="whitespace-nowrap">{link.label}</span>
@@ -88,7 +88,7 @@ export const Layout = ({ children }) => {
             </div>
 
             {/* Desktop Auth */}
-            <div className="hidden md:flex items-center gap-2 shrink-0">
+            <div className="hidden md:flex items-center gap-2">
               <LanguageSwitcher variant="minimal" />
               {user ? (
                 <div className="flex items-center gap-2">
