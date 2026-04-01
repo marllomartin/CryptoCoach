@@ -131,6 +131,15 @@ async def update_avatar(user_id: str, request: UpdateAvatarRequest):
     return result
 
 
+@router.get("/streak/{user_id}")
+async def get_streak_info(user_id: str):
+    """Get streak info for a user"""
+    info = await gamification_service.get_streak_info(user_id)
+    if not info:
+        raise HTTPException(status_code=404, detail="User not found")
+    return info
+
+
 @router.post("/streak/{user_id}")
 async def update_streak(user_id: str):
     """Update user's login streak"""

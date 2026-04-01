@@ -31,7 +31,7 @@ const ProfilePage = () => {
         axios.get(`${API}/v2/gamification/profile/${user.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get(`${API}/v2/streak/${user.id}`, {
+        axios.get(`${API}/v2/gamification/streak/${user.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);

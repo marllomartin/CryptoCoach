@@ -130,6 +130,16 @@ ACHIEVEMENTS = {
     }
 }
 
+# Streak milestones
+STREAK_MILESTONES = [
+    {"days": 3,   "title": "3-Day Streak",   "xp": 50},
+    {"days": 7,   "title": "7-Day Streak",   "xp": 175},
+    {"days": 14,  "title": "14-Day Streak",  "xp": 250},
+    {"days": 30,  "title": "30-Day Streak",  "xp": 500},
+    {"days": 60,  "title": "60-Day Streak",  "xp": 750},
+    {"days": 100, "title": "100-Day Streak", "xp": 1000},
+]
+
 # Avatar customization options
 AVATARS = {
     "base": [
@@ -439,22 +449,43 @@ class GamificationService:
         
         return {"success": True, "avatar": avatar_data}
     
+    async def get_streak_info(self, user_id: str) -> Dict:
+        """Get streak information for a user"""
+        user = await self.db.users.find_one({"id": user_id}, {"_id": 0})
+        if not user:
+            return None
+
+        current_streak = user.get("streak_days", 0)
+        longest_streak = user.get("longest_streak", current_streak)
+
+        all_milestones = [
+            {**m, "claimed": current_streak >= m["days"]}
+            for m in STREAK_MILESTONES
+        ]
+
+        return {
+            "current_streak": current_streak,
+            "longest_streak": longest_streak,
+            "all_milestones": all_milestones,
+        }
+
     async def update_streak(self, user_id: str) -> Dict:
         """Update user's login streak"""
         user = await self.db.users.find_one({"id": user_id}, {"_id": 0})
         if not user:
             return {}
-        
+
         last_activity = user.get("last_activity")
         current_streak = user.get("streak_days", 0)
-        
+        longest_streak = user.get("longest_streak", current_streak)
+
         now = datetime.now(timezone.utc)
         today = now.date()
-        
+
         if last_activity:
             last_date = datetime.fromisoformat(last_activity.replace("Z", "+00:00")).date()
             days_diff = (today - last_date).days
-            
+
             if days_diff == 0:
                 # Already logged in today
                 return {"streak_days": current_streak, "streak_updated": False}
@@ -466,21 +497,24 @@ class GamificationService:
                 new_streak = 1
         else:
             new_streak = 1
-        
+
+        new_longest = max(longest_streak, new_streak)
+
         # Award streak bonus XP
         streak_xp = XP_REWARDS["streak_bonus"](new_streak)
-        
+
         await self.db.users.update_one(
             {"id": user_id},
             {
                 "$set": {
                     "streak_days": new_streak,
+                    "longest_streak": new_longest,
                     "last_activity": now.isoformat()
                 },
                 "$inc": {"xp_points": streak_xp}
             }
         )
-        
+
         return {
             "streak_days": new_streak,
             "streak_updated": True,
