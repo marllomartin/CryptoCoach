@@ -16,7 +16,8 @@ import {
   Award,
   BarChart3,
   Store,
-  UserCircle
+  UserCircle,
+  Shield
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -95,6 +96,14 @@ export const Layout = ({ children }) => {
                       {t('nav.simulator')}
                     </Button>
                   </Link>
+                  {['admin', 'moderator'].includes(user.role) && (
+                    <Link to="/admin">
+                      <Button size="sm" className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white border-0">
+                        <Shield className="w-4 h-4 mr-2" />
+                        {t('admin.title')}
+                      </Button>
+                    </Link>
+                  )}
                   <NotificationBell />
                   <Link to="/profile">
                     <Button variant="ghost" size="sm" className="text-slate-300">
@@ -164,8 +173,8 @@ export const Layout = ({ children }) => {
                   <>
                     <div className="border-t border-border pt-4 mt-4">
                       {userLinks.map(link => (
-                        <Link 
-                          key={link.to} 
+                        <Link
+                          key={link.to}
                           to={link.to}
                           onClick={() => setMobileMenuOpen(false)}
                           className="flex items-center gap-2 py-2 text-slate-300 hover:text-primary"
@@ -174,6 +183,16 @@ export const Layout = ({ children }) => {
                           {link.label}
                         </Link>
                       ))}
+                      {['admin', 'moderator'].includes(user.role) && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2 py-2 text-fuchsia-400 hover:text-fuchsia-300"
+                        >
+                          <Shield className="w-4 h-4" />
+                          {t('admin.title')}
+                        </Link>
+                      )}
                     </div>
                   </>
                 )}
