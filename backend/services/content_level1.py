@@ -8,15 +8,18 @@ LEVEL1_LESSONS = {
         "order": 2,
         "duration_minutes": 55,
         "difficulty": "beginner",
+        "is_trial": True,
         "title": {
             "en": "How Cryptocurrency Works",
             "fr": "Comment Fonctionnent les Cryptomonnaies",
-            "ar": "كيف تعمل العملات المشفرة"
+            "ar": "كيف تعمل العملات المشفرة",
+            "pt": "Como Funciona a Criptomoeda"
         },
         "subtitle": {
             "en": "The mechanics of digital money",
             "fr": "La mécanique de l'argent numérique",
-            "ar": "آليات المال الرقمي"
+            "ar": "آليات المال الرقمي",
+            "pt": "A mecânica do dinheiro digital"
         },
         "learning_objectives": {
             "en": [
@@ -36,6 +39,12 @@ LEVEL1_LESSONS = {
                 "تعلم كيف يتم التحقق من المعاملات على الشبكة",
                 "استيعاب مفهوم التعدين والإجماع",
                 "معرفة ما تعنيه تأكيدات المعاملات"
+            ],
+            "pt": [
+                "Entender a criptografia de chave pública e as assinaturas digitais",
+                "Aprender como as transações são verificadas na rede",
+                "Compreender o conceito de mineração e consenso",
+                "Saber o que significam as confirmações de transação"
             ]
         },
         "content": {
@@ -357,12 +366,132 @@ Les validateurs mettent en jeu des ETH comme garantie :
 2. التوقيعات الرقمية تثبت إذن المعاملات
 3. آليات الإجماع تمنع الإنفاق المزدوج
 4. المزيد من التأكيدات = المزيد من الأمان
-5. رسوم المعاملات تحفز المعدنين/المدققين"""
+5. رسوم المعاملات تحفز المعدنين/المدققين""",
+            "pt": """# A Mecânica das Criptomoedas
+
+Entender como as criptomoedas realmente funcionam é essencial para qualquer investidor ou usuário sério. Vamos desmistificar a tecnologia.
+
+## Criptografia de Chave Pública
+
+No coração da segurança das criptomoedas está a **criptografia assimétrica**, também conhecida como criptografia de chave pública.
+
+### Suas Duas Chaves
+
+Todo usuário de criptomoeda possui um par de chaves criptográficas:
+
+**Chave Pública (Seu Endereço)**
+- Como seu endereço de e-mail — seguro para compartilhar
+- Outros a usam para enviar criptomoedas a você
+- Derivada matematicamente da sua chave privada
+- Exemplo: `0x742d35Cc6634C0532925a3b844Bc9e7595f...`
+
+**Chave Privada (Sua Senha)**
+- NUNCA compartilhe com ninguém
+- Usada para assinar transações (provar propriedade)
+- Se perdida, seus fundos desaparecem para sempre
+- Se roubada, seus fundos podem ser tomados
+- Exemplo: `5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd...`
+
+### Assinaturas Digitais
+
+Quando você envia criptomoedas:
+1. Você cria uma mensagem de transação
+2. Sua carteira a assina com sua chave privada
+3. Qualquer pessoa pode verificar a assinatura usando sua chave pública
+4. Isso prova que você autorizou a transação
+
+## Fluxo de uma Transação
+
+### Passo 1: Criando a Transação
+
+Você especifica:
+- Endereço do destinatário
+- Valor a enviar
+- Taxa de transação (para os mineradores)
+
+### Passo 2: Transmissão
+
+Sua transação é transmitida à rede. Milhares de nós a recebem em segundos.
+
+### Passo 3: Mempool
+
+Transações não confirmadas aguardam na **mempool** (pool de memória). Os mineradores selecionam transações daqui.
+
+### Passo 4: Verificação
+
+Os nós verificam:
+- Assinatura digital válida
+- Saldo suficiente (sem gasto duplo)
+- Formato correto da transação
+
+### Passo 5: Inclusão no Bloco
+
+Mineradores/validadores incluem sua transação em um novo bloco.
+
+### Passo 6: Confirmação
+
+Após o bloco ser adicionado à cadeia, sua transação tem 1 confirmação. Cada bloco subsequente adiciona mais uma confirmação.
+
+## Mineração e Consenso
+
+### Prova de Trabalho (Bitcoin)
+
+Mineradores competem para resolver um quebra-cabeça criptográfico:
+- Encontrar um número (nonce) que faça o hash do bloco começar com muitos zeros
+- O primeiro a resolver transmite o bloco
+- Outros nós verificam a solução (fácil de checar)
+- O vencedor recebe a recompensa do bloco + taxas de transação
+
+**Custo de Energia**: ~150 TWh/ano (mais do que alguns países)
+**Segurança**: Extremamente alta — custaria bilhões para atacar
+
+### Prova de Participação (Ethereum)
+
+Validadores apostam ETH como garantia:
+- Selecionados aleatoriamente para propor blocos
+- Outros validadores atestam a validade
+- Comportamento honesto recompensado, desonesto punido (slashing)
+- Mínimo de 32 ETH para operar um validador
+
+**Custo de Energia**: ~99,95% menos do que a Prova de Trabalho
+**Segurança**: Segurança econômica por meio do capital apostado
+
+## Confirmações Explicadas
+
+| Confirmações | Tempo no Bitcoin | Nível de Segurança |
+|--------------|------------------|--------------------|
+| 0 (não confirmada) | — | Muito Baixo |
+| 1 | ~10 minutos | Baixo |
+| 3 | ~30 minutos | Médio |
+| 6 | ~1 hora | Alto (recomendado) |
+| 60+ | ~10 horas | Irreversível |
+
+### Por que Esperar por Confirmações?
+
+Cada confirmação torna exponencialmente mais difícil reverter uma transação. Com 6 confirmações, reverter exigiria controlar mais de 50% do hashrate da rede e gastar bilhões.
+
+## Taxas de Transação
+
+### Como as Taxas Funcionam
+
+- Você oferece um lance pelo espaço no bloco
+- Taxa maior = confirmação mais rápida
+- Mineradores priorizam transações de taxa alta
+- Taxas variam conforme o congestionamento da rede
+
+## Principais Conclusões
+
+1. A criptografia de chave pública protege a propriedade
+2. As assinaturas digitais provam a autorização das transações
+3. Os mecanismos de consenso evitam o gasto duplo
+4. Mais confirmações = mais segurança
+5. As taxas de transação incentivam mineradores/validadores"""
         },
         "summary": {
             "en": "Cryptocurrency uses public-key cryptography for security, digital signatures for authorization, and consensus mechanisms to prevent double-spending. Transactions become more secure with each confirmation.",
             "fr": "Les cryptomonnaies utilisent la cryptographie à clé publique pour la sécurité, les signatures numériques pour l'autorisation, et les mécanismes de consensus pour empêcher la double dépense.",
-            "ar": "تستخدم العملات المشفرة التشفير بالمفتاح العام للأمان، والتوقيعات الرقمية للإذن، وآليات الإجماع لمنع الإنفاق المزدوج."
+            "ar": "تستخدم العملات المشفرة التشفير بالمفتاح العام للأمان، والتوقيعات الرقمية للإذن، وآليات الإجماع لمنع الإنفاق المزدوج.",
+            "pt": "As criptomoedas usam criptografia de chave pública para segurança, assinaturas digitais para autorização e mecanismos de consenso para evitar gastos duplos. As transações ficam mais seguras a cada confirmação."
         },
         "examples": {
             "en": [
@@ -379,6 +508,11 @@ Les validateurs mettent en jeu des ETH comme garantie :
                 "معدنو البيتكوين يتنافسون لإيجاد هاشات كتل صالحة",
                 "مدققو الإيثريوم يراهنون بـ 32 ETH للمشاركة في الإجماع",
                 "محافظ الأجهزة تولد وتخزن المفاتيح الخاصة دون اتصال"
+            ],
+            "pt": [
+                "Mineradores de Bitcoin competindo para encontrar hashes de bloco válidos",
+                "Validadores do Ethereum apostando 32 ETH para participar do consenso",
+                "Carteiras de hardware gerando e armazenando chaves privadas offline"
             ]
         },
         "checkpoints": [
@@ -388,18 +522,21 @@ Les validateurs mettent en jeu des ETH comme garantie :
                 "question": {
                     "en": "What is used to prove you authorized a cryptocurrency transaction?",
                     "fr": "Qu'est-ce qui est utilisé pour prouver que vous avez autorisé une transaction ?",
-                    "ar": "ما الذي يُستخدم لإثبات أنك أذنت بمعاملة عملة مشفرة؟"
+                    "ar": "ما الذي يُستخدم لإثبات أنك أذنت بمعاملة عملة مشفرة؟",
+                    "pt": "O que é usado para provar que você autorizou uma transação de criptomoeda?"
                 },
                 "options": {
                     "en": ["Password", "Digital signature", "Email verification", "Phone call"],
                     "fr": ["Mot de passe", "Signature numérique", "Vérification email", "Appel téléphonique"],
-                    "ar": ["كلمة مرور", "توقيع رقمي", "التحقق بالبريد الإلكتروني", "مكالمة هاتفية"]
+                    "ar": ["كلمة مرور", "توقيع رقمي", "التحقق بالبريد الإلكتروني", "مكالمة هاتفية"],
+                    "pt": ["Senha", "Assinatura digital", "Verificação por e-mail", "Ligação telefônica"]
                 },
                 "correct_answer": 1,
                 "explanation": {
                     "en": "Digital signatures created with your private key prove you authorized the transaction.",
                     "fr": "Les signatures numériques créées avec votre clé privée prouvent que vous avez autorisé la transaction.",
-                    "ar": "التوقيعات الرقمية المنشأة بمفتاحك الخاص تثبت أنك أذنت بالمعاملة."
+                    "ar": "التوقيعات الرقمية المنشأة بمفتاحك الخاص تثبت أنك أذنت بالمعاملة.",
+                    "pt": "As assinaturas digitais criadas com sua chave privada provam que você autorizou a transação."
                 }
             }
         ]

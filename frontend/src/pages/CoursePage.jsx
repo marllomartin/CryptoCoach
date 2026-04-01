@@ -22,17 +22,18 @@ import { Progress } from '../components/ui/progress';
 export default function CoursePage() {
   const { courseId } = useParams();
   const { user, token } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [course, setCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const lang = i18n.language?.split('-')[0] || 'en';
     const fetchData = async () => {
       try {
         const [courseRes, lessonsRes] = await Promise.all([
-          axios.get(`${API}/courses/${courseId}`),
-          axios.get(`${API}/courses/${courseId}/lessons`)
+          axios.get(`${API}/courses/${courseId}?lang=${lang}`),
+          axios.get(`${API}/courses/${courseId}/lessons?lang=${lang}`)
         ]);
         setCourse(courseRes.data);
         setLessons(lessonsRes.data);
@@ -43,7 +44,7 @@ export default function CoursePage() {
       }
     };
     fetchData();
-  }, [courseId]);
+  }, [courseId, i18n.language]);
 
   const isLessonCompleted = (lessonId) => {
     return user?.completed_lessons?.includes(lessonId);

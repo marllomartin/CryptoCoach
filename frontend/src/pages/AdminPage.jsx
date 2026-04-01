@@ -28,7 +28,8 @@ import {
   Settings,
   RefreshCw,
   TrendingUp,
-  Mail
+  Mail,
+  Globe
 } from 'lucide-react';
 import { AnalyticsDashboard } from '../components/AnalyticsDashboard';
 import NewsletterAdminTab from '../components/NewsletterAdminTab';
@@ -222,6 +223,350 @@ function DashboardTab({ stats }) {
   );
 }
 
+// Supported languages config
+const LANG_OPTIONS = [
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'ar', label: 'العربية', flag: '🇸🇦' },
+  { code: 'pt', label: 'Português', flag: '🇧🇷' },
+];
+
+const EMPTY_COURSE_TRANSLATIONS = () =>
+  Object.fromEntries(LANG_OPTIONS.map(({ code }) => [code, { title: '', description: '', topics: '' }]));
+
+const EMPTY_LESSON_TRANSLATIONS = () =>
+  Object.fromEntries(LANG_OPTIONS.map(({ code }) => [code, { title: '', subtitle: '', content: '', learning_objectives: '', examples: '', summary: '', recommended_readings: '' }]));
+
+/** Badge showing language availability for a course or lesson.
+ *  Trial lessons show a locked "Trial" pill followed by all 4 green flags.
+ *  Premium lessons show a green flag for each language with content, grey otherwise. */
+function LangBadges({ translations, isTrial }) {
+  if (isTrial) {
+    return (
+      <div className="flex gap-1 flex-wrap mt-1 items-center">
+        <span className="text-xs px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 font-medium">
+          🔒 Trial
+        </span>
+        {LANG_OPTIONS.map(({ code, flag }) => (
+          <span key={code} className="text-xs px-1.5 py-0.5 rounded bg-green-500/20 text-green-400" title={`${code.toUpperCase()} available`}>
+            {flag} {code.toUpperCase()}
+          </span>
+        ))}
+      </div>
+    );
+  }
+  const trans = translations ?? {};
+  return (
+    <div className="flex gap-1 flex-wrap mt-1">
+      {LANG_OPTIONS.map(({ code, flag }) => {
+        const entry = trans[code];
+        const hasContent = entry && entry.title && entry.title.trim();
+        return (
+          <span
+            key={code}
+            className={`text-xs px-1.5 py-0.5 rounded ${hasContent ? 'bg-green-500/20 text-green-400' : 'bg-muted text-slate-500'}`}
+            title={hasContent ? `${code.toUpperCase()} available` : `${code.toUpperCase()} missing`}
+          >
+            {flag} {code.toUpperCase()}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Multi-language tabs form for a course */
+function CourseForm({ initial, onSave, onCancel, saving }) {
+  const [level, setLevel] = useState(initial?.level ?? 1);
+  const [thumbnail, setThumbnail] = useState(initial?.thumbnail ?? '');
+  const [durationHours, setDurationHours] = useState(initial?.duration_hours ?? 0);
+  const [isPublished, setIsPublished] = useState(initial?.is_published ?? false);
+  const [translations, setTranslations] = useState(() => {
+    const base = EMPTY_COURSE_TRANSLATIONS();
+    if (initial?.translations) {
+      // Merge existing translations — all 4 tabs always present
+      for (const [lang, val] of Object.entries(initial.translations)) {
+        base[lang] = {
+          title: val.title ?? '',
+          description: val.description ?? '',
+          topics: Array.isArray(val.topics) ? val.topics.join(', ') : (val.topics ?? ''),
+        };
+      }
+    } else if (initial) {
+      // No translations yet — seed EN tab from top-level fields so existing content is preserved
+      base['en'] = {
+        title: initial.title ?? '',
+        description: initial.description ?? '',
+        topics: Array.isArray(initial.topics) ? initial.topics.join(', ') : (initial.topics ?? ''),
+      };
+    }
+    return base;
+  });
+  const [activeLang, setActiveLang] = useState('en');
+
+  const updateTrans = (lang, field, value) =>
+    setTranslations(prev => ({ ...prev, [lang]: { ...prev[lang], [field]: value } }));
+
+  const handleSave = () => {
+    // Build translations payload — only include languages with a non-empty title
+    const payload = {};
+    for (const [lang, val] of Object.entries(translations)) {
+      if (val.title.trim()) {
+        payload[lang] = {
+          title: val.title.trim(),
+          description: val.description.trim(),
+          topics: val.topics.split(',').map(s => s.trim()).filter(Boolean),
+        };
+      }
+    }
+    if (!Object.keys(payload).length) {
+      toast.error('At least one language must have a title.');
+      return;
+    }
+    onSave({ level: Number(level), thumbnail, duration_hours: Number(durationHours), is_published: isPublished, translations: payload });
+  };
+
+  return (
+    <Card className="bg-card border-border">
+      <CardContent className="p-6 space-y-4">
+        {/* Non-language fields */}
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="text-xs text-slate-400 mb-1 block">Level</label>
+            <select
+              value={level}
+              onChange={e => setLevel(e.target.value)}
+              className="w-full bg-muted border border-border rounded px-3 py-2 text-sm"
+            >
+              <option value={1}>1 – Foundations</option>
+              <option value={2}>2 – Investor</option>
+              <option value={3}>3 – Strategist</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-slate-400 mb-1 block">Duration (hours)</label>
+            <Input type="number" min={0} value={durationHours} onChange={e => setDurationHours(e.target.value)} />
+          </div>
+          <div className="flex items-end gap-2">
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" checked={isPublished} onChange={e => setIsPublished(e.target.checked)} className="rounded" />
+              Published
+            </label>
+          </div>
+        </div>
+        <div>
+          <label className="text-xs text-slate-400 mb-1 block">Thumbnail URL</label>
+          <Input placeholder="https://..." value={thumbnail} onChange={e => setThumbnail(e.target.value)} />
+        </div>
+
+        {/* Language tabs */}
+        <div className="border border-border rounded-lg overflow-hidden">
+          <div className="flex border-b border-border bg-muted/50">
+            {LANG_OPTIONS.map(({ code, flag, label }) => {
+              const hasContent = translations[code]?.title?.trim();
+              return (
+                <button
+                  key={code}
+                  onClick={() => setActiveLang(code)}
+                  className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors ${
+                    activeLang === code
+                      ? 'bg-primary/20 text-primary border-b-2 border-primary'
+                      : 'text-slate-400 hover:text-foreground'
+                  }`}
+                >
+                  <span>{flag}</span>
+                  <span>{label}</span>
+                  {hasContent && <span className="w-1.5 h-1.5 rounded-full bg-green-400" />}
+                </button>
+              );
+            })}
+          </div>
+          <div className="p-4 space-y-3">
+            <Input
+              placeholder={`Title (${activeLang})`}
+              value={translations[activeLang]?.title ?? ''}
+              onChange={e => updateTrans(activeLang, 'title', e.target.value)}
+            />
+            <Textarea
+              placeholder={`Description (${activeLang})`}
+              rows={3}
+              value={translations[activeLang]?.description ?? ''}
+              onChange={e => updateTrans(activeLang, 'description', e.target.value)}
+            />
+            <Input
+              placeholder={`Topics — comma separated (${activeLang})`}
+              value={translations[activeLang]?.topics ?? ''}
+              onChange={e => updateTrans(activeLang, 'topics', e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-2 justify-end">
+          <Button variant="outline" onClick={onCancel} disabled={saving}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+            Save Course
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+/** Multi-language tabs form for a lesson */
+function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
+  const [order, setOrder] = useState(initial?.order ?? 0);
+  const [translations, setTranslations] = useState(() => {
+    const base = EMPTY_LESSON_TRANSLATIONS();
+    if (initial?.translations) {
+      for (const [lang, val] of Object.entries(initial.translations)) {
+        base[lang] = {
+          title: val.title ?? '',
+          subtitle: val.subtitle ?? '',
+          content: val.content ?? '',
+          learning_objectives: Array.isArray(val.learning_objectives)
+            ? val.learning_objectives.join('\n')
+            : (val.learning_objectives ?? ''),
+          examples: Array.isArray(val.examples) ? val.examples.join('\n') : (val.examples ?? ''),
+          summary: val.summary ?? '',
+          recommended_readings: Array.isArray(val.recommended_readings)
+            ? val.recommended_readings.join('\n')
+            : (val.recommended_readings ?? ''),
+        };
+      }
+    } else if (initial) {
+      // No translations yet — seed EN tab from top-level fields so existing content is preserved
+      base['en'] = {
+        title: initial.title ?? '',
+        subtitle: initial.subtitle ?? '',
+        content: initial.content ?? '',
+        learning_objectives: Array.isArray(initial.learning_objectives)
+          ? initial.learning_objectives.join('\n')
+          : (initial.learning_objectives ?? ''),
+        examples: Array.isArray(initial.examples) ? initial.examples.join('\n') : (initial.examples ?? ''),
+        summary: initial.summary ?? '',
+        recommended_readings: Array.isArray(initial.recommended_readings)
+          ? initial.recommended_readings.join('\n')
+          : (initial.recommended_readings ?? ''),
+      };
+    }
+    return base;
+  });
+  const [activeLang, setActiveLang] = useState('en');
+
+  const updateTrans = (lang, field, value) =>
+    setTranslations(prev => ({ ...prev, [lang]: { ...prev[lang], [field]: value } }));
+
+  const handleSave = () => {
+    const payload = {};
+    for (const [lang, val] of Object.entries(translations)) {
+      if (val.title.trim()) {
+        payload[lang] = {
+          title: val.title.trim(),
+          subtitle: val.subtitle.trim(),
+          content: val.content.trim(),
+          learning_objectives: val.learning_objectives.split('\n').map(s => s.trim()).filter(Boolean),
+          examples: val.examples.split('\n').map(s => s.trim()).filter(Boolean),
+          summary: val.summary.trim(),
+          recommended_readings: val.recommended_readings.split('\n').map(s => s.trim()).filter(Boolean),
+        };
+      }
+    }
+    if (!Object.keys(payload).length) {
+      toast.error('At least one language must have a title.');
+      return;
+    }
+    onSave({ course_id: courseId, order: Number(order), translations: payload });
+  };
+
+  return (
+    <Card className="bg-card border-border">
+      <CardContent className="p-6 space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs text-slate-400 mb-1 block">Order (position in course)</label>
+            <Input type="number" min={0} value={order} onChange={e => setOrder(e.target.value)} />
+          </div>
+        </div>
+
+        {/* Language tabs */}
+        <div className="border border-border rounded-lg overflow-hidden">
+          <div className="flex border-b border-border bg-muted/50">
+            {LANG_OPTIONS.map(({ code, flag, label }) => {
+              const hasContent = translations[code]?.title?.trim();
+              return (
+                <button
+                  key={code}
+                  onClick={() => setActiveLang(code)}
+                  className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors ${
+                    activeLang === code
+                      ? 'bg-primary/20 text-primary border-b-2 border-primary'
+                      : 'text-slate-400 hover:text-foreground'
+                  }`}
+                >
+                  <span>{flag}</span>
+                  <span>{label}</span>
+                  {hasContent && <span className="w-1.5 h-1.5 rounded-full bg-green-400" />}
+                </button>
+              );
+            })}
+          </div>
+          <div className="p-4 space-y-3">
+            <Input
+              placeholder={`Title (${activeLang})`}
+              value={translations[activeLang]?.title ?? ''}
+              onChange={e => updateTrans(activeLang, 'title', e.target.value)}
+            />
+            <Input
+              placeholder={`Subtitle (${activeLang})`}
+              value={translations[activeLang]?.subtitle ?? ''}
+              onChange={e => updateTrans(activeLang, 'subtitle', e.target.value)}
+            />
+            <Textarea
+              placeholder={`Content — Markdown (${activeLang})`}
+              rows={8}
+              value={translations[activeLang]?.content ?? ''}
+              onChange={e => updateTrans(activeLang, 'content', e.target.value)}
+            />
+            <Textarea
+              placeholder={`Learning objectives — one per line (${activeLang})`}
+              rows={3}
+              value={translations[activeLang]?.learning_objectives ?? ''}
+              onChange={e => updateTrans(activeLang, 'learning_objectives', e.target.value)}
+            />
+            <Textarea
+              placeholder={`Examples — one per line (${activeLang})`}
+              rows={3}
+              value={translations[activeLang]?.examples ?? ''}
+              onChange={e => updateTrans(activeLang, 'examples', e.target.value)}
+            />
+            <Textarea
+              placeholder={`Summary (${activeLang})`}
+              rows={2}
+              value={translations[activeLang]?.summary ?? ''}
+              onChange={e => updateTrans(activeLang, 'summary', e.target.value)}
+            />
+            <Textarea
+              placeholder={`Recommended readings — one per line (${activeLang})`}
+              rows={2}
+              value={translations[activeLang]?.recommended_readings ?? ''}
+              onChange={e => updateTrans(activeLang, 'recommended_readings', e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-2 justify-end">
+          <Button variant="outline" onClick={onCancel} disabled={saving}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+            Save Lesson
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // Courses Tab Component
 function CoursesTab({ token }) {
   const { t } = useTranslation();
@@ -229,7 +574,15 @@ function CoursesTab({ token }) {
   const [lessons, setLessons] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Form visibility state
+  const [showCourseForm, setShowCourseForm] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [showLessonForm, setShowLessonForm] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
+
+  const authHeaders = { Authorization: `Bearer ${token}` };
 
   useEffect(() => {
     fetchCourses();
@@ -237,9 +590,7 @@ function CoursesTab({ token }) {
 
   const fetchCourses = async () => {
     try {
-      const response = await axios.get(`${API}/admin/courses`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(`${API}/admin/courses`, { headers: authHeaders });
       setCourses(response.data.courses);
     } catch (error) {
       toast.error(t('admin.errors.loadingCourses'));
@@ -250,9 +601,7 @@ function CoursesTab({ token }) {
 
   const fetchLessons = async (courseId) => {
     try {
-      const response = await axios.get(`${API}/admin/lessons?course_id=${courseId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(`${API}/admin/lessons?course_id=${courseId}`, { headers: authHeaders });
       setLessons(response.data.lessons);
       setSelectedCourse(courseId);
     } catch (error) {
@@ -260,19 +609,81 @@ function CoursesTab({ token }) {
     }
   };
 
+  const saveCourse = async (payload) => {
+    setSaving(true);
+    try {
+      if (editingCourse) {
+        await axios.put(`${API}/admin/courses/${editingCourse.id}`, payload, { headers: authHeaders });
+        toast.success('Course updated');
+      } else {
+        await axios.post(`${API}/admin/courses`, payload, { headers: authHeaders });
+        toast.success('Course created');
+      }
+      setShowCourseForm(false);
+      setEditingCourse(null);
+      fetchCourses();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || t('admin.errors.creationError'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteCourse = async (courseId) => {
+    if (!confirm('Delete this course and all its lessons?')) return;
+    try {
+      await axios.delete(`${API}/admin/courses/${courseId}`, { headers: authHeaders });
+      toast.success('Course deleted');
+      if (selectedCourse === courseId) {
+        setSelectedCourse(null);
+        setLessons([]);
+      }
+      fetchCourses();
+    } catch (error) {
+      toast.error(t('admin.errors.deletionError'));
+    }
+  };
+
+  const saveLesson = async (payload) => {
+    setSaving(true);
+    try {
+      if (editingLesson) {
+        await axios.put(`${API}/admin/lessons/${editingLesson.id}`, payload, { headers: authHeaders });
+        toast.success('Lesson updated');
+      } else {
+        await axios.post(`${API}/admin/lessons`, payload, { headers: authHeaders });
+        toast.success('Lesson created');
+      }
+      setShowLessonForm(false);
+      setEditingLesson(null);
+      fetchLessons(selectedCourse);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || t('admin.errors.creationError'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteLesson = async (lessonId) => {
+    if (!confirm('Delete this lesson?')) return;
+    try {
+      await axios.delete(`${API}/admin/lessons/${lessonId}`, { headers: authHeaders });
+      toast.success('Lesson deleted');
+      fetchLessons(selectedCourse);
+    } catch (error) {
+      toast.error(t('admin.errors.deletionError'));
+    }
+  };
+
   const generateAudio = async (lessonId) => {
     try {
       toast.info(t('admin.media.audioStarted'));
-      const response = await axios.post(
-        `${API}/admin/generate-audio/${lessonId}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await axios.post(`${API}/admin/generate-audio/${lessonId}`, {}, { headers: authHeaders });
       if (response.data.status === 'success') {
         toast.success(t('admin.media.audioSuccess'));
         fetchLessons(selectedCourse);
       } else {
-        toast.error('Erreur: ' + response.data.error);
+        toast.error('Error: ' + response.data.error);
       }
     } catch (error) {
       toast.error(t('admin.errors.audioGeneration'));
@@ -282,143 +693,208 @@ function CoursesTab({ token }) {
   const generateImage = async (lessonId) => {
     try {
       toast.info(t('admin.media.imageStarted'));
-      const response = await axios.post(
-        `${API}/admin/generate-image/${lessonId}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await axios.post(`${API}/admin/generate-image/${lessonId}`, {}, { headers: authHeaders });
       if (response.data.status === 'success') {
         toast.success(t('admin.media.imageSuccess'));
         fetchLessons(selectedCourse);
       } else {
-        toast.error('Erreur: ' + response.data.error);
+        toast.error('Error: ' + response.data.error);
       }
     } catch (error) {
       toast.error(t('admin.errors.imageGeneration'));
     }
   };
-  
+
+  /** Derive a display title — checks translations first (prefer EN), falls back to top-level title field */
+  const getDisplayTitle = (item) => {
+    const t = item?.translations;
+    if (t) return t.en?.title || t.fr?.title || t.ar?.title || t.pt?.title || '(untitled)';
+    return item?.title || '(untitled)';
+  };
+
   if (loading) {
     return <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin" /></div>;
   }
-  
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Courses List */}
-      <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center justify-between">
-            {t('admin.courses.title')}
-            <Button size="sm" variant="outline">
-              <Plus className="w-4 h-4" />
-            </Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {courses.map((course) => (
-            <div
-              key={course.id}
-              onClick={() => fetchLessons(course.id)}
-              className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                selectedCourse === course.id
-                  ? 'bg-primary/20 border border-primary'
-                  : 'bg-muted hover:bg-muted/80'
-              }`}
-            >
-              <p className="font-medium">{course.title}</p>
-              <p className="text-xs text-slate-400">
-                {t('admin.courses.levelInfo', { level: course.level, count: course.lessons_count })}
-              </p>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
 
-      {/* Lessons List */}
-      <Card className="bg-card border-border lg:col-span-2">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center justify-between">
-            {t('admin.courses.lessonsTitle')} {selectedCourse && `(${lessons.length})`}
-            {selectedCourse && (
-              <Button size="sm" variant="outline">
-                <Plus className="w-4 h-4 mr-1" /> {t('admin.courses.addLesson')}
+  return (
+    <div className="space-y-6">
+      {/* Course Form */}
+      {showCourseForm && (
+        <div className="space-y-2">
+          <h3 className="font-semibold text-lg flex items-center gap-2">
+            <Globe className="w-5 h-5 text-primary" />
+            {editingCourse ? 'Edit Course' : 'New Course'}
+          </h3>
+          <CourseForm
+            initial={editingCourse}
+            onSave={saveCourse}
+            onCancel={() => { setShowCourseForm(false); setEditingCourse(null); }}
+            saving={saving}
+          />
+        </div>
+      )}
+
+      {/* Lesson Form */}
+      {showLessonForm && (
+        <div className="space-y-2">
+          <h3 className="font-semibold text-lg flex items-center gap-2">
+            <Globe className="w-5 h-5 text-primary" />
+            {editingLesson ? 'Edit Lesson' : 'New Lesson'}
+          </h3>
+          <LessonForm
+            courseId={selectedCourse}
+            initial={editingLesson}
+            onSave={saveLesson}
+            onCancel={() => { setShowLessonForm(false); setEditingLesson(null); }}
+            saving={saving}
+          />
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Courses List */}
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center justify-between">
+              {t('admin.courses.title')}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => { setShowCourseForm(true); setEditingCourse(null); setShowLessonForm(false); }}
+              >
+                <Plus className="w-4 h-4" />
               </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {courses.length === 0 && (
+              <p className="text-slate-400 text-sm text-center py-4">No courses yet.</p>
             )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!selectedCourse ? (
-            <p className="text-slate-400 text-center py-8">
-              {t('admin.courses.selectCourse')}
-            </p>
-          ) : lessons.length === 0 ? (
-            <p className="text-slate-400 text-center py-8">{t('admin.courses.noLessons')}</p>
-          ) : (
-            <div className="space-y-3">
-              {lessons.sort((a, b) => a.order - b.order).map((lesson) => (
-                <div
-                  key={lesson.id}
-                  className="p-4 bg-muted rounded-lg"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <p className="font-medium">{lesson.order + 1}. {lesson.title}</p>
-                      <p className="text-xs text-slate-400 mt-1">
-                        {lesson.duration_minutes} min •
-                        {lesson.audio_full ? ` 🔊 ${t('admin.media.audio')}` : ` ⚪ ${t('admin.courses.noAudio')}`} •
-                        {lesson.hero_image ? ` 🖼️ ${t('admin.media.video')}` : ` ⚪ ${t('admin.courses.noImage')}`}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => generateAudio(lesson.id)}
-                        title={t('admin.media.generateAudio')}
-                      >
-                        <Volume2 className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => generateImage(lesson.id)}
-                        title={t('admin.media.generateAudio')}
-                      >
-                        <Image className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setEditingLesson(lesson)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    </div>
+            {courses.map((course) => (
+              <div
+                key={course.id}
+                onClick={() => { fetchLessons(course.id); setShowCourseForm(false); setShowLessonForm(false); }}
+                className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                  selectedCourse === course.id
+                    ? 'bg-primary/20 border border-primary'
+                    : 'bg-muted hover:bg-muted/80'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{getDisplayTitle(course)}</p>
+                    <p className="text-xs text-slate-400">
+                      Level {course.level} · {course.lessons_count} lessons
+                    </p>
+                    <LangBadges translations={course.translations} />
                   </div>
-                  
-                  {/* Show generated media */}
-                  {(lesson.audio_full || lesson.hero_image) && (
-                    <div className="mt-3 flex gap-4">
-                      {lesson.hero_image && (
-                        <img 
-                          src={lesson.hero_image} 
-                          alt={lesson.title}
-                          className="w-24 h-16 object-cover rounded"
-                        />
-                      )}
-                      {lesson.audio_full && (
-                        <audio controls className="h-8">
-                          <source src={`${API.replace('/api', '')}${lesson.audio_full}`} type="audio/mpeg" />
-                        </audio>
-                      )}
-                    </div>
-                  )}
+                  <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => { setEditingCourse(course); setShowCourseForm(true); setShowLessonForm(false); }}
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => deleteCourse(course.id)}
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                    </Button>
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Lessons List */}
+        <Card className="bg-card border-border lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center justify-between">
+              {t('admin.courses.lessonsTitle')} {selectedCourse && `(${lessons.length})`}
+              {selectedCourse && !showLessonForm && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => { setShowLessonForm(true); setEditingLesson(null); setShowCourseForm(false); }}
+                >
+                  <Plus className="w-4 h-4 mr-1" /> {t('admin.courses.addLesson')}
+                </Button>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!selectedCourse ? (
+              <p className="text-slate-400 text-center py-8">{t('admin.courses.selectCourse')}</p>
+            ) : lessons.length === 0 ? (
+              <p className="text-slate-400 text-center py-8">{t('admin.courses.noLessons')}</p>
+            ) : (
+              <div className="space-y-3">
+                {[...lessons].sort((a, b) => a.order - b.order).map((lesson) => (
+                  <div key={lesson.id} className="p-4 bg-muted rounded-lg">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium">
+                          {lesson.order + 1}. {getDisplayTitle(lesson)}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-1">
+                          {lesson.duration_minutes} min
+                          {lesson.audio_full ? ` · 🔊 ${t('admin.media.audio')}` : ` · ⚪ ${t('admin.courses.noAudio')}`}
+                          {lesson.hero_image ? ` · 🖼️ Image` : ` · ⚪ ${t('admin.courses.noImage')}`}
+                        </p>
+                        <LangBadges translations={lesson.translations} isTrial={lesson.is_trial} />
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button size="sm" variant="ghost" onClick={() => generateAudio(lesson.id)} title="Generate audio">
+                          <Volume2 className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => generateImage(lesson.id)} title="Generate image">
+                          <Image className="w-4 h-4" />
+                        </Button>
+                        {!lesson.is_trial && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => { setEditingLesson(lesson); setShowLessonForm(true); setShowCourseForm(false); }}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => deleteLesson(lesson.id)}>
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Media preview */}
+                    {(lesson.audio_full || lesson.hero_image) && (
+                      <div className="mt-3 flex gap-4">
+                        {lesson.hero_image && (
+                          <img
+                            src={lesson.hero_image}
+                            alt="hero"
+                            className="w-24 h-16 object-cover rounded"
+                          />
+                        )}
+                        {lesson.audio_full && (
+                          <audio controls className="h-8">
+                            <source src={`${API.replace('/api', '')}${lesson.audio_full}`} type="audio/mpeg" />
+                          </audio>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
@@ -684,7 +1160,6 @@ function MediaTab({ token }) {
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState('nova');
   const [selectedLanguage, setSelectedLanguage] = useState('en');
-  const [loading, setLoading] = useState(true);
   const [pollingInterval, setPollingInterval] = useState(null);
   const [showVideoSection, setShowVideoSection] = useState(true);
   const [uploadingVideo, setUploadingVideo] = useState(null); // lesson_id being uploaded
@@ -708,11 +1183,9 @@ function MediaTab({ token }) {
       setMediaStatus(statusRes.data);
     } catch (error) {
       toast.error(t('admin.errors.loadingData'));
-    } finally {
-      setLoading(false);
     }
   };
-  
+
   const fetchVoices = async () => {
     try {
       const res = await axios.get(`${API}/media/voices`);

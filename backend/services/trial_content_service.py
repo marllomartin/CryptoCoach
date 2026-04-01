@@ -1,5 +1,5 @@
-# Premium Course Content Service
-# Complete, professional educational content in 3 languages
+# Trial Content Service
+# Built-in trial lessons (lessons 1–2): always accessible to every user
 
 from typing import Dict, List, Optional
 from datetime import datetime, timezone
@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 # COURSE STRUCTURE - 3 LEVELS, 23 LESSONS
 # ============================================================
 
-PREMIUM_COURSES = {
+TRIAL_COURSES = {
     "course-foundations": {
         "id": "course-foundations",
         "title": {
@@ -69,23 +69,26 @@ PREMIUM_COURSES = {
 # COMPLETE LESSON CONTENT - LEVEL 1: FOUNDATIONS
 # ============================================================
 
-PREMIUM_LESSONS = {
-    # ==================== LEVEL 1: FOUNDATIONS ====================
+TRIAL_LESSONS = {
+    # ==================== TRIAL LESSONS (Lessons 1–2) ====================
     "course-foundations-lesson-1": {
         "id": "course-foundations-lesson-1",
         "course_id": "course-foundations",
         "order": 0,
         "duration_minutes": 45,
         "difficulty": "beginner",
+        "is_trial": True,
         "title": {
             "en": "What is Blockchain?",
             "fr": "Qu'est-ce que la Blockchain ?",
-            "ar": "ما هي البلوكتشين؟"
+            "ar": "ما هي البلوكتشين؟",
+            "pt": "O que é Blockchain?"
         },
         "subtitle": {
             "en": "The revolutionary technology behind cryptocurrencies",
             "fr": "La technologie révolutionnaire derrière les cryptomonnaies",
-            "ar": "التكنولوجيا الثورية وراء العملات المشفرة"
+            "ar": "التكنولوجيا الثورية وراء العملات المشفرة",
+            "pt": "A tecnologia revolucionária por trás das criptomoedas"
         },
         "learning_objectives": {
             "en": [
@@ -105,6 +108,12 @@ PREMIUM_LESSONS = {
                 "تعلم كيف ترتبط الكتل بشكل مشفر معًا",
                 "استيعاب مفهوم اللامركزية وأهميتها",
                 "تحديد التطبيقات الواقعية لتقنية البلوكتشين"
+            ],
+            "pt": [
+                "Entender o que é um registro distribuído e como ele funciona",
+                "Aprender como os blocos são ligados criptograficamente",
+                "Compreender o conceito de descentralização e sua importância",
+                "Identificar aplicações reais da tecnologia blockchain"
             ]
         },
         "content": {
@@ -248,6 +257,76 @@ Comment des milliers d'ordinateurs s'accordent-ils sur le vrai état du registre
 3. La décentralisation élimine les points de défaillance uniques
 4. Les mécanismes de consensus assurent l'accord du réseau
 5. Les applications s'étendent bien au-delà des cryptomonnaies""",
+            "pt": """# Entendendo a Tecnologia Blockchain
+
+O blockchain é uma das tecnologias mais transformadoras do século XXI. É a base sobre a qual Bitcoin, Ethereum e milhares de outras criptomoedas são construídas. Mas o potencial do blockchain vai muito além do dinheiro digital.
+
+## O que é um Blockchain?
+
+Em sua forma mais simples, um blockchain é um **registro digital distribuído** que grava transações em muitos computadores. Pense nele como um Google Doc compartilhado que milhares de pessoas podem visualizar e verificar, mas que ninguém pode modificar secretamente.
+
+### A Inovação Principal
+
+Bancos de dados tradicionais são controlados por uma autoridade central (como um banco). O blockchain elimina esse ponto único de controle ao distribuir o banco de dados em uma rede de computadores chamados **nós**.
+
+## Como os Blocos Funcionam
+
+### Estrutura de um Bloco
+
+Cada bloco contém:
+- **Dados da Transação**: As informações reais sendo registradas
+- **Carimbo de Tempo**: Quando o bloco foi criado
+- **Hash do Bloco Anterior**: Uma impressão digital criptográfica ligando ao bloco anterior
+- **Nonce**: Um número usado no processo de mineração
+- **Hash do Bloco Atual**: A impressão digital única do bloco
+
+### A Cadeia
+
+Quando um novo bloco é criado, ele inclui o hash do bloco anterior. Isso cria uma cadeia inquebrável onde alterar qualquer bloco passado exigiria recalcular todos os blocos subsequentes — uma tarefa computacionalmente impossível.
+
+## Por que a Descentralização Importa
+
+### O Problema da Centralização
+
+Quando uma única entidade controla os dados:
+- Ela pode modificar registros sem supervisão
+- Um único ataque compromete tudo
+- Os usuários precisam confiar na autoridade central
+- O serviço pode ser negado arbitrariamente
+
+### A Solução Blockchain
+
+Com o blockchain:
+- Nenhum ponto único de falha
+- Transparente e auditável por qualquer pessoa
+- Resistente a adulterações graças à criptografia
+- Funciona 24 horas por dia, sem interrupções
+
+## Aplicações no Mundo Real
+
+### Além das Criptomoedas
+
+1. **Cadeia de Suprimentos**: Rastreie produtos da fabricação à entrega
+2. **Saúde**: Prontuários médicos seguros e interoperáveis
+3. **Votação**: Sistemas eleitorais transparentes e verificáveis
+4. **Imóveis**: Transferências de propriedade simplificadas
+5. **Identidade**: Identidade digital autossoberana
+
+## O Problema do Consenso
+
+Como milhares de computadores concordam com o estado verdadeiro do registro? Isso é resolvido por **mecanismos de consenso**:
+
+- **Prova de Trabalho**: Mineradores competem para resolver quebra-cabeças matemáticos
+- **Prova de Participação**: Validadores apostam criptomoedas como garantia
+- **Prova de Participação Delegada**: Detentores de tokens votam em validadores
+
+## Principais Conclusões
+
+1. Blockchain é um registro distribuído e imutável
+2. Os blocos são ligados criptograficamente em uma cadeia
+3. A descentralização elimina pontos únicos de falha
+4. Os mecanismos de consenso garantem o acordo da rede
+5. As aplicações vão muito além das criptomoedas""",
             "ar": """# فهم تقنية البلوكتشين
 
 البلوكتشين هي واحدة من أكثر التقنيات تحويلًا في القرن الحادي والعشرين. إنها الأساس الذي بُني عليه البيتكوين والإيثريوم وآلاف العملات المشفرة الأخرى. لكن إمكانات البلوكتشين تمتد إلى ما هو أبعد من المال الرقمي.
@@ -322,7 +401,8 @@ Comment des milliers d'ordinateurs s'accordent-ils sur le vrai état du registre
         "summary": {
             "en": "Blockchain is a distributed, immutable digital ledger that enables trustless transactions without intermediaries. Its decentralized nature provides security, transparency, and censorship resistance.",
             "fr": "La blockchain est un registre numérique distribué et immuable qui permet des transactions sans confiance et sans intermédiaires. Sa nature décentralisée offre sécurité, transparence et résistance à la censure.",
-            "ar": "البلوكتشين هي دفتر أستاذ رقمي موزع وغير قابل للتغيير يمكّن من إجراء معاملات بدون وسطاء. طبيعتها اللامركزية توفر الأمان والشفافية ومقاومة الرقابة."
+            "ar": "البلوكتشين هي دفتر أستاذ رقمي موزع وغير قابل للتغيير يمكّن من إجراء معاملات بدون وسطاء. طبيعتها اللامركزية توفر الأمان والشفافية ومقاومة الرقابة.",
+            "pt": "Blockchain é um registro digital distribuído e imutável que permite transações sem necessidade de intermediários. Sua natureza descentralizada oferece segurança, transparência e resistência à censura."
         },
         "examples": {
             "en": [
@@ -339,6 +419,11 @@ Comment des milliers d'ordinateurs s'accordent-ils sur le vrai état du registre
                 "معاملات البيتكوين التي يتم التحقق منها بواسطة آلاف العقد حول العالم",
                 "وول مارت تتبع أصول الغذاء باستخدام البلوكتشين للسلامة",
                 "نظام الهوية الرقمية في إستونيا المبني على البلوكتشين"
+            ],
+            "pt": [
+                "Transações de Bitcoin verificadas por milhares de nós ao redor do mundo",
+                "Walmart rastreia a origem dos alimentos usando blockchain para segurança",
+                "Sistema de identidade digital da Estônia construído sobre blockchain"
             ]
         },
         "recommended_readings": {
@@ -356,6 +441,11 @@ Comment des milliers d'ordinateurs s'accordent-ils sur le vrai état du registre
                 "الورقة البيضاء للبيتكوين بواسطة ساتوشي ناكاموتو",
                 "إتقان البيتكوين بواسطة أندرياس أنتونوبولوس",
                 "ثورة البلوكتشين بواسطة دون تابسكوت"
+            ],
+            "pt": [
+                "Whitepaper do Bitcoin por Satoshi Nakamoto",
+                "Dominando o Bitcoin por Andreas Antonopoulos",
+                "A Revolução do Blockchain por Don Tapscott"
             ]
         },
         "checkpoints": [
@@ -365,18 +455,21 @@ Comment des milliers d'ordinateurs s'accordent-ils sur le vrai état du registre
                 "question": {
                     "en": "What is the main innovation of blockchain technology?",
                     "fr": "Quelle est l'innovation principale de la technologie blockchain ?",
-                    "ar": "ما هو الابتكار الرئيسي لتقنية البلوكتشين؟"
+                    "ar": "ما هو الابتكار الرئيسي لتقنية البلوكتشين؟",
+                    "pt": "Qual é a principal inovação da tecnologia blockchain?"
                 },
                 "options": {
                     "en": ["Faster transactions", "Decentralized control", "Lower fees", "Better graphics"],
                     "fr": ["Transactions plus rapides", "Contrôle décentralisé", "Frais réduits", "Meilleurs graphiques"],
-                    "ar": ["معاملات أسرع", "تحكم لامركزي", "رسوم أقل", "رسومات أفضل"]
+                    "ar": ["معاملات أسرع", "تحكم لامركزي", "رسوم أقل", "رسومات أفضل"],
+                    "pt": ["Transações mais rápidas", "Controle descentralizado", "Taxas menores", "Melhores gráficos"]
                 },
                 "correct_answer": 1,
                 "explanation": {
                     "en": "The key innovation is decentralized control - no single entity owns or controls the network.",
                     "fr": "L'innovation clé est le contrôle décentralisé - aucune entité unique ne possède ou ne contrôle le réseau.",
-                    "ar": "الابتكار الرئيسي هو التحكم اللامركزي - لا توجد جهة واحدة تمتلك أو تتحكم في الشبكة."
+                    "ar": "الابتكار الرئيسي هو التحكم اللامركزي - لا توجد جهة واحدة تمتلك أو تتحكم في الشبكة.",
+                    "pt": "A inovação central é o controle descentralizado — nenhuma entidade única possui ou controla a rede."
                 }
             },
             {
@@ -385,18 +478,21 @@ Comment des milliers d'ordinateurs s'accordent-ils sur le vrai état du registre
                 "question": {
                     "en": "What links blocks together in a blockchain?",
                     "fr": "Qu'est-ce qui lie les blocs ensemble dans une blockchain ?",
-                    "ar": "ما الذي يربط الكتل معًا في البلوكتشين؟"
+                    "ar": "ما الذي يربط الكتل معًا في البلوكتشين؟",
+                    "pt": "O que liga os blocos uns aos outros em um blockchain?"
                 },
                 "options": {
                     "en": ["Serial numbers", "Timestamps", "Cryptographic hashes", "IP addresses"],
                     "fr": ["Numéros de série", "Horodatages", "Hachages cryptographiques", "Adresses IP"],
-                    "ar": ["أرقام تسلسلية", "طوابع زمنية", "هاشات تشفيرية", "عناوين IP"]
+                    "ar": ["أرقام تسلسلية", "طوابع زمنية", "هاشات تشفيرية", "عناوين IP"],
+                    "pt": ["Números de série", "Carimbos de tempo", "Hashes criptográficos", "Endereços IP"]
                 },
                 "correct_answer": 2,
                 "explanation": {
                     "en": "Each block contains the cryptographic hash of the previous block, creating an unbreakable chain.",
                     "fr": "Chaque bloc contient le hachage cryptographique du bloc précédent, créant une chaîne incassable.",
-                    "ar": "كل كتلة تحتوي على الهاش التشفيري للكتلة السابقة، مما يخلق سلسلة غير قابلة للكسر."
+                    "ar": "كل كتلة تحتوي على الهاش التشفيري للكتلة السابقة، مما يخلق سلسلة غير قابلة للكسر.",
+                    "pt": "Cada bloco contém o hash criptográfico do bloco anterior, criando uma cadeia inquebrável."
                 }
             }
         ],
@@ -414,15 +510,18 @@ Comment des milliers d'ordinateurs s'accordent-ils sur le vrai état du registre
         "order": 1,
         "duration_minutes": 50,
         "difficulty": "beginner",
+        "is_trial": True,
         "title": {
             "en": "What is Bitcoin?",
             "fr": "Qu'est-ce que le Bitcoin ?",
-            "ar": "ما هو البيتكوين؟"
+            "ar": "ما هو البيتكوين؟",
+            "pt": "O que é Bitcoin?"
         },
         "subtitle": {
             "en": "The world's first and most valuable cryptocurrency",
             "fr": "La première et plus précieuse cryptomonnaie au monde",
-            "ar": "أول وأكثر عملة مشفرة قيمة في العالم"
+            "ar": "أول وأكثر عملة مشفرة قيمة في العالم",
+            "pt": "A primeira e mais valiosa criptomoeda do mundo"
         },
         "learning_objectives": {
             "en": [
@@ -442,6 +541,12 @@ Comment des milliers d'ordinateurs s'accordent-ils sur le vrai état du registre
                 "تعلم الخصائص النقدية الرئيسية للبيتكوين",
                 "مقارنة البيتكوين بالمال التقليدي والذهب",
                 "فهم مفهوم الندرة الرقمية"
+            ],
+            "pt": [
+                "Entender a origem do Bitcoin e o problema que ele resolve",
+                "Aprender as principais propriedades monetárias do Bitcoin",
+                "Comparar o Bitcoin com o dinheiro tradicional e o ouro",
+                "Compreender o conceito de escassez digital"
             ]
         },
         "content": {
@@ -708,12 +813,101 @@ Cela crée une boucle de rétroaction puissante qui a fait passer le Bitcoin de 
 2. سقف الـ 21 مليون يخلق ندرة رقمية
 3. اللامركزية تعني عدم وجود نقطة تحكم أو فشل واحدة
 4. التنصيف يقلل العرض الجديد كل 4 سنوات
-5. البيتكوين يجمع بين أفضل خصائص الذهب والمدفوعات الرقمية"""
+5. البيتكوين يجمع بين أفضل خصائص الذهب والمدفوعات الرقمية""",
+            "pt": """# Bitcoin: Ouro Digital para a Era Digital
+
+O Bitcoin é a primeira criptomoeda bem-sucedida do mundo, representando um avanço fundamental na forma como pensamos sobre dinheiro, valor e confiança no mundo digital.
+
+## A Origem do Bitcoin
+
+### A Crise Financeira de 2008
+
+Em 2008, o sistema financeiro global quase entrou em colapso. Bancos considerados "grandes demais para falir" foram socorridos com dinheiro dos contribuintes. A confiança nas instituições financeiras despencou. Foi nesse contexto que uma figura misteriosa emergiu.
+
+### Satoshi Nakamoto
+
+Em 31 de outubro de 2008, alguém usando o pseudônimo "Satoshi Nakamoto" publicou um whitepaper intitulado "Bitcoin: Um Sistema de Dinheiro Eletrônico Ponto a Ponto". Esse documento de 9 páginas descrevia um sistema revolucionário para dinheiro digital.
+
+Em 3 de janeiro de 2009, o primeiro bloco do Bitcoin (o "Bloco Gênesis") foi minerado. Nele estava incorporada a mensagem: "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks" — uma declaração clara do propósito do Bitcoin.
+
+## O que Torna o Bitcoin Único
+
+### Oferta Fixa
+
+O Bitcoin tem um limite rígido de **21 milhões de moedas**. Esse limite está codificado no protocolo e não pode ser alterado. Atualmente, cerca de 19,5 milhões já foram minerados, com o último Bitcoin previsto para por volta do ano 2140.
+
+### Eventos de Halving
+
+A cada 210.000 blocos (aproximadamente 4 anos), a recompensa pela mineração de novos blocos é cortada pela metade:
+- 2009: 50 BTC por bloco
+- 2012: 25 BTC por bloco
+- 2016: 12,5 BTC por bloco
+- 2020: 6,25 BTC por bloco
+- 2024: 3,125 BTC por bloco
+
+### Descentralização
+
+Nenhuma empresa, governo ou indivíduo controla o Bitcoin. Ele funciona em uma rede de milhares de computadores ao redor do mundo. Qualquer pessoa pode rodar um nó e participar.
+
+## Bitcoin vs Dinheiro Tradicional
+
+### Moeda Fiduciária (USD, BRL, EUR, etc.)
+
+| Propriedade | Fiduciária | Bitcoin |
+|-------------|------------|---------|
+| Oferta | Ilimitada | Máx. 21 milhões |
+| Controle | Bancos centrais | Descentralizado |
+| Inflação | Projetada para inflacionar | Deflacionário |
+| Apreensão | Pode ser congelada | Não pode ser apreendido |
+| Fronteiras | Restrita | Sem fronteiras |
+
+### Bitcoin vs Ouro
+
+| Propriedade | Ouro | Bitcoin |
+|-------------|------|---------|
+| Escassez | Natural | Programada |
+| Portabilidade | Pesado | Digital |
+| Divisibilidade | Difícil | 100 milhões de unidades |
+| Verificabilidade | Requer expertise | Criptográfica |
+| Armazenamento | Cofres físicos | Carteiras digitais |
+
+## A Proposta de Valor do Bitcoin
+
+### Reserva de Valor
+
+Muitos veem o Bitcoin como "ouro digital" — uma proteção contra inflação e desvalorização monetária. Sua oferta fixa o torna atraente em um mundo de impressão ilimitada de dinheiro.
+
+### Meio de Troca
+
+O Bitcoin permite transações ponto a ponto sem intermediários. Envie qualquer quantia, para qualquer lugar do mundo, 24 horas por dia, com taxas mínimas.
+
+### Unidade de Conta
+
+Embora ainda volátil, a menor unidade do Bitcoin (1 satoshi = 0,00000001 BTC) permite uma contabilidade precisa.
+
+## O Efeito de Rede
+
+O valor do Bitcoin cresce à medida que mais pessoas o utilizam:
+- Mais usuários = mais demanda
+- Mais demanda = preço mais alto
+- Preço mais alto = mais atenção da mídia
+- Mais atenção = mais usuários
+
+Isso cria um poderoso ciclo de retroalimentação que levou o Bitcoin de não ter valor algum a superar US$ 100.000 por moeda.
+
+## Principais Conclusões
+
+1. O Bitcoin foi criado em resposta à crise financeira de 2008
+2. Seu limite de 21 milhões cria escassez digital
+3. A descentralização significa nenhum ponto único de controle ou falha
+4. Os eventos de halving reduzem a nova oferta a cada 4 anos
+5. O Bitcoin combina as melhores propriedades do ouro e dos pagamentos digitais"""
         },
         "summary": {
             "en": "Bitcoin is a decentralized digital currency with a fixed supply of 21 million coins, created as a response to the 2008 financial crisis. Its scarcity, decentralization, and borderless nature make it 'digital gold'.",
             "fr": "Le Bitcoin est une monnaie numérique décentralisée avec une offre fixe de 21 millions de pièces, créée en réponse à la crise financière de 2008. Sa rareté, sa décentralisation et sa nature sans frontières en font 'l'or numérique'.",
-            "ar": "البيتكوين هي عملة رقمية لامركزية بعرض ثابت يبلغ 21 مليون عملة، تم إنشاؤها كاستجابة للأزمة المالية لعام 2008. ندرتها ولامركزيتها وطبيعتها العابرة للحدود تجعلها 'الذهب الرقمي'."
+            "ar": "البيتكوين هي عملة رقمية لامركزية بعرض ثابت يبلغ 21 مليون عملة، تم إنشاؤها كاستجابة للأزمة المالية لعام 2008. ندرتها ولامركزيتها وطبيعتها العابرة للحدود تجعلها 'الذهب الرقمي'.",
+            "pt": "O Bitcoin é uma moeda digital descentralizada com oferta fixa de 21 milhões de moedas, criada em resposta à crise financeira de 2008. Sua escassez, descentralização e natureza sem fronteiras fazem dele o 'ouro digital'."
         },
         "examples": {
             "en": [
@@ -730,6 +924,11 @@ Cela crée une boucle de rétroaction puissante qui a fait passer le Bitcoin de 
                 "اعتمدت السلفادور البيتكوين كعملة قانونية في 2021",
                 "تمتلك MicroStrategy أكثر من 4 مليارات دولار من البيتكوين",
                 "شبكة Lightning تمكن من مدفوعات بيتكوين فورية وشبه مجانية"
+            ],
+            "pt": [
+                "El Salvador adotou o Bitcoin como moeda de curso legal em 2021",
+                "MicroStrategy detém mais de US$ 4 bilhões em Bitcoin em seu balanço",
+                "A Lightning Network viabiliza pagamentos em Bitcoin instantâneos e quase gratuitos"
             ]
         },
         "recommended_readings": {
@@ -747,6 +946,11 @@ Cela crée une boucle de rétroaction puissante qui a fait passer le Bitcoin de 
                 "معيار البيتكوين بواسطة سيف الدين عموص",
                 "الذهب الرقمي بواسطة ناثانيال بوبر",
                 "إنترنت المال بواسطة أندرياس أنتونوبولوس"
+            ],
+            "pt": [
+                "O Padrão Bitcoin por Saifedean Ammous",
+                "Ouro Digital por Nathaniel Popper",
+                "A Internet do Dinheiro por Andreas Antonopoulos"
             ]
         },
         "checkpoints": [
@@ -756,18 +960,21 @@ Cela crée une boucle de rétroaction puissante qui a fait passer le Bitcoin de 
                 "question": {
                     "en": "What is the maximum supply of Bitcoin?",
                     "fr": "Quelle est l'offre maximale de Bitcoin ?",
-                    "ar": "ما هو الحد الأقصى لعرض البيتكوين؟"
+                    "ar": "ما هو الحد الأقصى لعرض البيتكوين؟",
+                    "pt": "Qual é a oferta máxima de Bitcoin?"
                 },
                 "options": {
                     "en": ["Unlimited", "21 million", "100 million", "1 billion"],
                     "fr": ["Illimitée", "21 millions", "100 millions", "1 milliard"],
-                    "ar": ["غير محدود", "21 مليون", "100 مليون", "مليار واحد"]
+                    "ar": ["غير محدود", "21 مليون", "100 مليون", "مليار واحد"],
+                    "pt": ["Ilimitada", "21 milhões", "100 milhões", "1 bilhão"]
                 },
                 "correct_answer": 1,
                 "explanation": {
                     "en": "Bitcoin has a hard cap of 21 million coins, making it a scarce digital asset.",
                     "fr": "Le Bitcoin a un plafond strict de 21 millions de pièces, en faisant un actif numérique rare.",
-                    "ar": "للبيتكوين حد أقصى صارم يبلغ 21 مليون عملة، مما يجعلها أصلًا رقميًا نادرًا."
+                    "ar": "للبيتكوين حد أقصى صارم يبلغ 21 مليون عملة، مما يجعلها أصلًا رقميًا نادرًا.",
+                    "pt": "O Bitcoin tem um limite rígido de 21 milhões de moedas, tornando-o um ativo digital escasso."
                 }
             },
             {
@@ -776,18 +983,21 @@ Cela crée une boucle de rétroaction puissante qui a fait passer le Bitcoin de 
                 "question": {
                     "en": "What happens during a Bitcoin halving?",
                     "fr": "Que se passe-t-il lors d'un halving Bitcoin ?",
-                    "ar": "ماذا يحدث خلال تنصيف البيتكوين؟"
+                    "ar": "ماذا يحدث خلال تنصيف البيتكوين؟",
+                    "pt": "O que acontece durante um halving do Bitcoin?"
                 },
                 "options": {
                     "en": ["Bitcoin price doubles", "Mining reward is cut in half", "Transaction fees double", "Network speed increases"],
                     "fr": ["Le prix du Bitcoin double", "La récompense de minage est divisée par deux", "Les frais de transaction doublent", "La vitesse du réseau augmente"],
-                    "ar": ["يتضاعف سعر البيتكوين", "يتم تقليل مكافأة التعدين إلى النصف", "تتضاعف رسوم المعاملات", "تزداد سرعة الشبكة"]
+                    "ar": ["يتضاعف سعر البيتكوين", "يتم تقليل مكافأة التعدين إلى النصف", "تتضاعف رسوم المعاملات", "تزداد سرعة الشبكة"],
+                    "pt": ["O preço do Bitcoin dobra", "A recompensa de mineração é cortada pela metade", "As taxas de transação dobram", "A velocidade da rede aumenta"]
                 },
                 "correct_answer": 1,
                 "explanation": {
                     "en": "Every ~4 years, the block reward for miners is cut in half, reducing new Bitcoin supply.",
                     "fr": "Tous les ~4 ans, la récompense de bloc pour les mineurs est divisée par deux, réduisant la nouvelle offre de Bitcoin.",
-                    "ar": "كل ~4 سنوات، يتم تقليل مكافأة الكتلة للمعدنين إلى النصف، مما يقلل من العرض الجديد للبيتكوين."
+                    "ar": "كل ~4 سنوات، يتم تقليل مكافأة الكتلة للمعدنين إلى النصف، مما يقلل من العرض الجديد للبيتكوين.",
+                    "pt": "A cada ~4 anos, a recompensa por bloco para os mineradores é cortada pela metade, reduzindo a nova oferta de Bitcoin."
                 }
             }
         ],
@@ -800,29 +1010,24 @@ Cela crée une boucle de rétroaction puissante qui a fait passer le Bitcoin de 
     }
 }
 
-# Helper function to get lesson in specific language
-def get_localized_lesson(lesson_id: str, language: str = "en") -> Optional[Dict]:
-    """Get a lesson with content in the specified language"""
-    if lesson_id not in PREMIUM_LESSONS:
+def get_localized_trial_lesson(lesson_id: str, language: str = "en") -> Optional[Dict]:
+    """Get a trial lesson with content in the specified language"""
+    if lesson_id not in TRIAL_LESSONS:
         return None
-    
-    lesson = PREMIUM_LESSONS[lesson_id].copy()
-    
-    # Localize all translatable fields
+
+    lesson = TRIAL_LESSONS[lesson_id].copy()
+
     for field in ["title", "subtitle", "summary"]:
         if field in lesson and isinstance(lesson[field], dict):
             lesson[field] = lesson[field].get(language, lesson[field].get("en", ""))
-    
-    # Localize content
+
     if "content" in lesson and isinstance(lesson["content"], dict):
         lesson["content"] = lesson["content"].get(language, lesson["content"].get("en", ""))
-    
-    # Localize arrays
+
     for field in ["learning_objectives", "examples", "recommended_readings"]:
         if field in lesson and isinstance(lesson[field], dict):
             lesson[field] = lesson[field].get(language, lesson[field].get("en", []))
-    
-    # Localize checkpoints
+
     if "checkpoints" in lesson:
         localized_checkpoints = []
         for cp in lesson["checkpoints"]:
@@ -834,29 +1039,29 @@ def get_localized_lesson(lesson_id: str, language: str = "en") -> Optional[Dict]
                 localized_cp["options"] = localized_cp["options"].get(language, localized_cp["options"].get("en", []))
             localized_checkpoints.append(localized_cp)
         lesson["checkpoints"] = localized_checkpoints
-    
+
     return lesson
 
-def get_localized_course(course_id: str, language: str = "en") -> Optional[Dict]:
-    """Get a course with content in the specified language"""
-    if course_id not in PREMIUM_COURSES:
+def get_localized_trial_course(course_id: str, language: str = "en") -> Optional[Dict]:
+    """Get a trial course with content in the specified language"""
+    if course_id not in TRIAL_COURSES:
         return None
-    
-    course = PREMIUM_COURSES[course_id].copy()
-    
+
+    course = TRIAL_COURSES[course_id].copy()
+
     for field in ["title", "description"]:
         if field in course and isinstance(course[field], dict):
             course[field] = course[field].get(language, course[field].get("en", ""))
-    
+
     return course
 
-def get_all_lessons_for_course(course_id: str, language: str = "en") -> List[Dict]:
-    """Get all lessons for a course in the specified language"""
+def get_all_trial_lessons_for_course(course_id: str, language: str = "en") -> List[Dict]:
+    """Get all trial lessons for a course in the specified language"""
     lessons = []
-    for lesson_id, lesson in PREMIUM_LESSONS.items():
+    for lesson_id, lesson in TRIAL_LESSONS.items():
         if lesson.get("course_id") == course_id:
-            localized = get_localized_lesson(lesson_id, language)
+            localized = get_localized_trial_lesson(lesson_id, language)
             if localized:
                 lessons.append(localized)
-    
+
     return sorted(lessons, key=lambda x: x.get("order", 0))

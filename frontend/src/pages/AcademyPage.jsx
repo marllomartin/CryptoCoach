@@ -21,16 +21,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 import { Progress } from '../components/ui/progress';
 
 export default function AcademyPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { canAccessCourse, userTier } = useSubscriptionAccess();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const lang = i18n.language?.split('-')[0] || 'en';
     const fetchCourses = async () => {
       try {
-        const response = await axios.get(`${API}/courses`);
+        const response = await axios.get(`${API}/courses?lang=${lang}`);
         setCourses(response.data);
       } catch (e) {
         console.error('Failed to fetch courses', e);
@@ -39,7 +40,7 @@ export default function AcademyPage() {
       }
     };
     fetchCourses();
-  }, []);
+  }, [i18n.language]);
 
   const getLevelStyles = (level) => {
     const styles = {

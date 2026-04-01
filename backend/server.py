@@ -300,11 +300,10 @@ class LessonUpdateRequest(BaseModel):
 def localize_course(course: dict, lang: str) -> Optional[dict]:
     """Flatten course translations for a given language.
     Returns None if the requested language has no usable content.
-    Falls back gracefully for legacy records without translations."""
+    Falls back gracefully for unmigrated records that still use top-level fields."""
     translations = course.get("translations")
     if not translations:
-        # Legacy record — return as-is (backward compat)
-        return course
+        return course  # Unmigrated record — return as-is
 
     trans = translations.get(lang)
     if not trans or not trans.get("title", "").strip():
@@ -319,10 +318,10 @@ def localize_course(course: dict, lang: str) -> Optional[dict]:
 def localize_lesson(lesson: dict, lang: str) -> Optional[dict]:
     """Flatten lesson translations for a given language.
     Returns None if the requested language has no usable content.
-    Falls back gracefully for legacy records without translations."""
+    Falls back gracefully for unmigrated records that still use top-level fields."""
     translations = lesson.get("translations")
     if not translations:
-        return lesson  # Legacy record — return as-is
+        return lesson  # Unmigrated record — return as-is
 
     trans = translations.get(lang)
     if not trans or not trans.get("title", "").strip():
@@ -641,16 +640,14 @@ async def get_course(course_id: str, lang: str = "en"):
     return localized
 
 from services.lesson_images import get_lesson_images, LESSON_IMAGES
-from services.content_aggregator import get_localized_lesson, get_all_lessons_for_course, ALL_PREMIUM_LESSONS, get_premium_content_stats
+from services.content_aggregator import get_localized_lesson, get_all_lessons_for_course, ALL_LESSONS, get_content_stats
 
 @api_router.get("/courses/{course_id}/lessons", response_model=List[Lesson])
 async def get_course_lessons(course_id: str, lang: str = "en"):
-    # First try premium content
-    premium_lessons = get_all_lessons_for_course(course_id, lang)
-    if premium_lessons:
-        # Convert to lesson format expected by frontend
-        for lesson in premium_lessons:
-            # Ensure all required fields are present
+    # First try built-in content (trial + all other static lessons)
+    static_lessons = get_all_lessons_for_course(course_id, lang)
+    if static_lessons:
+        for lesson in static_lessons:
             lesson.setdefault("xp_reward", 50)
             lesson.setdefault("quiz_questions", [])
             lesson.setdefault("recommended_readings", [])
@@ -663,7 +660,7 @@ async def get_course_lessons(course_id: str, lang: str = "en"):
             lesson.setdefault("checkpoints", [])
             lesson.setdefault("infographics", [])
             lesson.setdefault("hero_image", None)
-        return premium_lessons
+        return static_lessons
     
     # Fallback to database
     lessons = await db.lessons.find({"course_id": course_id}, {"_id": 0}).sort("order", 1).to_list(100)
@@ -685,23 +682,22 @@ async def get_course_lessons(course_id: str, lang: str = "en"):
 
 @api_router.get("/lessons/{lesson_id}", response_model=Lesson)
 async def get_lesson(lesson_id: str, lang: str = "en"):
-    # First try premium content
-    premium_lesson = get_localized_lesson(lesson_id, lang)
-    if premium_lesson:
-        # Ensure all required fields are present
-        premium_lesson.setdefault("xp_reward", 50)
-        premium_lesson.setdefault("quiz_questions", [])
-        premium_lesson.setdefault("recommended_readings", [])
-        premium_lesson.setdefault("examples", [])
-        premium_lesson.setdefault("learning_objectives", [])
-        premium_lesson.setdefault("audio_intro", None)
-        premium_lesson.setdefault("audio_full", None)
-        premium_lesson.setdefault("subtitle", "")
-        premium_lesson.setdefault("summary", "")
-        premium_lesson.setdefault("checkpoints", [])
-        premium_lesson.setdefault("infographics", [])
-        premium_lesson.setdefault("hero_image", None)
-        return premium_lesson
+    # First try built-in content (trial + all other static lessons)
+    static_lesson = get_localized_lesson(lesson_id, lang)
+    if static_lesson:
+        static_lesson.setdefault("xp_reward", 50)
+        static_lesson.setdefault("quiz_questions", [])
+        static_lesson.setdefault("recommended_readings", [])
+        static_lesson.setdefault("examples", [])
+        static_lesson.setdefault("learning_objectives", [])
+        static_lesson.setdefault("audio_intro", None)
+        static_lesson.setdefault("audio_full", None)
+        static_lesson.setdefault("subtitle", "")
+        static_lesson.setdefault("summary", "")
+        static_lesson.setdefault("checkpoints", [])
+        static_lesson.setdefault("infographics", [])
+        static_lesson.setdefault("hero_image", None)
+        return static_lesson
     
     # Fallback to database
     lesson = await db.lessons.find_one({"id": lesson_id}, {"_id": 0})
@@ -720,9 +716,9 @@ async def get_lesson(lesson_id: str, lang: str = "en"):
     return localized
 
 @api_router.get("/premium/stats")
-async def get_content_stats():
-    """Get premium content statistics"""
-    return get_premium_content_stats()
+async def content_stats():
+    """Get content statistics"""
+    return get_content_stats()
 
 @api_router.post("/lessons/{lesson_id}/complete")
 async def complete_lesson(lesson_id: str, current_user: dict = Depends(get_current_user)):
@@ -4072,9 +4068,18 @@ async def delete_course_admin(course_id: str, admin: dict = Depends(get_admin_us
 
 @api_router.get("/admin/lessons")
 async def get_admin_lessons(course_id: Optional[str] = None, admin: dict = Depends(get_admin_user)):
-    """Get lessons for admin management — returns full translations structure"""
+    """Get lessons for admin management — returns full translations structure.
+    Falls back to the static content service when no DB lessons exist for a course,
+    so built-in lessons (trial + others) are visible in the admin panel."""
     query = {"course_id": course_id} if course_id else {}
     lessons = await db.lessons.find(query, {"_id": 0}).sort("order", 1).to_list(length=100)
+
+    # If the DB has no lessons for this course, surface the static built-in lessons.
+    if not lessons and course_id:
+        static = get_all_lessons_for_course(course_id, "en")
+        if static:
+            lessons = sorted(static, key=lambda x: x.get("order", 0))
+
     return {"lessons": lessons}
 
 @api_router.post("/admin/lessons")

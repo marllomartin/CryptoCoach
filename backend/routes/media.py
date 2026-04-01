@@ -9,7 +9,7 @@ import os
 import shutil
 
 from services.media_generator import media_generator, AUDIO_DIR, VIDEO_DIR
-from services.content_aggregator import ALL_PREMIUM_LESSONS
+from services.content_aggregator import ALL_LESSONS
 
 media_router = APIRouter(prefix="/api/media", tags=["Media"])
 
@@ -163,7 +163,7 @@ async def generate_batch_audio(request: BatchAudioRequest, background_tasks: Bac
     if generation_status["audio"]["in_progress"]:
         raise HTTPException(status_code=409, detail="Audio generation already in progress")
     
-    lesson_ids = request.lesson_ids or list(ALL_PREMIUM_LESSONS.keys())
+    lesson_ids = request.lesson_ids or list(ALL_LESSONS.keys())
     
     background_tasks.add_task(
         batch_generate_audio_task,
@@ -200,7 +200,7 @@ async def generate_batch_video(request: BatchVideoRequest, background_tasks: Bac
     if generation_status["video"]["in_progress"]:
         raise HTTPException(status_code=409, detail="Video generation already in progress")
     
-    lesson_ids = request.lesson_ids or list(ALL_PREMIUM_LESSONS.keys())
+    lesson_ids = request.lesson_ids or list(ALL_LESSONS.keys())
     
     background_tasks.add_task(
         batch_generate_video_task,
@@ -240,7 +240,7 @@ async def get_available_voices():
 async def get_lessons_for_generation():
     """Get list of all lessons with their media status"""
     lessons = []
-    for lesson_id, lesson_data in ALL_PREMIUM_LESSONS.items():
+    for lesson_id, lesson_data in ALL_LESSONS.items():
         lesson_info = {
             "id": lesson_id,
             "title": lesson_data.get("title", {}).get("en", lesson_id),
@@ -275,7 +275,7 @@ async def upload_lesson_video(
     """Upload a video file for a specific lesson"""
     
     # Validate lesson exists
-    if lesson_id not in ALL_PREMIUM_LESSONS:
+    if lesson_id not in ALL_LESSONS:
         raise HTTPException(status_code=404, detail=f"Lesson '{lesson_id}' not found")
     
     # Validate language

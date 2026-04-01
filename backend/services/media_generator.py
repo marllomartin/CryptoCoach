@@ -29,7 +29,7 @@ except ImportError:
     MOVIEPY_AVAILABLE = False
     print("Warning: moviepy not available for video generation")
 
-from services.content_aggregator import ALL_PREMIUM_LESSONS, get_localized_lesson
+from services.content_aggregator import ALL_LESSONS, get_localized_lesson
 from services.lesson_images import get_lesson_images
 
 # Storage directories
@@ -252,10 +252,10 @@ class LessonMediaGenerator:
         results = {
             "success": [],
             "failed": [],
-            "total": len(ALL_PREMIUM_LESSONS)
+            "total": len(ALL_LESSONS)
         }
         
-        for lesson_id in ALL_PREMIUM_LESSONS.keys():
+        for lesson_id in ALL_LESSONS.keys():
             result = await self.generate_lesson_audio(lesson_id, language, voice)
             if result["success"]:
                 results["success"].append(lesson_id)
@@ -452,10 +452,10 @@ class LessonMediaGenerator:
         results = {
             "success": [],
             "failed": [],
-            "total": len(ALL_PREMIUM_LESSONS)
+            "total": len(ALL_LESSONS)
         }
         
-        for lesson_id in ALL_PREMIUM_LESSONS.keys():
+        for lesson_id in ALL_LESSONS.keys():
             result = await self.generate_lesson_video(lesson_id, language)
             if result["success"]:
                 results["success"].append(lesson_id)
@@ -514,14 +514,14 @@ class LessonMediaGenerator:
     def get_all_media_status(self) -> Dict:
         """Get status of all generated media"""
         status = {
-            "total_lessons": len(ALL_PREMIUM_LESSONS),
+            "total_lessons": len(ALL_LESSONS),
             "audio_generated": {},
             "video_generated": {},
             "pending_audio": [],
             "pending_video": []
         }
         
-        for lesson_id in ALL_PREMIUM_LESSONS.keys():
+        for lesson_id in ALL_LESSONS.keys():
             for lang in ["en", "fr", "ar"]:
                 media = self.get_lesson_media(lesson_id, lang)
                 
