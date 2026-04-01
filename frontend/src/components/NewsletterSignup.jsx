@@ -22,7 +22,8 @@ export function NewsletterSignup({ variant = 'default', language = 'en' }) {
       cta: 'Subscribe Free',
       success: 'Welcome aboard!',
       successMsg: "You'll receive your first newsletter soon.",
-      benefits: ['Weekly market recap', 'AI-powered insights', 'Exclusive tips']
+      benefits: ['Weekly market recap', 'AI-powered insights', 'Exclusive tips'],
+      invalidEmail: 'Invalid email'
     },
     fr: {
       title: 'Gardez une longueur d\'avance',
@@ -31,7 +32,8 @@ export function NewsletterSignup({ variant = 'default', language = 'en' }) {
       cta: 'S\'abonner Gratuitement',
       success: 'Bienvenue !',
       successMsg: 'Vous recevrez bientôt votre première newsletter.',
-      benefits: ['Récap hebdomadaire', 'Insights IA', 'Conseils exclusifs']
+      benefits: ['Récap hebdomadaire', 'Insights IA', 'Conseils exclusifs'],
+      invalidEmail: 'Email invalide'
     },
     ar: {
       title: 'ابق في المقدمة',
@@ -40,7 +42,18 @@ export function NewsletterSignup({ variant = 'default', language = 'en' }) {
       cta: 'اشترك مجانًا',
       success: 'مرحبًا بك!',
       successMsg: 'ستتلقى نشرتك الإخبارية الأولى قريبًا.',
-      benefits: ['ملخص أسبوعي', 'رؤى ذكية', 'نصائح حصرية']
+      benefits: ['ملخص أسبوعي', 'رؤى ذكية', 'نصائح حصرية'],
+      invalidEmail: 'بريد إلكتروني غير صالح'
+    },
+    pt: {
+      title: 'Fique à Frente do Mercado',
+      subtitle: 'Receba insights semanais de cripto, análises de mercado e dicas exclusivas na sua caixa de entrada.',
+      placeholder: 'Insira seu e-mail',
+      cta: 'Inscrever-se Grátis',
+      success: 'Bem-vindo(a)!',
+      successMsg: 'Você receberá sua primeira newsletter em breve.',
+      benefits: ['Resumo semanal do mercado', 'Insights com IA', 'Dicas exclusivas'],
+      invalidEmail: 'E-mail inválido'
     }
   };
   
@@ -49,7 +62,7 @@ export function NewsletterSignup({ variant = 'default', language = 'en' }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !email.includes('@')) {
-      toast.error(language === 'fr' ? 'Email invalide' : 'Invalid email');
+      toast.error(txt.invalidEmail || 'Invalid email');
       return;
     }
     
@@ -199,11 +212,13 @@ export function NewsletterSignup({ variant = 'default', language = 'en' }) {
         </form>
         
         <p className="text-xs text-slate-500 mt-4">
-          {language === 'fr' 
+          {language === 'fr'
             ? 'Nous respectons votre vie privée. Désabonnez-vous à tout moment.'
             : language === 'ar'
               ? 'نحترم خصوصيتك. يمكنك إلغاء الاشتراك في أي وقت.'
-              : 'We respect your privacy. Unsubscribe at any time.'}
+              : language === 'pt'
+                ? 'Respeitamos sua privacidade. Cancele a inscrição a qualquer momento.'
+                : 'We respect your privacy. Unsubscribe at any time.'}
         </p>
       </div>
     </motion.div>
