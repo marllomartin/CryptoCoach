@@ -23,7 +23,7 @@ import { Progress } from '../components/ui/progress';
 export default function AcademyPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const { canAccessCourse, userTier } = useSubscriptionAccess();
+  const { canAccessCourse } = useSubscriptionAccess();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -101,9 +101,16 @@ export default function AcademyPage() {
         </div>
       </section>
 
-      {/* Courses Grid */}
+      {/* Trial Courses Grid */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3 mb-8">
+            <GraduationCap className="w-6 h-6 text-primary" />
+            <h2 className="font-heading text-2xl font-bold">{t('academy.freeCourses')}</h2>
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+              {t('academy.freeForEveryone')}
+            </span>
+          </div>
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[1, 2, 3].map(i => (
@@ -119,12 +126,9 @@ export default function AcademyPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {courses.map((course, index) => {
+              {courses.filter(c => c.is_trial).map((course, index) => {
                 const styles = getLevelStyles(course.level);
                 const progress = getCourseProgress(course);
-                const isLocked = !user && course.level > 1;
-                const hasAccess = user ? canAccessCourse(course.level) : course.level === 1;
-                const needsUpgrade = user && !hasAccess;
 
                 return (
                   <motion.div
@@ -134,32 +138,6 @@ export default function AcademyPage() {
                     transition={{ delay: index * 0.1 }}
                   >
                     <Card className={`bg-gradient-to-br ${styles.gradient} border ${styles.border} h-full transition-all group relative overflow-hidden`}>
-                      {isLocked && (
-                        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                          <div className="text-center">
-                            <Lock className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                            <p className="text-slate-400">{t('academy.signInToAccess')}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {needsUpgrade && (
-                        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                          <div className="text-center px-4">
-                            <Crown className="w-8 h-8 text-primary mx-auto mb-2" />
-                            <p className="text-slate-300 font-medium mb-1">{t('academy.upgradeRequired')}</p>
-                            <p className="text-slate-400 text-sm mb-3">
-                              {course.level === 2 ? 'Starter' : 'Pro'} {t('academy.orHigher')}
-                            </p>
-                            <Link to="/pricing">
-                              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                                {t('academy.viewPlans')}
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-                      )}
-                      
                       <CardHeader>
                         <div className="flex items-center justify-between mb-4">
                           <span className={`px-3 py-1 rounded-full text-xs font-medium border ${styles.badge}`}>
@@ -174,7 +152,6 @@ export default function AcademyPage() {
                           {course.description}
                         </CardDescription>
                       </CardHeader>
-                      
                       <CardContent>
                         <div className="space-y-4">
                           <div className="flex items-center gap-6 text-sm text-slate-400">
@@ -187,7 +164,6 @@ export default function AcademyPage() {
                               <span>{course.duration_hours}h</span>
                             </div>
                           </div>
-
                           {user && (
                             <div className="space-y-2">
                               <div className="flex justify-between text-sm">
@@ -197,18 +173,13 @@ export default function AcademyPage() {
                               <Progress value={progress} className="h-2" />
                             </div>
                           )}
-
                           <div className="flex flex-wrap gap-2 pt-2">
                             {course.topics?.slice(0, 4).map(topic => (
-                              <span 
-                                key={topic} 
-                                className="px-2 py-1 text-xs bg-muted rounded-md text-slate-400"
-                              >
+                              <span key={topic} className="px-2 py-1 text-xs bg-muted rounded-md text-slate-400">
                                 {topic}
                               </span>
                             ))}
                           </div>
-
                           <Link to={`/course/${course.id}`} className="block pt-4">
                             <Button className="w-full bg-slate-800 hover:bg-slate-700 group-hover:bg-primary group-hover:text-white transition-colors">
                               {progress > 0 ? t('academy.continueLearning') : t('academy.startCourse')}
@@ -225,6 +196,89 @@ export default function AcademyPage() {
           )}
         </div>
       </section>
+
+      {/* Premium Courses Section */}
+      {!loading && courses.some(c => !c.is_trial) && (
+        <section className="py-16 bg-card/30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-3 mb-8">
+              <Crown className="w-6 h-6 text-amber-400" />
+              <h2 className="font-heading text-2xl font-bold">{t('academy.premiumCourses')}</h2>
+              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                {t('academy.expertCurated')}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {courses.filter(c => !c.is_trial).map((course, index) => {
+                const progress = getCourseProgress(course);
+                return (
+                  <motion.div
+                    key={course.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/30 hover:border-amber-500/50 h-full transition-all group relative overflow-hidden">
+                      <CardHeader>
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="px-3 py-1 rounded-full text-xs font-medium border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1">
+                            <Crown className="w-3 h-3" /> Premium
+                          </span>
+                          <div className="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                            <GraduationCap className="w-5 h-5" />
+                          </div>
+                        </div>
+                        <CardTitle className="font-heading text-2xl">{course.title}</CardTitle>
+                        <CardDescription className="text-slate-400">
+                          {course.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-6 text-sm text-slate-400">
+                            <div className="flex items-center gap-2">
+                              <BookOpen className="w-4 h-4" />
+                              <span>{course.lessons_count} {t('academy.lessons')}</span>
+                            </div>
+                            {course.duration_hours > 0 && (
+                              <div className="flex items-center gap-2">
+                                <Clock className="w-4 h-4" />
+                                <span>{course.duration_hours}h</span>
+                              </div>
+                            )}
+                          </div>
+                          {user && (
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-slate-400">{t('academy.progress')}</span>
+                                <span className="text-amber-400 font-medium">{progress}%</span>
+                              </div>
+                              <Progress value={progress} className="h-2" />
+                            </div>
+                          )}
+                          <div className="flex flex-wrap gap-2 pt-2">
+                            {course.topics?.slice(0, 4).map(topic => (
+                              <span key={topic} className="px-2 py-1 text-xs bg-muted rounded-md text-slate-400">
+                                {topic}
+                              </span>
+                            ))}
+                          </div>
+                          <Link to={`/course/${course.id}`} className="block pt-4">
+                            <Button className="w-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 group-hover:bg-amber-500 group-hover:text-white transition-colors border border-amber-500/30">
+                              {progress > 0 ? t('academy.continueLearning') : t('academy.startCourse')}
+                              <ChevronRight className="w-4 h-4 ml-2" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Certification Section */}
       <section className="py-24 bg-card/50">

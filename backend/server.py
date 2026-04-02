@@ -4393,10 +4393,71 @@ async def delete_lesson_admin(lesson_id: str, admin: dict = Depends(get_admin_us
     lesson = await db.lessons.find_one({"id": lesson_id})
     if lesson:
         await db.lessons.delete_one({"id": lesson_id})
+        await db.quizzes.delete_one({"lesson_id": lesson_id})
         await db.courses.update_one(
             {"id": lesson["course_id"]},
             {"$inc": {"lessons_count": -1}}
         )
+    return {"status": "deleted"}
+
+# ==================== ADMIN QUIZ ROUTES ====================
+
+class AdminQuizQuestionTranslation(BaseModel):
+    question: str
+    options: List[str]
+    explanation: str = ""
+
+class AdminQuizQuestion(BaseModel):
+    question_type: str = "multiple_choice"
+    correct_answer_index: int = 0
+    translations: Dict[str, AdminQuizQuestionTranslation]
+
+class AdminQuizRequest(BaseModel):
+    title: Optional[str] = None
+    questions: List[AdminQuizQuestion]
+
+@api_router.get("/admin/lessons/{lesson_id}/quiz")
+async def get_admin_lesson_quiz(lesson_id: str, admin: dict = Depends(get_admin_user)):
+    """Get the raw multilingual quiz for a lesson"""
+    quiz = await db.quizzes.find_one({"lesson_id": lesson_id}, {"_id": 0})
+    if not quiz:
+        raise HTTPException(status_code=404, detail="No quiz found for this lesson")
+    return quiz
+
+@api_router.put("/admin/lessons/{lesson_id}/quiz")
+async def upsert_lesson_quiz(
+    lesson_id: str,
+    request: AdminQuizRequest,
+    admin: dict = Depends(get_admin_user)
+):
+    """Create or replace the quiz for a premium lesson"""
+    lesson = await db.lessons.find_one({"id": lesson_id}, {"_id": 0})
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+
+    questions = []
+    for i, q in enumerate(request.questions):
+        questions.append({
+            "id": f"{lesson_id}-q{i+1}",
+            "question_type": q.question_type,
+            "correct_answer_index": q.correct_answer_index,
+            "translations": {lang: t.model_dump() for lang, t in q.translations.items()}
+        })
+
+    title = request.title or f"Quiz: Lesson {lesson_id.split('-lesson-')[-1]}"
+    quiz_doc = {
+        "id": f"quiz-{lesson_id}",
+        "lesson_id": lesson_id,
+        "title": title,
+        "questions": questions,
+    }
+    await db.quizzes.replace_one({"lesson_id": lesson_id}, quiz_doc, upsert=True)
+    return {"status": "success", "questions": len(questions)}
+
+@api_router.delete("/admin/lessons/{lesson_id}/quiz")
+async def delete_lesson_quiz_admin(lesson_id: str, admin: dict = Depends(get_admin_user)):
+    """Delete the quiz for a lesson"""
+    await db.quizzes.delete_one({"lesson_id": lesson_id})
     return {"status": "deleted"}
 
 # ==================== MIGRATION ROUTES ====================

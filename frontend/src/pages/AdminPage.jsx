@@ -29,7 +29,8 @@ import {
   RefreshCw,
   TrendingUp,
   Mail,
-  Globe
+  Globe,
+  HelpCircle
 } from 'lucide-react';
 import { AnalyticsDashboard } from '../components/AnalyticsDashboard';
 import NewsletterAdminTab from '../components/NewsletterAdminTab';
@@ -567,6 +568,195 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
   );
 }
 
+/** Multi-language quiz editor for a single lesson */
+function QuizForm({ lessonId, lessonTitle, token, onClose }) {
+  const [activeLang, setActiveLang] = useState('en');
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await axios.get(`${API}/admin/lessons/${lessonId}/quiz`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setQuestions((res.data.questions || []).map((q, i) => ({
+          _key: i,
+          question_type: q.question_type || 'multiple_choice',
+          correct_answer_index: q.correct_answer_index ?? 0,
+          translations: Object.fromEntries(
+            LANG_OPTIONS.map(({ code }) => [code, {
+              question: q.translations?.[code]?.question || '',
+              options: (q.translations?.[code]?.options || []).join('\n'),
+              explanation: q.translations?.[code]?.explanation || '',
+            }])
+          )
+        })));
+      } catch {
+        // No quiz yet — start empty
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [lessonId]);
+
+  const emptyQuestion = () => ({
+    _key: Date.now(),
+    question_type: 'multiple_choice',
+    correct_answer_index: 0,
+    translations: Object.fromEntries(LANG_OPTIONS.map(({ code }) => [code, { question: '', options: '', explanation: '' }]))
+  });
+
+  const addQuestion = () => setQuestions(prev => [...prev, emptyQuestion()]);
+  const removeQuestion = (key) => setQuestions(prev => prev.filter(q => q._key !== key));
+  const updateQ = (key, field, value) =>
+    setQuestions(prev => prev.map(q => q._key === key ? { ...q, [field]: value } : q));
+  const updateTrans = (key, lang, field, value) =>
+    setQuestions(prev => prev.map(q =>
+      q._key === key
+        ? { ...q, translations: { ...q.translations, [lang]: { ...q.translations[lang], [field]: value } } }
+        : q
+    ));
+
+  const handleSave = async () => {
+    if (questions.length === 0) { toast.error('Add at least one question'); return; }
+    setSaving(true);
+    try {
+      const payload = {
+        questions: questions.map(q => ({
+          question_type: q.question_type,
+          correct_answer_index: Number(q.correct_answer_index),
+          translations: Object.fromEntries(
+            LANG_OPTIONS
+              .filter(({ code }) => q.translations[code]?.question?.trim())
+              .map(({ code }) => [code, {
+                question: q.translations[code].question.trim(),
+                options: q.translations[code].options.split('\n').map(s => s.trim()).filter(Boolean),
+                explanation: q.translations[code].explanation.trim(),
+              }])
+          )
+        })).filter(q => Object.keys(q.translations).length > 0)
+      };
+      if (payload.questions.length === 0) { toast.error('Each question needs at least one language filled'); return; }
+      await axios.put(`${API}/admin/lessons/${lessonId}/quiz`, payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Quiz saved');
+      onClose();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to save quiz');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin" /></div>;
+
+  return (
+    <Card className="bg-card border-border">
+      <CardHeader>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <HelpCircle className="w-5 h-5 text-primary" />
+          Quiz — {lessonTitle}
+        </CardTitle>
+        <div className="flex gap-2 flex-wrap mt-2">
+          {LANG_OPTIONS.map(({ code, flag, label }) => (
+            <button
+              key={code}
+              onClick={() => setActiveLang(code)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                activeLang === code
+                  ? 'bg-primary/20 text-primary border border-primary/40'
+                  : 'bg-muted text-slate-400 hover:text-foreground'
+              }`}
+            >
+              {flag} {label}
+            </button>
+          ))}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {questions.length === 0 && (
+          <p className="text-slate-400 text-center py-4 text-sm">No questions yet. Add your first one below.</p>
+        )}
+        {questions.map((q, idx) => {
+          const enOptions = (q.translations['en']?.options || '').split('\n').filter(Boolean);
+          return (
+            <div key={q._key} className="border border-border rounded-lg p-4 space-y-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-sm font-semibold text-slate-400 w-6">Q{idx + 1}</span>
+                <select
+                  value={q.question_type}
+                  onChange={e => updateQ(q._key, 'question_type', e.target.value)}
+                  className="bg-muted border border-border rounded px-2 py-1 text-sm"
+                >
+                  <option value="multiple_choice">Multiple Choice</option>
+                  <option value="true_false">True / False</option>
+                </select>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-slate-400">Correct:</span>
+                  <select
+                    value={q.correct_answer_index}
+                    onChange={e => updateQ(q._key, 'correct_answer_index', Number(e.target.value))}
+                    className="bg-muted border border-border rounded px-2 py-1 text-sm"
+                  >
+                    {q.question_type === 'true_false' ? (
+                      <>
+                        <option value={0}>True</option>
+                        <option value={1}>False</option>
+                      </>
+                    ) : enOptions.length > 0
+                      ? enOptions.map((opt, i) => (
+                          <option key={i} value={i}>{String.fromCharCode(65 + i)}: {opt.slice(0, 28)}</option>
+                        ))
+                      : [0, 1, 2, 3].map(i => (
+                          <option key={i} value={i}>{String.fromCharCode(65 + i)}</option>
+                        ))
+                    }
+                  </select>
+                </div>
+                <Button size="sm" variant="ghost" onClick={() => removeQuestion(q._key)} className="ml-auto">
+                  <Trash2 className="w-4 h-4 text-red-500" />
+                </Button>
+              </div>
+              <Input
+                placeholder={`Question text (${activeLang})`}
+                value={q.translations[activeLang]?.question ?? ''}
+                onChange={e => updateTrans(q._key, activeLang, 'question', e.target.value)}
+              />
+              <Textarea
+                placeholder={q.question_type === 'true_false'
+                  ? `Options (${activeLang}) — e.g. True\nFalse`
+                  : `Options (${activeLang}) — one per line`}
+                rows={4}
+                value={q.translations[activeLang]?.options ?? ''}
+                onChange={e => updateTrans(q._key, activeLang, 'options', e.target.value)}
+              />
+              <Input
+                placeholder={`Explanation (${activeLang})`}
+                value={q.translations[activeLang]?.explanation ?? ''}
+                onChange={e => updateTrans(q._key, activeLang, 'explanation', e.target.value)}
+              />
+            </div>
+          );
+        })}
+        <Button variant="outline" onClick={addQuestion} className="w-full">
+          <Plus className="w-4 h-4 mr-2" /> Add Question
+        </Button>
+        <div className="flex gap-2 justify-end pt-2 border-t border-border">
+          <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+            Save Quiz
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // Courses Tab Component
 function CoursesTab({ token }) {
   const { t } = useTranslation();
@@ -581,6 +771,8 @@ function CoursesTab({ token }) {
   const [editingCourse, setEditingCourse] = useState(null);
   const [showLessonForm, setShowLessonForm] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
+  const [showQuizForm, setShowQuizForm] = useState(false);
+  const [selectedLessonForQuiz, setSelectedLessonForQuiz] = useState(null);
 
   const authHeaders = { Authorization: `Bearer ${token}` };
 
@@ -751,6 +943,18 @@ function CoursesTab({ token }) {
         </div>
       )}
 
+      {/* Quiz Form */}
+      {showQuizForm && selectedLessonForQuiz && (
+        <div className="space-y-2">
+          <QuizForm
+            lessonId={selectedLessonForQuiz.id}
+            lessonTitle={getDisplayTitle(selectedLessonForQuiz)}
+            token={token}
+            onClose={() => { setShowQuizForm(false); setSelectedLessonForQuiz(null); }}
+          />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Courses List */}
         <Card className="bg-card border-border">
@@ -773,7 +977,7 @@ function CoursesTab({ token }) {
             {courses.map((course) => (
               <div
                 key={course.id}
-                onClick={() => { fetchLessons(course.id); setShowCourseForm(false); setShowLessonForm(false); }}
+                onClick={() => { fetchLessons(course.id); setShowCourseForm(false); setShowLessonForm(false); setShowQuizForm(false); setSelectedLessonForQuiz(null); }}
                 className={`p-3 rounded-lg cursor-pointer transition-colors ${
                   selectedCourse === course.id
                     ? 'bg-primary/20 border border-primary'
@@ -861,7 +1065,20 @@ function CoursesTab({ token }) {
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => { setEditingLesson(lesson); setShowLessonForm(true); setShowCourseForm(false); }}
+                              title="Manage quiz"
+                              onClick={() => {
+                                setSelectedLessonForQuiz(lesson);
+                                setShowQuizForm(true);
+                                setShowLessonForm(false);
+                                setShowCourseForm(false);
+                              }}
+                            >
+                              <HelpCircle className="w-4 h-4 text-primary" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => { setEditingLesson(lesson); setShowLessonForm(true); setShowCourseForm(false); setShowQuizForm(false); }}
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
