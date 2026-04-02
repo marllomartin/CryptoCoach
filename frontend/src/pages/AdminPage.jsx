@@ -1235,18 +1235,18 @@ function UsersTab({ token, currentUser }) {
     }
   };
 
-  const tierColors = {
-    free: 'bg-slate-500',
-    starter: 'bg-blue-500',
-    pro: 'bg-purple-500',
-    elite: 'bg-yellow-500'
+  const tierStyle = {
+    free:    { badge: 'bg-slate-500/20 text-slate-300 border border-slate-500/30',    select: 'border-slate-500/40 text-slate-300' },
+    starter: { badge: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',       select: 'border-blue-500/40 text-blue-300' },
+    pro:     { badge: 'bg-purple-500/20 text-purple-300 border border-purple-500/30', select: 'border-purple-500/40 text-purple-300' },
+    elite:   { badge: 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30', select: 'border-yellow-500/40 text-yellow-300' },
   };
 
-  const roleColors = {
-    admin:     'bg-red-500/20 text-red-400 border border-red-500/30',
-    moderator: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
-    editor:    'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-    none:      'bg-slate-500/20 text-slate-400 border border-slate-500/30',
+  const roleStyle = {
+    admin:     { badge: 'bg-red-500/20 text-red-400 border border-red-500/30',       select: 'border-red-500/40 text-red-400' },
+    moderator: { badge: 'bg-purple-500/20 text-purple-400 border border-purple-500/30', select: 'border-purple-500/40 text-purple-400' },
+    editor:    { badge: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',    select: 'border-blue-500/40 text-blue-400' },
+    none:      { badge: 'bg-slate-500/20 text-slate-400 border border-slate-500/30', select: 'border-slate-500/40 text-slate-400' },
   };
 
   return (
@@ -1279,14 +1279,14 @@ function UsersTab({ token, currentUser }) {
                   <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.subscription')}</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.xp')}</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.registration')}</th>
-                  {(canEditRoles || canEditSubscriptions) && (
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.actions')}</th>
-                  )}
                 </tr>
               </thead>
               <tbody>
                 {users.map((u) => {
                   const userRole = u.role || 'none';
+                  const userTier = u.subscription_tier || 'free';
+                  const rs = roleStyle[userRole] || roleStyle.none;
+                  const ts = tierStyle[userTier] || tierStyle.free;
                   return (
                     <tr key={u.id} className="border-b border-border/50 hover:bg-muted/50">
                       <td className="py-3 px-4 text-sm">{u.email}</td>
@@ -1294,7 +1294,7 @@ function UsersTab({ token, currentUser }) {
                       <td className="py-3 px-4">
                         {canEditRoles ? (
                           <select
-                            className="bg-muted border border-border rounded px-2 py-1 text-xs"
+                            className={`bg-background border rounded px-2 py-1 text-xs font-medium ${rs.select}`}
                             value={userRole}
                             onChange={(e) => updateUserRole(u.id, e.target.value)}
                           >
@@ -1304,36 +1304,33 @@ function UsersTab({ token, currentUser }) {
                             <option value="admin">admin</option>
                           </select>
                         ) : (
-                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${roleColors[userRole] || roleColors.none}`}>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${rs.badge}`}>
                             {userRole}
                           </span>
                         )}
                       </td>
                       <td className="py-3 px-4">
-                        <span className={`px-2 py-1 rounded text-xs text-white ${tierColors[u.subscription_tier] || tierColors.free}`}>
-                          {u.subscription_tier || 'free'}
-                        </span>
+                        {canEditSubscriptions ? (
+                          <select
+                            className={`bg-background border rounded px-2 py-1 text-xs font-medium ${ts.select}`}
+                            value={userTier}
+                            onChange={(e) => updateUserTier(u.id, e.target.value)}
+                          >
+                            <option value="free">free</option>
+                            <option value="starter">starter</option>
+                            <option value="pro">pro</option>
+                            <option value="elite">elite</option>
+                          </select>
+                        ) : (
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${ts.badge}`}>
+                            {userTier}
+                          </span>
+                        )}
                       </td>
                       <td className="py-3 px-4 text-sm">{u.xp_points || 0}</td>
                       <td className="py-3 px-4 text-sm text-slate-400">
                         {new Date(u.created_at).toLocaleDateString()}
                       </td>
-                      {(canEditRoles || canEditSubscriptions) && (
-                        <td className="py-3 px-4">
-                          {canEditSubscriptions && (
-                            <select
-                              className="bg-muted border border-border rounded px-2 py-1 text-xs"
-                              value={u.subscription_tier || 'free'}
-                              onChange={(e) => updateUserTier(u.id, e.target.value)}
-                            >
-                              <option value="free">Free</option>
-                              <option value="starter">Starter</option>
-                              <option value="pro">Pro</option>
-                              <option value="elite">Elite</option>
-                            </select>
-                          )}
-                        </td>
-                      )}
                     </tr>
                   );
                 })}
