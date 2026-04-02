@@ -4178,7 +4178,7 @@ async def get_admin_stats(admin: dict = Depends(get_admin_user)):
     
     # Subscription breakdown
     subscriptions = {}
-    for tier in ["free", "starter", "pro", "elite"]:
+    for tier in ["free", "pro", "elite"]:
         count = await db.users.count_documents({"subscription_tier": tier})
         subscriptions[tier] = count
     

@@ -1236,10 +1236,9 @@ function UsersTab({ token, currentUser }) {
   };
 
   const tierStyle = {
-    free:    { badge: 'bg-slate-500/20 text-slate-300 border border-slate-500/30',    select: 'border-slate-500/40 text-slate-300' },
-    starter: { badge: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',       select: 'border-blue-500/40 text-blue-300' },
-    pro:     { badge: 'bg-purple-500/20 text-purple-300 border border-purple-500/30', select: 'border-purple-500/40 text-purple-300' },
-    elite:   { badge: 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30', select: 'border-yellow-500/40 text-yellow-300' },
+    free:  { badge: 'bg-slate-500/20 text-slate-300 border border-slate-500/30',    select: 'border-slate-500/40 text-slate-300' },
+    pro:   { badge: 'bg-purple-500/20 text-purple-300 border border-purple-500/30', select: 'border-purple-500/40 text-purple-300' },
+    elite: { badge: 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30', select: 'border-yellow-500/40 text-yellow-300' },
   };
 
   const roleStyle = {
@@ -1316,14 +1315,13 @@ function UsersTab({ token, currentUser }) {
                             value={userTier}
                             onChange={(e) => updateUserTier(u.id, e.target.value)}
                           >
-                            <option value="free">free</option>
-                            <option value="starter">starter</option>
+                            <option value="free">standard</option>
                             <option value="pro">pro</option>
                             <option value="elite">elite</option>
                           </select>
                         ) : (
                           <span className={`px-2 py-0.5 rounded text-xs font-medium ${ts.badge}`}>
-                            {userTier}
+                            {userTier === 'free' ? 'standard' : userTier}
                           </span>
                         )}
                       </td>

@@ -16,19 +16,11 @@ import { SocialProof, SocialProofMini } from '../components/SocialProof';
 const TIER_META = [
   {
     id: 'free',
-    name: 'Free',
+    name: 'Standard',
     monthlyPrice: 0,
     annualPrice: 0,
     icon: Star,
     popular: false
-  },
-  {
-    id: 'starter',
-    name: 'Starter',
-    monthlyPrice: 9.99,
-    annualPrice: 79.99,
-    icon: Zap,
-    popular: true
   },
   {
     id: 'pro',
@@ -36,7 +28,7 @@ const TIER_META = [
     monthlyPrice: 19.99,
     annualPrice: 159.99,
     icon: Rocket,
-    popular: false,
+    popular: true,
   },
   {
     id: 'elite',
@@ -60,7 +52,7 @@ const PricingPage = () => {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
 
   const tiers = TIER_META.map(meta => {
-    const featuresCount = { free: 5, starter: 6, pro: 6, elite: 5 };
+    const featuresCount = { free: 5, pro: 6, elite: 5 };
     const count = featuresCount[meta.id];
     const features = Array.from({ length: count }, (_, i) =>
       t(`pricing.tiers.${meta.id}.feature${i + 1}`)
