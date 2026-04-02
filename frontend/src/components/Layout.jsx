@@ -97,7 +97,7 @@ export const Layout = ({ children }) => {
                       {t('nav.simulator')}
                     </Button>
                   </Link>
-                  {['admin', 'moderator'].includes(user.role) && (
+                  {['admin', 'moderador', 'editor'].includes(user.role) && (
                     <Link to="/admin">
                       <Button variant="outline" size="sm" className="whitespace-nowrap text-fuchsia-400 border-fuchsia-500/50 hover:bg-fuchsia-500/10 bg-gradient-to-r from-fuchsia-500/5 to-purple-500/5">
                         <Shield className="w-4 h-4 mr-2 shrink-0" />
@@ -184,7 +184,7 @@ export const Layout = ({ children }) => {
                           {link.label}
                         </Link>
                       ))}
-                      {['admin', 'moderator'].includes(user.role) && (
+                      {['admin', 'moderador', 'editor'].includes(user.role) && (
                         <Link
                           to="/admin"
                           onClick={() => setMobileMenuOpen(false)}
