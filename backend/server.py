@@ -264,6 +264,8 @@ class CourseCreateRequest(BaseModel):
     level: int
     thumbnail: str = "https://images.unsplash.com/photo-1639825752750-5061ded5503b?w=800"
     duration_hours: int = 0
+    color_from: Optional[str] = None
+    color_to: Optional[str] = None
     translations: Dict[str, CourseTranslation]
 
 class CourseUpdateRequest(BaseModel):
@@ -271,6 +273,8 @@ class CourseUpdateRequest(BaseModel):
     thumbnail: Optional[str] = None
     duration_hours: Optional[int] = None
     is_published: Optional[bool] = None
+    color_from: Optional[str] = None
+    color_to: Optional[str] = None
     translations: Optional[Dict[str, CourseTranslation]] = None
 
 class LessonTranslation(BaseModel):
@@ -4237,6 +4241,10 @@ async def create_course_admin(
         "created_at": datetime.now(timezone.utc).isoformat(),
         "translations": {k: v.model_dump() for k, v in request.translations.items()}
     }
+    if request.color_from:
+        course["color_from"] = request.color_from
+    if request.color_to:
+        course["color_to"] = request.color_to
     await db.courses.insert_one(course)
     del course["_id"]
     return course
@@ -4261,6 +4269,10 @@ async def update_course_admin(
         update_data["duration_hours"] = request.duration_hours
     if request.is_published is not None:
         update_data["is_published"] = request.is_published
+    if request.color_from is not None:
+        update_data["color_from"] = request.color_from
+    if request.color_to is not None:
+        update_data["color_to"] = request.color_to
 
     if request.translations is not None:
         validate_translations({k: v.model_dump() for k, v in request.translations.items()}, "course")

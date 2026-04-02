@@ -220,7 +220,13 @@ export default function AcademyPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <Card className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/30 hover:border-amber-500/50 h-full transition-all group relative overflow-hidden">
+                    <Card
+                      className="border h-full transition-all group relative overflow-hidden"
+                      style={{
+                        background: `linear-gradient(to bottom right, ${course.color_from || '#1e3a5f'}33, ${course.color_to || '#0f2027'}33)`,
+                        borderColor: `${course.color_from || '#f59e0b'}55`,
+                      }}
+                    >
                       <CardHeader>
                         <div className="flex items-center justify-between mb-4">
                           <span className="px-3 py-1 rounded-full text-xs font-medium border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1">

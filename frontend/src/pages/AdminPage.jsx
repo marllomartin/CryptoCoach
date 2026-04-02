@@ -282,6 +282,8 @@ function CourseForm({ initial, onSave, onCancel, saving }) {
   const [thumbnail, setThumbnail] = useState(initial?.thumbnail ?? '');
   const [durationHours, setDurationHours] = useState(initial?.duration_hours ?? 0);
   const [isPublished, setIsPublished] = useState(initial?.is_published ?? false);
+  const [colorFrom, setColorFrom] = useState(initial?.color_from ?? '#1e3a5f');
+  const [colorTo, setColorTo] = useState(initial?.color_to ?? '#0f2027');
   const [translations, setTranslations] = useState(() => {
     const base = EMPTY_COURSE_TRANSLATIONS();
     if (initial?.translations) {
@@ -324,7 +326,7 @@ function CourseForm({ initial, onSave, onCancel, saving }) {
       toast.error('At least one language must have a title.');
       return;
     }
-    onSave({ level: Number(level), thumbnail, duration_hours: Number(durationHours), is_published: isPublished, translations: payload });
+    onSave({ level: Number(level), thumbnail, duration_hours: Number(durationHours), is_published: isPublished, color_from: colorFrom, color_to: colorTo, translations: payload });
   };
 
   return (
@@ -358,6 +360,49 @@ function CourseForm({ initial, onSave, onCancel, saving }) {
         <div>
           <label className="text-xs text-slate-400 mb-1 block">Thumbnail URL</label>
           <Input placeholder="https://..." value={thumbnail} onChange={e => setThumbnail(e.target.value)} />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs text-slate-400 mb-1 block">Card gradient — start color</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={colorFrom}
+                onChange={e => setColorFrom(e.target.value)}
+                className="w-10 h-9 rounded cursor-pointer border border-border bg-muted p-0.5"
+              />
+              <Input
+                value={colorFrom}
+                onChange={e => setColorFrom(e.target.value)}
+                placeholder="#1e3a5f"
+                className="font-mono text-sm"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-slate-400 mb-1 block">Card gradient — end color</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={colorTo}
+                onChange={e => setColorTo(e.target.value)}
+                className="w-10 h-9 rounded cursor-pointer border border-border bg-muted p-0.5"
+              />
+              <Input
+                value={colorTo}
+                onChange={e => setColorTo(e.target.value)}
+                placeholder="#0f2027"
+                className="font-mono text-sm"
+              />
+            </div>
+          </div>
+          <div className="col-span-2">
+            <label className="text-xs text-slate-400 mb-1 block">Preview</label>
+            <div
+              className="h-10 rounded-lg border border-border"
+              style={{ background: `linear-gradient(to bottom right, ${colorFrom}, ${colorTo})` }}
+            />
+          </div>
         </div>
 
         {/* Language tabs */}
