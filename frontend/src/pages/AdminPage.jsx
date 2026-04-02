@@ -238,8 +238,8 @@ const EMPTY_LESSON_TRANSLATIONS = () =>
   Object.fromEntries(LANG_OPTIONS.map(({ code }) => [code, { title: '', subtitle: '', content: '', learning_objectives: '', examples: '', summary: '', recommended_readings: '' }]));
 
 /** Badge showing language availability for a course or lesson.
- *  Trial lessons show a locked "Trial" pill followed by all 4 green flags.
- *  Premium lessons show a green flag for each language with content, grey otherwise. */
+ *  Trial courses/lessons show a locked "Trial" pill followed by all 4 green flags.
+ *  Other items show a green flag per language with content, grey for missing. */
 function LangBadges({ translations, isTrial }) {
   if (isTrial) {
     return (
@@ -786,24 +786,26 @@ function CoursesTab({ token }) {
                     <p className="text-xs text-slate-400">
                       Level {course.level} · {course.lessons_count} lessons
                     </p>
-                    <LangBadges translations={course.translations} />
+                    <LangBadges translations={course.translations} isTrial={course.is_trial} />
                   </div>
-                  <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => { setEditingCourse(course); setShowCourseForm(true); setShowLessonForm(false); }}
-                    >
-                      <Edit className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => deleteCourse(course.id)}
-                    >
-                      <Trash2 className="w-3.5 h-3.5 text-red-500" />
-                    </Button>
-                  </div>
+                  {!course.is_trial && (
+                    <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => { setEditingCourse(course); setShowCourseForm(true); setShowLessonForm(false); }}
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => deleteCourse(course.id)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -845,7 +847,7 @@ function CoursesTab({ token }) {
                           {lesson.audio_full ? ` · 🔊 ${t('admin.media.audio')}` : ` · ⚪ ${t('admin.courses.noAudio')}`}
                           {lesson.hero_image ? ` · 🖼️ Image` : ` · ⚪ ${t('admin.courses.noImage')}`}
                         </p>
-                        <LangBadges translations={lesson.translations} isTrial={lesson.is_trial} />
+                        <LangBadges translations={lesson.translations} isTrial={courses.find(c => c.id === selectedCourse)?.is_trial} />
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         <Button size="sm" variant="ghost" onClick={() => generateAudio(lesson.id)} title="Generate audio">
@@ -854,7 +856,7 @@ function CoursesTab({ token }) {
                         <Button size="sm" variant="ghost" onClick={() => generateImage(lesson.id)} title="Generate image">
                           <Image className="w-4 h-4" />
                         </Button>
-                        {!lesson.is_trial && (
+                        {!courses.find(c => c.id === selectedCourse)?.is_trial && (
                           <>
                             <Button
                               size="sm"

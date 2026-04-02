@@ -1174,6 +1174,7 @@ async def seed_courses():
             "lessons_count": 8,
             "duration_hours": 6,
             "is_published": True,
+            "is_trial": True,
             "created_at": datetime.now(timezone.utc).isoformat(),
             "translations": {
                 "en": {
@@ -1205,6 +1206,7 @@ async def seed_courses():
             "lessons_count": 8,
             "duration_hours": 10,
             "is_published": True,
+            "is_trial": True,
             "created_at": datetime.now(timezone.utc).isoformat(),
             "translations": {
                 "en": {
@@ -1236,6 +1238,7 @@ async def seed_courses():
             "lessons_count": 7,
             "duration_hours": 12,
             "is_published": True,
+            "is_trial": True,
             "created_at": datetime.now(timezone.utc).isoformat(),
             "translations": {
                 "en": {
@@ -4455,12 +4458,31 @@ async def migrate_to_translations(
         )
         migrated_lessons += 1
 
+    # Stamp is_trial on the three built-in trial courses
+    TRIAL_COURSE_IDS = ["course-foundations", "course-investor", "course-strategist"]
+    await db.courses.update_many(
+        {"id": {"$in": TRIAL_COURSE_IDS}},
+        {"$set": {"is_trial": True}}
+    )
+
     return {
         "status": "success",
         "migrated_courses": migrated_courses,
         "migrated_lessons": migrated_lessons,
         "default_language": default_lang
     }
+
+@api_router.post("/admin/migrate-trial-courses")
+async def migrate_trial_courses(admin: dict = Depends(get_admin_user)):
+    """Stamp is_trial: true on the three built-in trial courses. Safe to run multiple times."""
+    if admin["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin only action")
+    TRIAL_COURSE_IDS = ["course-foundations", "course-investor", "course-strategist"]
+    result = await db.courses.update_many(
+        {"id": {"$in": TRIAL_COURSE_IDS}},
+        {"$set": {"is_trial": True}}
+    )
+    return {"status": "success", "updated": result.modified_count}
 
 # ==================== MEDIA GENERATION ROUTES ====================
 

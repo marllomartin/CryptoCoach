@@ -8,7 +8,6 @@ LEVEL1_LESSONS = {
         "order": 2,
         "duration_minutes": 55,
         "difficulty": "beginner",
-        "is_trial": True,
         "title": {
             "en": "How Cryptocurrency Works",
             "fr": "Comment Fonctionnent les Cryptomonnaies",

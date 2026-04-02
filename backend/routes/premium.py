@@ -19,6 +19,20 @@ mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ.get('DB_NAME', 'test_database')]
 
+# IDs of the built-in trial courses — all their lessons are free for everyone
+TRIAL_COURSE_IDS = {
+    "course-foundations",
+    "course-investor",
+    "course-strategist",
+}
+
+def is_trial_lesson(lesson_id: str) -> bool:
+    """Return True if the lesson belongs to one of the built-in trial courses."""
+    for course_id in TRIAL_COURSE_IDS:
+        if lesson_id.startswith(course_id + "-lesson-"):
+            return True
+    return False
+
 # Trial configuration
 TRIAL_CONFIG = {
     "lesson_1_trial_days": 3,  # 3 days free access to lesson 1 videos
@@ -71,14 +85,7 @@ class ReferralBonusRequest(BaseModel):
 
 def calculate_trial_status(user_created_at: str, lesson_id: str, subscription_tier: str, is_admin: bool = False) -> TrialStatus:
     """Calculate trial status for a user and lesson"""
-    
-    # Check if this is one of the first 3 free lessons
-    FREE_LESSONS = [
-        "course-foundations-lesson-1",
-        "course-foundations-lesson-2", 
-        "course-foundations-lesson-3"
-    ]
-    is_free_lesson = lesson_id in FREE_LESSONS
+    is_free_lesson = is_trial_lesson(lesson_id)
     
     # Admins always have full access
     if is_admin:
@@ -159,15 +166,8 @@ async def get_trial_status(
             preview_seconds=0
         )
     
-    # Check if lesson is one of the 3 free lessons
-    FREE_LESSONS = [
-        "course-foundations-lesson-1",
-        "course-foundations-lesson-2", 
-        "course-foundations-lesson-3"
-    ]
-    
-    # Free lessons are accessible to everyone
-    if lesson_id in FREE_LESSONS:
+    # All lessons in trial courses are accessible to everyone
+    if is_trial_lesson(lesson_id):
         return TrialStatus(
             has_trial=False,
             trial_active=False,

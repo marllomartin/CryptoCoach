@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 TRIAL_COURSES = {
     "course-foundations": {
         "id": "course-foundations",
+        "is_trial": True,
         "title": {
             "en": "Crypto Foundations",
             "fr": "Fondamentaux Crypto",
@@ -29,6 +30,7 @@ TRIAL_COURSES = {
     },
     "course-investor": {
         "id": "course-investor",
+        "is_trial": True,
         "title": {
             "en": "Crypto Investor",
             "fr": "Investisseur Crypto",
@@ -47,6 +49,7 @@ TRIAL_COURSES = {
     },
     "course-strategist": {
         "id": "course-strategist",
+        "is_trial": True,
         "title": {
             "en": "Advanced Crypto Strategist",
             "fr": "Stratège Crypto Avancé",
@@ -77,7 +80,6 @@ TRIAL_LESSONS = {
         "order": 0,
         "duration_minutes": 45,
         "difficulty": "beginner",
-        "is_trial": True,
         "title": {
             "en": "What is Blockchain?",
             "fr": "Qu'est-ce que la Blockchain ?",
@@ -510,7 +512,6 @@ Como milhares de computadores concordam com o estado verdadeiro do registro? Iss
         "order": 1,
         "duration_minutes": 50,
         "difficulty": "beginner",
-        "is_trial": True,
         "title": {
             "en": "What is Bitcoin?",
             "fr": "Qu'est-ce que le Bitcoin ?",
