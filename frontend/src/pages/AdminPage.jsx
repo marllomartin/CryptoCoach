@@ -41,7 +41,10 @@ export default function AdminPage() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const isAdmin = user?.role === 'admin';
+  const isModerator = user?.role === 'moderator';
+  const defaultTab = isAdmin || isModerator ? 'dashboard' : 'courses';
+  const [activeTab, setActiveTab] = useState(defaultTab);
 
   // Check admin access
   useEffect(() => {
@@ -50,7 +53,7 @@ export default function AdminPage() {
       return;
     }
 
-    if (!['admin', 'moderador', 'editor'].includes(user.role)) {
+    if (!['admin', 'moderator', 'editor'].includes(user.role)) {
       toast.error(t('admin.accessDenied'));
       navigate('/');
       return;
@@ -103,20 +106,24 @@ export default function AdminPage() {
           
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-7 w-full mb-8">
-              <TabsTrigger value="dashboard" className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4" />
-                {t('admin.tabs.dashboard')}
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                {t('admin.tabs.analytics')}
-              </TabsTrigger>
+            <TabsList className="flex flex-wrap w-full mb-8 h-auto gap-1">
+              {isAdmin && (
+                <TabsTrigger value="dashboard" className="flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4" />
+                  {t('admin.tabs.dashboard')}
+                </TabsTrigger>
+              )}
+              {isAdmin && (
+                <TabsTrigger value="analytics" className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  {t('admin.tabs.analytics')}
+                </TabsTrigger>
+              )}
               <TabsTrigger value="courses" className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4" />
                 {t('admin.tabs.courses')}
               </TabsTrigger>
-              {['admin', 'moderador'].includes(user?.role) && (
+              {(isAdmin || isModerator) && (
                 <TabsTrigger value="users" className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
                   {t('admin.tabs.users')}
@@ -806,7 +813,7 @@ function QuizForm({ lessonId, lessonTitle, token, onClose }) {
 
 // Courses Tab Component
 function CoursesTab({ token, currentUser }) {
-  const canDelete = ['admin', 'moderador'].includes(currentUser?.role);
+  const canDelete = ['admin', 'moderator'].includes(currentUser?.role);
   const { t } = useTranslation();
   const [courses, setCourses] = useState([]);
   const [lessons, setLessons] = useState([]);
@@ -1179,7 +1186,7 @@ function UsersTab({ token, currentUser }) {
   const [total, setTotal] = useState(0);
 
   const canEditRoles = currentUser?.role === 'admin';
-  const canEditSubscriptions = ['admin', 'moderador'].includes(currentUser?.role);
+  const canEditSubscriptions = ['admin', 'moderator'].includes(currentUser?.role);
 
   useEffect(() => {
     fetchUsers();
@@ -1237,7 +1244,7 @@ function UsersTab({ token, currentUser }) {
 
   const roleColors = {
     admin:     'bg-red-500/20 text-red-400 border border-red-500/30',
-    moderador: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
+    moderator: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
     editor:    'bg-blue-500/20 text-blue-400 border border-blue-500/30',
     none:      'bg-slate-500/20 text-slate-400 border border-slate-500/30',
   };
@@ -1293,7 +1300,7 @@ function UsersTab({ token, currentUser }) {
                           >
                             <option value="none">none</option>
                             <option value="editor">editor</option>
-                            <option value="moderador">moderador</option>
+                            <option value="moderator">moderator</option>
                             <option value="admin">admin</option>
                           </select>
                         ) : (
@@ -1341,7 +1348,7 @@ function UsersTab({ token, currentUser }) {
 
 // Blog Tab Component
 function BlogTab({ token, currentUser }) {
-  const canDelete = ['admin', 'moderador'].includes(currentUser?.role);
+  const canDelete = ['admin', 'moderator'].includes(currentUser?.role);
   const { t } = useTranslation();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);

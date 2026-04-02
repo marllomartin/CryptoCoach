@@ -197,7 +197,7 @@ class UserResponse(BaseModel):
     last_activity: Optional[str] = None
     subscription_tier: str = "free"
     subscription_expires: Optional[str] = None
-    role: str = "none"  # none, editor, moderador, admin
+    role: str = "none"  # none, editor, moderator, admin
 
 class TokenResponse(BaseModel):
     access_token: str
@@ -591,8 +591,8 @@ async def login(request: Request, credentials: UserLogin):
             role = "admin"
             await db.users.update_one({"id": user["id"]}, {"$set": {"role": "admin"}})
         elif email in MODERATOR_EMAILS:
-            role = "moderador"
-            await db.users.update_one({"id": user["id"]}, {"$set": {"role": "moderador"}})
+            role = "moderator"
+            await db.users.update_one({"id": user["id"]}, {"$set": {"role": "moderator"}})
         else:
             role = "none"
 
@@ -627,8 +627,8 @@ async def get_me(current_user: dict = Depends(get_current_user)):
             role = "admin"
             await db.users.update_one({"id": current_user["id"]}, {"$set": {"role": "admin"}})
         elif email in MODERATOR_EMAILS:
-            role = "moderador"
-            await db.users.update_one({"id": current_user["id"]}, {"$set": {"role": "moderador"}})
+            role = "moderator"
+            await db.users.update_one({"id": current_user["id"]}, {"$set": {"role": "moderator"}})
         else:
             role = "none"
     
@@ -4121,12 +4121,12 @@ def check_course_access(user: dict, course_level: int) -> bool:
 # ==================== ADMIN ROUTES ====================
 
 # Roles that have access to the admin panel
-ADMIN_PANEL_ROLES = {"admin", "moderador", "editor"}
+ADMIN_PANEL_ROLES = {"admin", "moderator", "editor"}
 # All valid role values
-VALID_ROLES = {"none", "editor", "moderador", "admin"}
+VALID_ROLES = {"none", "editor", "moderator", "admin"}
 
 async def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    """Base admin dependency — allows any admin-panel role (admin, moderador, editor)."""
+    """Base admin dependency — allows any admin-panel role (admin, moderator, editor)."""
     try:
         payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user_id = payload.get("sub")
@@ -4144,8 +4144,8 @@ async def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(sec
                 role = "admin"
                 await db.users.update_one({"id": user_id}, {"$set": {"role": "admin"}})
             elif email in MODERATOR_EMAILS:
-                role = "moderador"
-                await db.users.update_one({"id": user_id}, {"$set": {"role": "moderador"}})
+                role = "moderator"
+                await db.users.update_one({"id": user_id}, {"$set": {"role": "moderator"}})
             else:
                 raise HTTPException(status_code=403, detail="Admin panel access required")
 
@@ -4155,9 +4155,9 @@ async def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(sec
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-async def require_moderador_or_above(admin: dict = Depends(get_admin_user)):
-    """Requires moderador or admin role. Editors cannot delete content or manage users."""
-    if admin["role"] not in ("admin", "moderador"):
+async def require_moderator_or_above(admin: dict = Depends(get_admin_user)):
+    """Requires moderator or admin role. Editors cannot delete content or manage users."""
+    if admin["role"] not in ("admin", "moderator"):
         raise HTTPException(status_code=403, detail="Moderador or admin role required")
     return admin
 
@@ -4208,7 +4208,7 @@ async def get_admin_users(
     skip: int = 0,
     limit: int = 50,
     search: Optional[str] = None,
-    admin: dict = Depends(require_moderador_or_above)
+    admin: dict = Depends(require_moderator_or_above)
 ):
     """Get all users with pagination and search"""
     query = {}
@@ -4229,7 +4229,7 @@ async def update_user_admin(
     role: Optional[str] = None,
     subscription_tier: Optional[str] = None,
     is_banned: Optional[bool] = None,
-    admin: dict = Depends(require_moderador_or_above)
+    admin: dict = Depends(require_moderator_or_above)
 ):
     """Update user properties with role-based permission checks."""
     update_data = {}
@@ -4243,7 +4243,7 @@ async def update_user_admin(
         update_data["role"] = role
 
     if subscription_tier is not None:
-        # Admin and moderador can change subscriptions
+        # Admin and moderator can change subscriptions
         update_data["subscription_tier"] = subscription_tier
         if subscription_tier != "free":
             update_data["subscription_expires"] = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
@@ -4329,8 +4329,8 @@ async def update_course_admin(
     return {"status": "success", "updated": list(update_data.keys())}
 
 @api_router.delete("/admin/courses/{course_id}")
-async def delete_course_admin(course_id: str, admin: dict = Depends(require_moderador_or_above)):
-    """Delete a course and its lessons (moderador or admin only)."""
+async def delete_course_admin(course_id: str, admin: dict = Depends(require_moderator_or_above)):
+    """Delete a course and its lessons (moderator or admin only)."""
     await db.courses.delete_one({"id": course_id})
     await db.lessons.delete_many({"course_id": course_id})
     await db.quizzes.delete_many({"course_id": course_id})
@@ -4440,7 +4440,7 @@ async def update_lesson_admin(
     return {"status": "success", "updated": list(update_data.keys())}
 
 @api_router.delete("/admin/lessons/{lesson_id}")
-async def delete_lesson_admin(lesson_id: str, admin: dict = Depends(require_moderador_or_above)):
+async def delete_lesson_admin(lesson_id: str, admin: dict = Depends(require_moderator_or_above)):
     """Delete a lesson"""
     lesson = await db.lessons.find_one({"id": lesson_id})
     if lesson:
@@ -4507,7 +4507,7 @@ async def upsert_lesson_quiz(
     return {"status": "success", "questions": len(questions)}
 
 @api_router.delete("/admin/lessons/{lesson_id}/quiz")
-async def delete_lesson_quiz_admin(lesson_id: str, admin: dict = Depends(require_moderador_or_above)):
+async def delete_lesson_quiz_admin(lesson_id: str, admin: dict = Depends(require_moderator_or_above)):
     """Delete the quiz for a lesson"""
     await db.quizzes.delete_one({"lesson_id": lesson_id})
     return {"status": "deleted"}
@@ -4588,7 +4588,7 @@ async def migrate_roles(admin: dict = Depends(require_admin_only)):
     """Seed DB-stored roles for users in the legacy email allow-lists.
     Safe to run multiple times — only updates users whose role is 'none' or 'user'."""
     updated_admins = 0
-    updated_moderadors = 0
+    updated_moderators = 0
 
     for email in ADMIN_EMAILS:
         result = await db.users.update_one(
@@ -4600,14 +4600,14 @@ async def migrate_roles(admin: dict = Depends(require_admin_only)):
     for email in MODERATOR_EMAILS:
         result = await db.users.update_one(
             {"email": email, "role": {"$in": ["none", "user", None]}},
-            {"$set": {"role": "moderador"}}
+            {"$set": {"role": "moderator"}}
         )
-        updated_moderadors += result.modified_count
+        updated_moderators += result.modified_count
 
     return {
         "status": "success",
         "updated_admins": updated_admins,
-        "updated_moderadors": updated_moderadors
+        "updated_moderators": updated_moderators
     }
 
 @api_router.post("/admin/migrate-trial-courses")
@@ -4784,7 +4784,7 @@ async def update_blog_post_admin(
     return {"status": "success", "updated": update_data}
 
 @api_router.delete("/admin/blog/{post_id}")
-async def delete_blog_post_admin(post_id: str, admin: dict = Depends(require_moderador_or_above)):
+async def delete_blog_post_admin(post_id: str, admin: dict = Depends(require_moderator_or_above)):
     """Delete a blog post"""
     await db.blog_posts.delete_one({"id": post_id})
     return {"status": "deleted"}

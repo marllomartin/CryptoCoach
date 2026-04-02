@@ -97,14 +97,21 @@ export const Layout = ({ children }) => {
                       {t('nav.simulator')}
                     </Button>
                   </Link>
-                  {['admin', 'moderador', 'editor'].includes(user.role) && (
-                    <Link to="/admin">
-                      <Button variant="outline" size="sm" className="whitespace-nowrap text-fuchsia-400 border-fuchsia-500/50 hover:bg-fuchsia-500/10 bg-gradient-to-r from-fuchsia-500/5 to-purple-500/5">
-                        <Shield className="w-4 h-4 mr-2 shrink-0" />
-                        {t('admin.title')}
-                      </Button>
-                    </Link>
-                  )}
+                  {['admin', 'moderator', 'editor'].includes(user.role) && (() => {
+                    const roleStyle = {
+                      admin:     'text-red-400 border-red-500/50 hover:bg-red-500/10 bg-gradient-to-r from-red-500/5 to-red-600/5',
+                      moderator: 'text-purple-400 border-purple-500/50 hover:bg-purple-500/10 bg-gradient-to-r from-purple-500/5 to-purple-600/5',
+                      editor:    'text-blue-400 border-blue-500/50 hover:bg-blue-500/10 bg-gradient-to-r from-blue-500/5 to-blue-600/5',
+                    }[user.role] || '';
+                    return (
+                      <Link to="/admin">
+                        <Button variant="outline" size="sm" className={`whitespace-nowrap ${roleStyle}`}>
+                          <Shield className="w-4 h-4 mr-2 shrink-0" />
+                          {t('admin.title')}
+                        </Button>
+                      </Link>
+                    );
+                  })()}
                   <NotificationBell />
                   <Link to="/profile">
                     <Button variant="ghost" size="sm" className="whitespace-nowrap text-slate-300">
@@ -184,11 +191,15 @@ export const Layout = ({ children }) => {
                           {link.label}
                         </Link>
                       ))}
-                      {['admin', 'moderador', 'editor'].includes(user.role) && (
+                      {['admin', 'moderator', 'editor'].includes(user.role) && (
                         <Link
                           to="/admin"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-2 py-2 text-fuchsia-400 hover:text-fuchsia-300"
+                          className={`flex items-center gap-2 py-2 ${{
+                            admin:     'text-red-400 hover:text-red-300',
+                            moderator: 'text-purple-400 hover:text-purple-300',
+                            editor:    'text-blue-400 hover:text-blue-300',
+                          }[user.role] || 'text-fuchsia-400 hover:text-fuchsia-300'}`}
                         >
                           <Shield className="w-4 h-4" />
                           {t('admin.title')}
