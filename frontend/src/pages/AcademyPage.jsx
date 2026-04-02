@@ -7,13 +7,12 @@ import { API, useAuth } from '../App';
 import { useSubscriptionAccess } from '../components/SubscriptionGate';
 import { useTranslation } from 'react-i18next';
 import { 
-  GraduationCap, 
-  Clock, 
-  BookOpen, 
+  GraduationCap,
+  Clock,
+  BookOpen,
   Award,
   ChevronRight,
   CheckCircle,
-  Lock,
   Crown
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -23,7 +22,7 @@ import { Progress } from '../components/ui/progress';
 export default function AcademyPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const { canAccessCourse } = useSubscriptionAccess();
+  useSubscriptionAccess();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,22 +44,25 @@ export default function AcademyPage() {
   const getLevelStyles = (level) => {
     const styles = {
       1: {
-        gradient: "from-blue-500/20 to-cyan-500/20",
-        border: "border-blue-500/30 hover:border-blue-500/50",
-        icon: "bg-blue-500/10 text-blue-500",
-        badge: "bg-blue-500/10 text-blue-400 border-blue-500/20"
+        // Bronze
+        gradient: "from-amber-800/25 to-orange-900/25",
+        border: "border-amber-700/40 hover:border-amber-600/60",
+        icon: "bg-amber-700/15 text-amber-600",
+        badge: "bg-amber-800/20 text-amber-500 border-amber-700/30"
       },
       2: {
-        gradient: "from-purple-500/20 to-pink-500/20",
-        border: "border-purple-500/30 hover:border-purple-500/50",
-        icon: "bg-purple-500/10 text-purple-500",
-        badge: "bg-purple-500/10 text-purple-400 border-purple-500/20"
+        // Silver
+        gradient: "from-slate-400/20 to-zinc-500/20",
+        border: "border-slate-400/40 hover:border-slate-300/60",
+        icon: "bg-slate-400/15 text-slate-300",
+        badge: "bg-slate-400/15 text-slate-300 border-slate-400/30"
       },
       3: {
-        gradient: "from-amber-500/20 to-orange-500/20",
-        border: "border-amber-500/30 hover:border-amber-500/50",
-        icon: "bg-amber-500/10 text-amber-500",
-        badge: "bg-amber-500/10 text-amber-400 border-amber-500/20"
+        // Gold
+        gradient: "from-yellow-400/20 to-amber-300/20",
+        border: "border-yellow-400/40 hover:border-yellow-300/60",
+        icon: "bg-yellow-400/15 text-yellow-300",
+        badge: "bg-yellow-400/15 text-yellow-300 border-yellow-400/30"
       }
     };
     return styles[level] || styles[1];
