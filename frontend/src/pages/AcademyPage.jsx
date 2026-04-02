@@ -48,21 +48,27 @@ export default function AcademyPage() {
         gradient: "from-amber-800/25 to-orange-900/25",
         border: "border-amber-700/40 hover:border-amber-600/60",
         icon: "bg-amber-700/15 text-amber-600",
-        badge: "bg-amber-800/20 text-amber-500 border-amber-700/30"
+        badge: "bg-amber-800/20 text-amber-500 border-amber-700/30",
+        tag: "bg-amber-800/15 text-amber-600/80",
+        button: "bg-amber-800/20 hover:bg-amber-700/30 text-amber-500 border border-amber-700/40"
       },
       2: {
         // Silver
         gradient: "from-slate-400/20 to-zinc-500/20",
         border: "border-slate-400/40 hover:border-slate-300/60",
         icon: "bg-slate-400/15 text-slate-300",
-        badge: "bg-slate-400/15 text-slate-300 border-slate-400/30"
+        badge: "bg-slate-400/15 text-slate-300 border-slate-400/30",
+        tag: "bg-slate-400/10 text-slate-400",
+        button: "bg-slate-400/15 hover:bg-slate-400/25 text-slate-300 border border-slate-400/30"
       },
       3: {
         // Gold
         gradient: "from-yellow-400/20 to-amber-300/20",
         border: "border-yellow-400/40 hover:border-yellow-300/60",
         icon: "bg-yellow-400/15 text-yellow-300",
-        badge: "bg-yellow-400/15 text-yellow-300 border-yellow-400/30"
+        badge: "bg-yellow-400/15 text-yellow-300 border-yellow-400/30",
+        tag: "bg-yellow-400/10 text-yellow-400/80",
+        button: "bg-yellow-400/15 hover:bg-yellow-400/25 text-yellow-300 border border-yellow-400/30"
       }
     };
     return styles[level] || styles[1];
@@ -177,13 +183,13 @@ export default function AcademyPage() {
                           )}
                           <div className="flex flex-wrap gap-2 pt-2">
                             {course.topics?.slice(0, 4).map(topic => (
-                              <span key={topic} className="px-2 py-1 text-xs bg-muted rounded-md text-slate-400">
+                              <span key={topic} className={`px-2 py-1 text-xs rounded-md ${styles.tag}`}>
                                 {topic}
                               </span>
                             ))}
                           </div>
                           <Link to={`/course/${course.id}`} className="block pt-4">
-                            <Button className="w-full bg-slate-800 hover:bg-slate-700 group-hover:bg-primary group-hover:text-white transition-colors">
+                            <Button className={`w-full transition-colors ${styles.button}`}>
                               {progress > 0 ? t('academy.continueLearning') : t('academy.startCourse')}
                               <ChevronRight className="w-4 h-4 ml-2" />
                             </Button>
@@ -213,6 +219,8 @@ export default function AcademyPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {courses.filter(c => !c.is_trial).map((course, index) => {
                 const progress = getCourseProgress(course);
+                const cf = course.color_from || '#f59e0b';
+                const ct = course.color_to || '#b45309';
                 return (
                   <motion.div
                     key={course.id}
@@ -223,16 +231,22 @@ export default function AcademyPage() {
                     <Card
                       className="border h-full transition-all group relative overflow-hidden"
                       style={{
-                        background: `linear-gradient(to bottom right, ${course.color_from || '#1e3a5f'}33, ${course.color_to || '#0f2027'}33)`,
-                        borderColor: `${course.color_from || '#f59e0b'}55`,
+                        background: `linear-gradient(to bottom right, ${cf}33, ${ct}33)`,
+                        borderColor: `${cf}55`,
                       }}
                     >
                       <CardHeader>
                         <div className="flex items-center justify-between mb-4">
-                          <span className="px-3 py-1 rounded-full text-xs font-medium border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1">
+                          <span
+                            className="px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1"
+                            style={{ background: `${cf}22`, color: cf, borderColor: `${cf}55` }}
+                          >
                             <Crown className="w-3 h-3" /> Premium
                           </span>
-                          <div className="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                          <div
+                            className="w-10 h-10 rounded-lg flex items-center justify-center"
+                            style={{ background: `${cf}22`, color: cf }}
+                          >
                             <GraduationCap className="w-5 h-5" />
                           </div>
                         </div>
@@ -259,20 +273,31 @@ export default function AcademyPage() {
                             <div className="space-y-2">
                               <div className="flex justify-between text-sm">
                                 <span className="text-slate-400">{t('academy.progress')}</span>
-                                <span className="text-amber-400 font-medium">{progress}%</span>
+                                <span style={{ color: cf }} className="font-medium">{progress}%</span>
                               </div>
                               <Progress value={progress} className="h-2" />
                             </div>
                           )}
                           <div className="flex flex-wrap gap-2 pt-2">
                             {course.topics?.slice(0, 4).map(topic => (
-                              <span key={topic} className="px-2 py-1 text-xs bg-muted rounded-md text-slate-400">
+                              <span
+                                key={topic}
+                                className="px-2 py-1 text-xs rounded-md"
+                                style={{ background: `${cf}18`, color: `${cf}cc` }}
+                              >
                                 {topic}
                               </span>
                             ))}
                           </div>
                           <Link to={`/course/${course.id}`} className="block pt-4">
-                            <Button className="w-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 group-hover:bg-amber-500 group-hover:text-white transition-colors border border-amber-500/30">
+                            <Button
+                              className="w-full transition-colors border"
+                              style={{
+                                background: `${cf}28`,
+                                color: cf,
+                                borderColor: `${cf}55`,
+                              }}
+                            >
                               {progress > 0 ? t('academy.continueLearning') : t('academy.startCourse')}
                               <ChevronRight className="w-4 h-4 ml-2" />
                             </Button>
