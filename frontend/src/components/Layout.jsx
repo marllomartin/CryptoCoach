@@ -10,7 +10,6 @@ import {
   User,
   LogOut,
   LayoutDashboard,
-  BookOpen,
   Bot,
   TrendingUp,
   Award,
@@ -71,7 +70,7 @@ export const Layout = ({ children }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-[auto_1fr_auto] items-center h-16 gap-4">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
+            <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
                 <GraduationCap className="w-6 h-6 text-white" />
               </div>
