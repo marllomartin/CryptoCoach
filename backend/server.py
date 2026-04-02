@@ -652,6 +652,11 @@ async def get_courses(lang: str = "en"):
     for course in courses:
         localized = localize_course(course, lang)
         if localized and localized.get("title"):
+            # For premium courses, include lesson IDs so the frontend can compute
+            # progress correctly (premium lesson IDs don't share a prefix with course.id)
+            if not localized.get("is_trial"):
+                lesson_ids = await db.lessons.distinct("id", {"course_id": course["id"]})
+                localized["lesson_ids"] = lesson_ids
             result.append(localized)
     return result
 

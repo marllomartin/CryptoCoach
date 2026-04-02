@@ -76,8 +76,10 @@ export default function AcademyPage() {
 
   const getCourseProgress = (course) => {
     if (!user) return 0;
-    const completedInCourse = user.completed_lessons?.filter(l => l.startsWith(course.id)).length || 0;
-    return Math.round((completedInCourse / course.lessons_count) * 100);
+    const completed = course.lesson_ids
+      ? user.completed_lessons?.filter(l => course.lesson_ids.includes(l)).length || 0
+      : user.completed_lessons?.filter(l => l.startsWith(course.id + '-')).length || 0;
+    return Math.round((completed / course.lessons_count) * 100);
   };
 
   const certifications = [
