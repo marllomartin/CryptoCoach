@@ -1,5 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 import axios from 'axios';
 import { Toaster } from 'sonner';
 import { DiscountPopup } from './components/DiscountPopup';
@@ -153,7 +161,8 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Toaster 
+        <ScrollToTop />
+        <Toaster
           position="top-right" 
           toastOptions={{
             style: {
