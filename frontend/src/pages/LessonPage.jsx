@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,7 +24,6 @@ import {
   BookMarked,
   GraduationCap,
   Volume2,
-  VolumeX,
   Play,
   Pause,
   SkipForward,
@@ -31,9 +32,7 @@ import {
   Eye,
   List,
   X,
-  Loader2,
-  Gift,
-  Lock
+  Loader2
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -517,30 +516,59 @@ export default function LessonPage() {
             </Card>
 
             {/* Main Content with enhanced rendering */}
-            <div className="prose prose-invert max-w-none mb-8">
-              <div 
-                className="text-slate-300 leading-relaxed lesson-content"
-                dangerouslySetInnerHTML={{ 
-                  __html: lesson.content
-                    .replace(/^# (.*)/gm, '<h1 class="font-heading text-2xl font-bold text-white mt-8 mb-4">$1</h1>')
-                    .replace(/^## (.*)/gm, '<h2 class="font-heading text-xl font-bold text-white mt-6 mb-3">$1</h2>')
-                    .replace(/^### (.*)/gm, '<h3 class="font-heading text-lg font-semibold text-white mt-4 mb-2">$1</h3>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
-                    .replace(/`(.*?)`/g, '<code class="bg-muted px-2 py-0.5 rounded text-primary text-sm">$1</code>')
-                    .replace(/!\[(.*?)\]\((.*?)\)/g, '<figure class="my-6"><img src="$2" alt="$1" class="rounded-xl w-full max-w-2xl mx-auto shadow-lg border border-border" /><figcaption class="text-center text-sm text-slate-400 mt-2">$1</figcaption></figure>')
-                    .replace(/^- (.*)/gm, '<li class="ml-4 mb-1 flex items-start gap-2"><span class="text-primary">•</span><span>$1</span></li>')
-                    .replace(/^\d+\. (.*)/gm, '<li class="ml-4 mb-1">$1</li>')
-                    .replace(/\|(.*)\|/g, (match) => {
-                      const cells = match.split('|').filter(c => c.trim());
-                      if (cells.length > 0) {
-                        return '<tr class="border-b border-border">' + cells.map(c => `<td class="px-4 py-2 text-sm">${c.trim()}</td>`).join('') + '</tr>';
-                      }
-                      return match;
-                    })
-                    .replace(/\n\n/g, '</p><p class="mb-4">')
-                    .replace(/\n/g, '<br />')
+            <div className="prose max-w-none mb-8 text-slate-300 leading-relaxed">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  h1: ({ children }) => <h1 className="font-heading text-2xl font-bold text-white mt-8 mb-4">{children}</h1>,
+                  h2: ({ children }) => <h2 className="font-heading text-xl font-bold text-white mt-6 mb-3">{children}</h2>,
+                  h3: ({ children }) => <h3 className="font-heading text-lg font-semibold text-white mt-4 mb-2">{children}</h3>,
+                  p: ({ children }) => <p className="mb-4 leading-relaxed">{children}</p>,
+                  strong: ({ children }) => <strong className="text-white font-semibold">{children}</strong>,
+                  em: ({ children }) => <em className="text-slate-300 italic">{children}</em>,
+                  pre: ({ children }) => (
+                    <pre className="bg-slate-900 border border-slate-700 rounded-lg p-4 overflow-x-auto my-4">{children}</pre>
+                  ),
+                  code: ({ children, className }) => (
+                    className
+                      ? <code className={`text-sm text-slate-300 font-mono ${className}`}>{children}</code>
+                      : <code className="bg-slate-800 px-2 py-0.5 rounded text-blue-400 text-sm font-mono">{children}</code>
+                  ),
+                  img: ({ src, alt }) => (
+                    <figure className="my-6">
+                      <img
+                        src={src}
+                        alt={alt}
+                        className="rounded-xl w-full max-w-2xl mx-auto shadow-lg border border-slate-700 block"
+                      />
+                      {alt && <figcaption>{alt}</figcaption>}
+                    </figure>
+                  ),
+                  a: ({ href, children }) => (
+                    <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline underline-offset-2">
+                      {children}
+                    </a>
+                  ),
+                  blockquote: ({ children }) => (
+                    <blockquote className="border-l-4 border-blue-500 pl-4 py-1 my-4 bg-blue-500/5 rounded-r-lg text-slate-400 italic">
+                      {children}
+                    </blockquote>
+                  ),
+                  table: ({ children }) => (
+                    <div className="overflow-x-auto my-6">
+                      <table className="w-full border-collapse text-sm">{children}</table>
+                    </div>
+                  ),
+                  thead: ({ children }) => <thead>{children}</thead>,
+                  tbody: ({ children }) => <tbody>{children}</tbody>,
+                  tr: ({ children }) => <tr>{children}</tr>,
+                  th: ({ children }) => <th>{children}</th>,
+                  td: ({ children }) => <td>{children}</td>,
+                  hr: () => <hr />,
                 }}
-              />
+              >
+                {lesson.content}
+              </ReactMarkdown>
             </div>
             
             {/* Interactive Checkpoints */}

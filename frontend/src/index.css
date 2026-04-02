@@ -235,18 +235,84 @@ code, pre {
 .prose table {
     width: 100%;
     border-collapse: collapse;
-    margin: 1em 0;
+    margin: 1.5em 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #1E293B;
+    font-size: 0.9em;
 }
 
-.prose th, .prose td {
-    border: 1px solid #1E293B;
-    padding: 0.5em 1em;
-    text-align: left;
+.prose thead {
+    background: linear-gradient(to right, #0f172a, #1e293b);
 }
 
 .prose th {
-    background: #0B101B;
+    padding: 0.75em 1.25em;
+    text-align: left;
     font-weight: 600;
+    color: #E2E8F0;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #334155;
+}
+
+.prose td {
+    padding: 0.7em 1.25em;
+    text-align: left;
+    border-bottom: 1px solid #1E293B;
+    color: #CBD5E1;
+}
+
+.prose tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.prose tbody tr:nth-child(even) {
+    background: rgba(30, 41, 59, 0.4);
+}
+
+.prose tbody tr:hover {
+    background: rgba(37, 99, 235, 0.07);
+}
+
+.prose hr {
+    border: none;
+    margin: 2.5em 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #334155, #2563EB55, #334155, transparent);
+    position: relative;
+}
+
+.prose hr::after {
+    content: '◆';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #0f172a;
+    color: #334155;
+    font-size: 0.6em;
+    padding: 0 0.75em;
+    letter-spacing: 0.25em;
+}
+
+.prose img {
+    border-radius: 10px;
+    border: 1px solid #1E293B;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5em auto;
+    display: block;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+.prose figcaption {
+    text-align: center;
+    font-size: 0.8em;
+    color: #64748B;
+    margin-top: 0.5em;
+    font-style: italic;
 }
 
 .prose strong {
@@ -255,14 +321,50 @@ code, pre {
 }
 
 .prose a {
-    color: #2563EB;
+    color: #3B82F6;
     text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.prose a:hover {
+    color: #60A5FA;
 }
 
 .prose blockquote {
-    border-left: 4px solid #2563EB;
-    padding-left: 1em;
-    margin: 1em 0;
+    border-left: 3px solid #2563EB;
+    padding: 0.75em 1.25em;
+    margin: 1.5em 0;
+    background: rgba(37, 99, 235, 0.07);
+    border-radius: 0 6px 6px 0;
     color: #94A3B8;
     font-style: italic;
+}
+
+.prose ul {
+    list-style: none;
+    margin-left: 0;
+}
+
+.prose ul li {
+    padding-left: 1.25em;
+    position: relative;
+    margin-bottom: 0.35em;
+}
+
+.prose ul li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #3B82F6;
+    font-weight: bold;
+}
+
+.prose ol {
+    list-style: decimal;
+    margin-left: 1.5em;
+}
+
+.prose ol li {
+    margin-bottom: 0.35em;
+    padding-left: 0.25em;
 }
