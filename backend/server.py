@@ -197,7 +197,7 @@ class UserResponse(BaseModel):
     last_activity: Optional[str] = None
     subscription_tier: str = "free"
     subscription_expires: Optional[str] = None
-    role: str = "user"  # user, admin, moderator
+    role: str = "none"  # none, editor, moderador, admin
 
 class TokenResponse(BaseModel):
     access_token: str
@@ -518,6 +518,7 @@ async def register(request: Request, user_data: UserCreate):
         "portfolio": {},
         "subscription_tier": "free",
         "subscription_expires": None,
+        "role": "none",
         "security": {
             "failed_logins": 0,
             "last_login_ip": client_ip,
@@ -582,15 +583,19 @@ async def login(request: Request, credentials: UserLogin):
         }}
     )
     
-    # Determine user role
+    # Determine user role — read from DB, fall back to email lists for legacy bootstrap
     email = user.get("email", "")
-    if email in ADMIN_EMAILS:
-        role = "admin"
-    elif email in MODERATOR_EMAILS:
-        role = "moderator"
-    else:
-        role = "user"
-    
+    role = user.get("role", "none")
+    if role in ("none", "user"):
+        if email in ADMIN_EMAILS:
+            role = "admin"
+            await db.users.update_one({"id": user["id"]}, {"$set": {"role": "admin"}})
+        elif email in MODERATOR_EMAILS:
+            role = "moderador"
+            await db.users.update_one({"id": user["id"]}, {"$set": {"role": "moderador"}})
+        else:
+            role = "none"
+
     AuditLogger.log_auth_event("LOGIN", clean_email, client_ip, True, f"Role: {role}")
     
     token = create_token(user["id"])
@@ -614,14 +619,18 @@ async def login(request: Request, credentials: UserLogin):
 
 @api_router.get("/auth/me", response_model=UserResponse)
 async def get_me(current_user: dict = Depends(get_current_user)):
-    # Determine user role
+    # Read role from DB, fall back to email lists for legacy bootstrap
     email = current_user.get("email", "")
-    if email in ADMIN_EMAILS:
-        role = "admin"
-    elif email in MODERATOR_EMAILS:
-        role = "moderator"
-    else:
-        role = "user"
+    role = current_user.get("role", "none")
+    if role in ("none", "user"):
+        if email in ADMIN_EMAILS:
+            role = "admin"
+            await db.users.update_one({"id": current_user["id"]}, {"$set": {"role": "admin"}})
+        elif email in MODERATOR_EMAILS:
+            role = "moderador"
+            await db.users.update_one({"id": current_user["id"]}, {"$set": {"role": "moderador"}})
+        else:
+            role = "none"
     
     return UserResponse(
         id=current_user["id"],
@@ -4111,29 +4120,52 @@ def check_course_access(user: dict, course_level: int) -> bool:
 
 # ==================== ADMIN ROUTES ====================
 
+# Roles that have access to the admin panel
+ADMIN_PANEL_ROLES = {"admin", "moderador", "editor"}
+# All valid role values
+VALID_ROLES = {"none", "editor", "moderador", "admin"}
+
 async def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    """Verify admin or moderator access"""
+    """Base admin dependency — allows any admin-panel role (admin, moderador, editor)."""
     try:
         payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user_id = payload.get("sub")
-        
-        # Fetch user from database to get email
+
         user = await db.users.find_one({"id": user_id}, {"_id": 0})
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
-        
+
         email = user.get("email", "")
-        
-        if email in ADMIN_EMAILS:
-            return {"email": email, "role": "admin", "user": user}
-        elif email in MODERATOR_EMAILS:
-            return {"email": email, "role": "moderator", "user": user}
-        else:
-            raise HTTPException(status_code=403, detail="Admin access required")
+        role = user.get("role", "none")
+
+        # Bootstrap: persist role from legacy email lists on first admin login
+        if role not in ADMIN_PANEL_ROLES:
+            if email in ADMIN_EMAILS:
+                role = "admin"
+                await db.users.update_one({"id": user_id}, {"$set": {"role": "admin"}})
+            elif email in MODERATOR_EMAILS:
+                role = "moderador"
+                await db.users.update_one({"id": user_id}, {"$set": {"role": "moderador"}})
+            else:
+                raise HTTPException(status_code=403, detail="Admin panel access required")
+
+        return {"email": email, "role": role, "user": user}
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+async def require_moderador_or_above(admin: dict = Depends(get_admin_user)):
+    """Requires moderador or admin role. Editors cannot delete content or manage users."""
+    if admin["role"] not in ("admin", "moderador"):
+        raise HTTPException(status_code=403, detail="Moderador or admin role required")
+    return admin
+
+async def require_admin_only(admin: dict = Depends(get_admin_user)):
+    """Requires admin role. Only admins can manage roles and run migrations."""
+    if admin["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin role required")
+    return admin
 
 @api_router.get("/admin/stats")
 async def get_admin_stats(admin: dict = Depends(get_admin_user)):
@@ -4173,10 +4205,10 @@ async def get_admin_stats(admin: dict = Depends(get_admin_user)):
 
 @api_router.get("/admin/users")
 async def get_admin_users(
-    skip: int = 0, 
+    skip: int = 0,
     limit: int = 50,
     search: Optional[str] = None,
-    admin: dict = Depends(get_admin_user)
+    admin: dict = Depends(require_moderador_or_above)
 ):
     """Get all users with pagination and search"""
     query = {}
@@ -4197,25 +4229,31 @@ async def update_user_admin(
     role: Optional[str] = None,
     subscription_tier: Optional[str] = None,
     is_banned: Optional[bool] = None,
-    admin: dict = Depends(get_admin_user)
+    admin: dict = Depends(require_moderador_or_above)
 ):
-    """Update user properties (admin only)"""
-    if admin["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Admin only action")
-    
+    """Update user properties with role-based permission checks."""
     update_data = {}
+
     if role is not None:
+        # Only admin can assign or change roles
+        if admin["role"] != "admin":
+            raise HTTPException(status_code=403, detail="Only admin can modify user roles")
+        if role not in VALID_ROLES:
+            raise HTTPException(status_code=400, detail=f"Invalid role. Must be one of: {sorted(VALID_ROLES)}")
         update_data["role"] = role
+
     if subscription_tier is not None:
+        # Admin and moderador can change subscriptions
         update_data["subscription_tier"] = subscription_tier
         if subscription_tier != "free":
             update_data["subscription_expires"] = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+
     if is_banned is not None:
         update_data["is_banned"] = is_banned
-    
+
     if update_data:
         await db.users.update_one({"id": user_id}, {"$set": update_data})
-    
+
     return {"status": "success", "updated": update_data}
 
 @api_router.get("/admin/courses")
@@ -4291,11 +4329,8 @@ async def update_course_admin(
     return {"status": "success", "updated": list(update_data.keys())}
 
 @api_router.delete("/admin/courses/{course_id}")
-async def delete_course_admin(course_id: str, admin: dict = Depends(get_admin_user)):
-    """Delete a course and its lessons"""
-    if admin["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Admin only action")
-
+async def delete_course_admin(course_id: str, admin: dict = Depends(require_moderador_or_above)):
+    """Delete a course and its lessons (moderador or admin only)."""
     await db.courses.delete_one({"id": course_id})
     await db.lessons.delete_many({"course_id": course_id})
     await db.quizzes.delete_many({"course_id": course_id})
@@ -4405,7 +4440,7 @@ async def update_lesson_admin(
     return {"status": "success", "updated": list(update_data.keys())}
 
 @api_router.delete("/admin/lessons/{lesson_id}")
-async def delete_lesson_admin(lesson_id: str, admin: dict = Depends(get_admin_user)):
+async def delete_lesson_admin(lesson_id: str, admin: dict = Depends(require_moderador_or_above)):
     """Delete a lesson"""
     lesson = await db.lessons.find_one({"id": lesson_id})
     if lesson:
@@ -4472,7 +4507,7 @@ async def upsert_lesson_quiz(
     return {"status": "success", "questions": len(questions)}
 
 @api_router.delete("/admin/lessons/{lesson_id}/quiz")
-async def delete_lesson_quiz_admin(lesson_id: str, admin: dict = Depends(get_admin_user)):
+async def delete_lesson_quiz_admin(lesson_id: str, admin: dict = Depends(require_moderador_or_above)):
     """Delete the quiz for a lesson"""
     await db.quizzes.delete_one({"lesson_id": lesson_id})
     return {"status": "deleted"}
@@ -4482,12 +4517,10 @@ async def delete_lesson_quiz_admin(lesson_id: str, admin: dict = Depends(get_adm
 @api_router.post("/admin/migrate-translations")
 async def migrate_to_translations(
     default_lang: str = "en",
-    admin: dict = Depends(get_admin_user)
+    admin: dict = Depends(require_admin_only)
 ):
     """Migrate existing single-language courses and lessons to the translations structure.
     Idempotent: records already using translations are skipped."""
-    if admin["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Admin only action")
 
     migrated_courses = 0
     migrated_lessons = 0
@@ -4550,11 +4583,36 @@ async def migrate_to_translations(
         "default_language": default_lang
     }
 
+@api_router.post("/admin/migrate-roles")
+async def migrate_roles(admin: dict = Depends(require_admin_only)):
+    """Seed DB-stored roles for users in the legacy email allow-lists.
+    Safe to run multiple times — only updates users whose role is 'none' or 'user'."""
+    updated_admins = 0
+    updated_moderadors = 0
+
+    for email in ADMIN_EMAILS:
+        result = await db.users.update_one(
+            {"email": email, "role": {"$in": ["none", "user", None]}},
+            {"$set": {"role": "admin"}}
+        )
+        updated_admins += result.modified_count
+
+    for email in MODERATOR_EMAILS:
+        result = await db.users.update_one(
+            {"email": email, "role": {"$in": ["none", "user", None]}},
+            {"$set": {"role": "moderador"}}
+        )
+        updated_moderadors += result.modified_count
+
+    return {
+        "status": "success",
+        "updated_admins": updated_admins,
+        "updated_moderadors": updated_moderadors
+    }
+
 @api_router.post("/admin/migrate-trial-courses")
-async def migrate_trial_courses(admin: dict = Depends(get_admin_user)):
+async def migrate_trial_courses(admin: dict = Depends(require_admin_only)):
     """Stamp is_trial: true on the three built-in trial courses. Safe to run multiple times."""
-    if admin["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Admin only action")
     TRIAL_COURSE_IDS = ["course-foundations", "course-investor", "course-strategist"]
     result = await db.courses.update_many(
         {"id": {"$in": TRIAL_COURSE_IDS}},
@@ -4726,7 +4784,7 @@ async def update_blog_post_admin(
     return {"status": "success", "updated": update_data}
 
 @api_router.delete("/admin/blog/{post_id}")
-async def delete_blog_post_admin(post_id: str, admin: dict = Depends(get_admin_user)):
+async def delete_blog_post_admin(post_id: str, admin: dict = Depends(require_moderador_or_above)):
     """Delete a blog post"""
     await db.blog_posts.delete_one({"id": post_id})
     return {"status": "deleted"}

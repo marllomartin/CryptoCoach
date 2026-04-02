@@ -50,7 +50,7 @@ export default function AdminPage() {
       return;
     }
 
-    if (!['admin', 'moderator'].includes(user.role)) {
+    if (!['admin', 'moderador', 'editor'].includes(user.role)) {
       toast.error(t('admin.accessDenied'));
       navigate('/');
       return;
@@ -116,10 +116,12 @@ export default function AdminPage() {
                 <BookOpen className="w-4 h-4" />
                 {t('admin.tabs.courses')}
               </TabsTrigger>
-              <TabsTrigger value="users" className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                {t('admin.tabs.users')}
-              </TabsTrigger>
+              {['admin', 'moderador'].includes(user?.role) && (
+                <TabsTrigger value="users" className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  {t('admin.tabs.users')}
+                </TabsTrigger>
+              )}
               <TabsTrigger value="newsletter" className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
                 {t('admin.tabs.newsletter')}
@@ -143,19 +145,19 @@ export default function AdminPage() {
             </TabsContent>
             
             <TabsContent value="courses">
-              <CoursesTab token={token} />
+              <CoursesTab token={token} currentUser={user} />
             </TabsContent>
-            
+
             <TabsContent value="users">
-              <UsersTab token={token} />
+              <UsersTab token={token} currentUser={user} />
             </TabsContent>
-            
+
             <TabsContent value="newsletter">
               <NewsletterAdminTab token={token} />
             </TabsContent>
-            
+
             <TabsContent value="blog">
-              <BlogTab token={token} />
+              <BlogTab token={token} currentUser={user} />
             </TabsContent>
             
             <TabsContent value="media">
@@ -803,7 +805,8 @@ function QuizForm({ lessonId, lessonTitle, token, onClose }) {
 }
 
 // Courses Tab Component
-function CoursesTab({ token }) {
+function CoursesTab({ token, currentUser }) {
+  const canDelete = ['admin', 'moderador'].includes(currentUser?.role);
   const { t } = useTranslation();
   const [courses, setCourses] = useState([]);
   const [lessons, setLessons] = useState([]);
@@ -1046,13 +1049,15 @@ function CoursesTab({ token }) {
                       >
                         <Edit className="w-3.5 h-3.5" />
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => deleteCourse(course.id)}
-                      >
-                        <Trash2 className="w-3.5 h-3.5 text-red-500" />
-                      </Button>
+                      {canDelete && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => deleteCourse(course.id)}
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1127,9 +1132,11 @@ function CoursesTab({ token }) {
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={() => deleteLesson(lesson.id)}>
-                              <Trash2 className="w-4 h-4 text-red-500" />
-                            </Button>
+                            {canDelete && (
+                              <Button size="sm" variant="ghost" onClick={() => deleteLesson(lesson.id)}>
+                                <Trash2 className="w-4 h-4 text-red-500" />
+                              </Button>
+                            )}
                           </>
                         )}
                       </div>
@@ -1164,12 +1171,15 @@ function CoursesTab({ token }) {
 }
 
 // Users Tab Component
-function UsersTab({ token }) {
+function UsersTab({ token, currentUser }) {
   const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [total, setTotal] = useState(0);
+
+  const canEditRoles = currentUser?.role === 'admin';
+  const canEditSubscriptions = ['admin', 'moderador'].includes(currentUser?.role);
 
   useEffect(() => {
     fetchUsers();
@@ -1203,14 +1213,35 @@ function UsersTab({ token }) {
       toast.error(t('admin.errors.updateError'));
     }
   };
-  
+
+  const updateUserRole = async (userId, role) => {
+    try {
+      await axios.put(
+        `${API}/admin/users/${userId}?role=${role}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success('Role updated');
+      fetchUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || t('admin.errors.updateError'));
+    }
+  };
+
   const tierColors = {
     free: 'bg-slate-500',
     starter: 'bg-blue-500',
     pro: 'bg-purple-500',
     elite: 'bg-yellow-500'
   };
-  
+
+  const roleColors = {
+    admin:     'bg-red-500/20 text-red-400 border border-red-500/30',
+    moderador: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
+    editor:    'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+    none:      'bg-slate-500/20 text-slate-400 border border-slate-500/30',
+  };
+
   return (
     <Card className="bg-card border-border">
       <CardHeader>
@@ -1237,40 +1268,68 @@ function UsersTab({ token }) {
                 <tr className="border-b border-border">
                   <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.email')}</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.name')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Role</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.subscription')}</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.xp')}</th>
                   <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.registration')}</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.actions')}</th>
+                  {(canEditRoles || canEditSubscriptions) && (
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">{t('admin.users.tableHeaders.actions')}</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
-                  <tr key={user.id} className="border-b border-border/50 hover:bg-muted/50">
-                    <td className="py-3 px-4 text-sm">{user.email}</td>
-                    <td className="py-3 px-4 text-sm">{user.full_name}</td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-1 rounded text-xs text-white ${tierColors[user.subscription_tier] || tierColors.free}`}>
-                        {user.subscription_tier || 'free'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-sm">{user.xp_points || 0}</td>
-                    <td className="py-3 px-4 text-sm text-slate-400">
-                      {new Date(user.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="py-3 px-4">
-                      <select
-                        className="bg-muted border border-border rounded px-2 py-1 text-xs"
-                        value={user.subscription_tier || 'free'}
-                        onChange={(e) => updateUserTier(user.id, e.target.value)}
-                      >
-                        <option value="free">Free</option>
-                        <option value="starter">Starter</option>
-                        <option value="pro">Pro</option>
-                        <option value="elite">Elite</option>
-                      </select>
-                    </td>
-                  </tr>
-                ))}
+                {users.map((u) => {
+                  const userRole = u.role || 'none';
+                  return (
+                    <tr key={u.id} className="border-b border-border/50 hover:bg-muted/50">
+                      <td className="py-3 px-4 text-sm">{u.email}</td>
+                      <td className="py-3 px-4 text-sm">{u.full_name}</td>
+                      <td className="py-3 px-4">
+                        {canEditRoles ? (
+                          <select
+                            className="bg-muted border border-border rounded px-2 py-1 text-xs"
+                            value={userRole}
+                            onChange={(e) => updateUserRole(u.id, e.target.value)}
+                          >
+                            <option value="none">none</option>
+                            <option value="editor">editor</option>
+                            <option value="moderador">moderador</option>
+                            <option value="admin">admin</option>
+                          </select>
+                        ) : (
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${roleColors[userRole] || roleColors.none}`}>
+                            {userRole}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2 py-1 rounded text-xs text-white ${tierColors[u.subscription_tier] || tierColors.free}`}>
+                          {u.subscription_tier || 'free'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-sm">{u.xp_points || 0}</td>
+                      <td className="py-3 px-4 text-sm text-slate-400">
+                        {new Date(u.created_at).toLocaleDateString()}
+                      </td>
+                      {(canEditRoles || canEditSubscriptions) && (
+                        <td className="py-3 px-4">
+                          {canEditSubscriptions && (
+                            <select
+                              className="bg-muted border border-border rounded px-2 py-1 text-xs"
+                              value={u.subscription_tier || 'free'}
+                              onChange={(e) => updateUserTier(u.id, e.target.value)}
+                            >
+                              <option value="free">Free</option>
+                              <option value="starter">Starter</option>
+                              <option value="pro">Pro</option>
+                              <option value="elite">Elite</option>
+                            </select>
+                          )}
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -1281,7 +1340,8 @@ function UsersTab({ token }) {
 }
 
 // Blog Tab Component
-function BlogTab({ token }) {
+function BlogTab({ token, currentUser }) {
+  const canDelete = ['admin', 'moderador'].includes(currentUser?.role);
   const { t } = useTranslation();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1401,9 +1461,11 @@ function BlogTab({ token }) {
                 <span className="text-xs text-primary">{post.category}</span>
                 <div className="flex gap-2">
                   <Button size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
-                  <Button size="sm" variant="ghost" onClick={() => deletePost(post.id)}>
-                    <Trash2 className="w-4 h-4 text-red-500" />
-                  </Button>
+                  {canDelete && (
+                    <Button size="sm" variant="ghost" onClick={() => deletePost(post.id)}>
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>
