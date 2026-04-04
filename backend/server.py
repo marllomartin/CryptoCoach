@@ -660,33 +660,36 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         except Exception:
             pass
 
+    # Re-fetch to get any writes made during this request (streak reset, role update, etc.)
+    fresh_user = await db.users.find_one({"id": current_user["id"]}, {"_id": 0})
+
     # Read role from DB, fall back to email lists for legacy bootstrap
-    email = current_user.get("email", "")
-    role = current_user.get("role", "none")
+    email = fresh_user.get("email", "")
+    role = fresh_user.get("role", "none")
     if role in ("none", "user"):
         if email in ADMIN_EMAILS:
             role = "admin"
-            await db.users.update_one({"id": current_user["id"]}, {"$set": {"role": "admin"}})
+            await db.users.update_one({"id": fresh_user["id"]}, {"$set": {"role": "admin"}})
         elif email in MODERATOR_EMAILS:
             role = "moderator"
-            await db.users.update_one({"id": current_user["id"]}, {"$set": {"role": "moderator"}})
+            await db.users.update_one({"id": fresh_user["id"]}, {"$set": {"role": "moderator"}})
         else:
             role = "none"
-    
+
     return UserResponse(
-        id=current_user["id"],
-        email=current_user["email"],
-        full_name=current_user["full_name"],
-        created_at=current_user["created_at"],
-        xp_points=current_user.get("xp_points", 0),
-        completed_lessons=current_user.get("completed_lessons", []),
-        completed_quizzes=current_user.get("completed_quizzes", []),
-        completed_exams=current_user.get("completed_exams", []),
-        certificates=current_user.get("certificates", []),
-        streak_days=current_user.get("streak_days", 0),
-        last_activity=current_user.get("last_activity"),
-        subscription_tier=current_user.get("subscription_tier", "free"),
-        subscription_expires=current_user.get("subscription_expires"),
+        id=fresh_user["id"],
+        email=fresh_user["email"],
+        full_name=fresh_user["full_name"],
+        created_at=fresh_user["created_at"],
+        xp_points=fresh_user.get("xp_points", 0),
+        completed_lessons=fresh_user.get("completed_lessons", []),
+        completed_quizzes=fresh_user.get("completed_quizzes", []),
+        completed_exams=fresh_user.get("completed_exams", []),
+        certificates=fresh_user.get("certificates", []),
+        streak_days=fresh_user.get("streak_days", 0),
+        last_activity=fresh_user.get("last_activity"),
+        subscription_tier=fresh_user.get("subscription_tier", "free"),
+        subscription_expires=fresh_user.get("subscription_expires"),
         role=role
     )
 
