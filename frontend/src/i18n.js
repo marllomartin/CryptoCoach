@@ -768,21 +768,18 @@ const resources = {
       },
       // Subscription Gate
       subscriptionGate: {
-        title: 'Premium Feature',
-        message: '{{feature}} requires a {{tier}} subscription or higher.',
+        title: 'Pro Feature',
+        message: '{{feature}} is available on the {{tier}} plan and above.',
         perMonth: '/month',
         viewPlans: 'View Plans',
         signIn: 'Sign In',
         expired: 'Your subscription has expired. Renew to continue.',
-        starterFeature1: 'Levels 1 & 2 (16 lessons)',
-        starterFeature2: 'Interactive Quizzes',
-        starterFeature3: 'Trading Simulator',
-        proFeature1: 'All levels (23 lessons)',
-        proFeature2: 'Certification Exams',
-        proFeature3: 'PDF Certificates with QR',
-        eliteFeature1: 'Full Access',
-        eliteFeature2: 'AI Crypto Mentor',
-        eliteFeature3: 'Exclusive Content'
+        proFeature1: 'All premium courses',
+        proFeature2: 'Trading Simulator',
+        proFeature3: 'Unlimited watchlist & price alerts',
+        eliteFeature1: 'CryptoCoach AI Mentor',
+        eliteFeature2: 'Exclusive trading strategies',
+        eliteFeature3: 'Priority support'
       },
       // Lesson Checkpoint
       checkpoint: {
@@ -1983,21 +1980,18 @@ const resources = {
       },
       // Subscription Gate
       subscriptionGate: {
-        title: 'Fonctionnalité Premium',
-        message: '{{feature}} nécessite un abonnement {{tier}} ou supérieur.',
+        title: 'Fonctionnalité Pro',
+        message: '{{feature}} est disponible avec le plan {{tier}} et supérieur.',
         perMonth: '/mois',
         viewPlans: 'Voir les abonnements',
         signIn: 'Se connecter',
         expired: 'Votre abonnement a expiré. Renouvelez pour continuer.',
-        starterFeature1: 'Niveau 1 & 2 (16 leçons)',
-        starterFeature2: 'Quiz interactifs',
-        starterFeature3: 'Simulateur de Trading',
-        proFeature1: 'Tous les niveaux (23 leçons)',
-        proFeature2: 'Examens de certification',
-        proFeature3: 'Certificats PDF avec QR',
-        eliteFeature1: 'Accès complet',
-        eliteFeature2: 'AI Crypto Mentor',
-        eliteFeature3: 'Contenu exclusif'
+        proFeature1: 'Tous les cours premium',
+        proFeature2: 'Simulateur de Trading',
+        proFeature3: 'Liste de suivi & alertes illimitées',
+        eliteFeature1: 'CryptoCoach AI Mentor',
+        eliteFeature2: 'Stratégies de trading exclusives',
+        eliteFeature3: 'Support prioritaire'
       },
       // Lesson Checkpoint
       checkpoint: {
@@ -3004,21 +2998,18 @@ const resources = {
       },
       // Subscription Gate
       subscriptionGate: {
-        title: 'ميزة مميزة',
-        message: '{{feature}} يتطلب اشتراك {{tier}} أو أعلى.',
+        title: 'ميزة Pro',
+        message: '{{feature}} متاح في خطة {{tier}} وما فوقها.',
         perMonth: '/شهر',
         viewPlans: 'عرض الخطط',
         signIn: 'تسجيل الدخول',
         expired: 'انتهى اشتراكك. جدد للمتابعة.',
-        starterFeature1: 'المستويات 1 و2 (16 درس)',
-        starterFeature2: 'اختبارات تفاعلية',
-        starterFeature3: 'محاكي التداول',
-        proFeature1: 'جميع المستويات (23 درس)',
-        proFeature2: 'امتحانات الشهادات',
-        proFeature3: 'شهادات PDF مع QR',
-        eliteFeature1: 'وصول كامل',
-        eliteFeature2: 'مرشد ذكي للكريبتو',
-        eliteFeature3: 'محتوى حصري'
+        proFeature1: 'جميع الدورات المميزة',
+        proFeature2: 'محاكي التداول',
+        proFeature3: 'قائمة متابعة وتنبيهات غير محدودة',
+        eliteFeature1: 'مرشد CryptoCoach AI',
+        eliteFeature2: 'استراتيجيات تداول حصرية',
+        eliteFeature3: 'دعم ذو أولوية'
       },
       // Lesson Checkpoint
       checkpoint: {
@@ -4413,21 +4404,18 @@ const resources = {
       },
       // Subscription Gate
       subscriptionGate: {
-        title: 'Recurso Premium',
-        message: '{{feature}} requer uma assinatura {{tier}} ou superior.',
+        title: 'Recurso Pro',
+        message: '{{feature}} está disponível no plano {{tier}} e acima.',
         perMonth: '/mês',
         viewPlans: 'Ver Planos',
         signIn: 'Entrar',
         expired: 'Sua assinatura expirou. Renove para continuar.',
-        starterFeature1: 'Níveis 1 e 2 (16 aulas)',
-        starterFeature2: 'Quizzes Interativos',
-        starterFeature3: 'Simulador de Trading',
-        proFeature1: 'Todos os níveis (23 aulas)',
-        proFeature2: 'Exames de Certificação',
-        proFeature3: 'Certificados PDF com QR',
-        eliteFeature1: 'Acesso Total',
-        eliteFeature2: 'Mentor IA de Cripto',
-        eliteFeature3: 'Conteúdo Exclusivo'
+        proFeature1: 'Todos os cursos premium',
+        proFeature2: 'Simulador de Trading',
+        proFeature3: 'Lista de acompanhamento e alertas ilimitados',
+        eliteFeature1: 'CryptoCoach AI Mentor',
+        eliteFeature2: 'Estratégias de trading exclusivas',
+        eliteFeature3: 'Suporte prioritário'
       },
       // Lesson Checkpoint
       checkpoint: {

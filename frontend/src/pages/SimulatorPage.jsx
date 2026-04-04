@@ -410,7 +410,7 @@ export default function SimulatorPage() {
     return (
       <Layout>
         <SubscriptionGate
-          requiredTier="starter"
+          requiredTier="pro"
           feature={t('simulator.featureName')}
         />
       </Layout>

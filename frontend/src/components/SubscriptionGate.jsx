@@ -1,21 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lock, Crown, Zap, Rocket } from 'lucide-react';
+import { Lock, Crown, Rocket } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '../App';
 import { useTranslation } from 'react-i18next';
 
 const tierIcons = {
-  starter: Zap,
   pro: Rocket,
   elite: Crown
 };
 
 const tierPrices = {
-  starter: '$9.99',
-  pro: '$19.99',
-  elite: '$25.00'
+  pro: '€19.99',
+  elite: '€25.00'
 };
 
 export const SubscriptionGate = ({
@@ -26,7 +24,7 @@ export const SubscriptionGate = ({
   const { user } = useAuth();
   const { t } = useTranslation();
 
-  const tierOrder = ['free', 'starter', 'pro', 'elite'];
+  const tierOrder = ['free', 'pro', 'elite'];
   const userTier = user?.subscription_tier || 'free';
   const userTierIndex = tierOrder.indexOf(userTier);
   const requiredTierIndex = tierOrder.indexOf(requiredTier);
@@ -43,7 +41,6 @@ export const SubscriptionGate = ({
 
   const Icon = tierIcons[requiredTier] || Lock;
   const tierNames = {
-    starter: 'Starter',
     pro: 'Pro',
     elite: 'Elite'
   };
@@ -74,20 +71,6 @@ export const SubscriptionGate = ({
             <span className="font-heading font-bold text-lg">{tierNames[requiredTier]}</span>
             <span className="text-slate-400">{tierPrices[requiredTier]}{t('subscriptionGate.perMonth')}</span>
           </div>
-
-          {requiredTier === 'starter' && (
-            <ul className="text-sm text-slate-300 space-y-2 text-left">
-              <li className="flex items-center gap-2">
-                <span className="text-green-500">✓</span> {t('subscriptionGate.starterFeature1')}
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-500">✓</span> {t('subscriptionGate.starterFeature2')}
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-500">✓</span> {t('subscriptionGate.starterFeature3')}
-              </li>
-            </ul>
-          )}
 
           {requiredTier === 'pro' && (
             <ul className="text-sm text-slate-300 space-y-2 text-left">
@@ -151,7 +134,7 @@ export const SubscriptionGate = ({
 export const useSubscriptionAccess = () => {
   const { user } = useAuth();
 
-  const tierOrder = ['free', 'starter', 'pro', 'elite'];
+  const tierOrder = ['free', 'pro', 'elite'];
   const userTier = user?.subscription_tier || 'free';
   const userTierIndex = tierOrder.indexOf(userTier);
 
@@ -167,7 +150,6 @@ export const useSubscriptionAccess = () => {
   const canAccessCourse = (level) => {
     if (isExpired) return level === 1;
     if (userTier === 'free') return level === 1;
-    if (userTier === 'starter') return level <= 2;
     return true; // pro and elite can access all
   };
 
@@ -175,7 +157,7 @@ export const useSubscriptionAccess = () => {
     userTier: isExpired ? 'free' : userTier,
     hasAccess,
     canAccessCourse,
-    canAccessSimulator: hasAccess('starter'),
+    canAccessSimulator: hasAccess('pro'),
     canAccessExams: hasAccess('pro'),
     canAccessCertificates: hasAccess('pro'),
     canAccessAIMentor: hasAccess('elite'),
