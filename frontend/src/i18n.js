@@ -9,7 +9,7 @@ const resources = {
       // Navigation
       nav: {
         academy: 'Academy',
-        pricing: 'Pricing',
+        pricing: 'Plans',
         glossary: 'Glossary',
         insights: 'Insights',
         about: 'About',
@@ -1274,7 +1274,7 @@ const resources = {
       // Navigation
       nav: {
         academy: 'Académie',
-        pricing: 'Tarifs',
+        pricing: 'Abonnements',
         glossary: 'Glossaire',
         insights: 'Actualités',
         about: 'À propos',

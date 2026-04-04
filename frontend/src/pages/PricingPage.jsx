@@ -251,7 +251,7 @@ const PricingPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  {tier.popular && (
+                  {tier.popular && !isCurrentTier && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                       <span className="bg-primary text-primary-foreground text-sm font-medium px-4 py-1 rounded-full">
                         {t('pricing.popular')}
