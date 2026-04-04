@@ -822,7 +822,6 @@ async def complete_lesson(lesson_id: str, current_user: dict = Depends(get_curre
         update_data = {
             "$addToSet": {"completed_lessons": lesson_id},
             "$inc": {"xp_points": xp_earned},
-            "$set": {"last_activity": datetime.now(timezone.utc).isoformat()}
         }
         
         # Award coins on level up
