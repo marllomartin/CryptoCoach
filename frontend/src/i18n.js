@@ -639,6 +639,8 @@ const resources = {
         lessonOf: 'Lesson {{current}} of {{total}}',
         toastCompleted: 'Lesson completed! +50 XP',
         toastError: 'Validation error',
+        streakUpdated: '🔥 {{count}} day streak!',
+        streakStarted: '🔥 Streak started! Day {{count}}',
         next: 'Next',
         previous: 'Previous',
         practicalExamples: 'Practical Examples',
@@ -1265,6 +1267,25 @@ const resources = {
           batchStarted: 'Batch audio generation started...',
           batchAudioComplete: 'Audio generation complete!',
           videoUploaded: 'Video uploaded successfully!'
+        }
+      },
+      streak: {
+        modal: {
+          title: 'How Streaks Work',
+          rule1: 'Complete at least one lesson per day to build your streak. Each consecutive day adds one to your count.',
+          rule2: 'Miss a day and your streak resets to zero. Consistency is key.',
+          rule3: 'Reach milestones (7, 14, 30, 60, 100, 365 days) to earn bonus XP and coins.',
+          exGoodLabel: 'Keeping your streak alive',
+          exGoodResult: '5-day streak — well done!',
+          exBrokenLabel: 'Missing a day breaks your streak',
+          exBrokenResult: 'Streak reset — start fresh today',
+          exMon: 'Mon',
+          exTue: 'Tue',
+          exWed: 'Wed',
+          exThu: 'Thu',
+          exFri: 'Fri',
+          exSat: 'Sat',
+          exSun: 'Today',
         }
       }
     }
@@ -1904,6 +1925,8 @@ const resources = {
         lessonOf: 'Leçon {{current}} sur {{total}}',
         toastCompleted: 'Leçon terminée ! +50 XP',
         toastError: 'Erreur de validation',
+        streakUpdated: '🔥 Série de {{count}} jours !',
+        streakStarted: '🔥 Série commencée ! Jour {{count}}',
         next: 'Suivant',
         previous: 'Précédent',
         practicalExamples: 'Exemples concrets',
@@ -2531,6 +2554,25 @@ const resources = {
           batchAudioComplete: 'Génération audio terminée!',
           videoUploaded: 'Vidéo uploadée avec succès!'
         }
+      },
+      streak: {
+        modal: {
+          title: 'Comment fonctionnent les séries',
+          rule1: 'Complétez au moins une leçon par jour pour maintenir votre série. Chaque jour consécutif ajoute un point à votre compteur.',
+          rule2: 'Manquer un jour réinitialise votre série à zéro. La régularité est la clé.',
+          rule3: 'Atteignez des jalons (7, 14, 30, 60, 100, 365 jours) pour gagner des XP et des pièces bonus.',
+          exGoodLabel: 'Maintenir sa série',
+          exGoodResult: 'Série de 5 jours — bravo !',
+          exBrokenLabel: 'Manquer un jour brise la série',
+          exBrokenResult: 'Série réinitialisée — recommencez aujourd\'hui',
+          exMon: 'Lun',
+          exTue: 'Mar',
+          exWed: 'Mer',
+          exThu: 'Jeu',
+          exFri: 'Ven',
+          exSat: 'Sam',
+          exSun: 'Auj.',
+        }
       }
     }
   },
@@ -2975,6 +3017,8 @@ const resources = {
         lessonOf: 'الدرس {{current}} من {{total}}',
         toastCompleted: 'اكتمل الدرس! +50 XP',
         toastError: 'خطأ في التحقق',
+        streakUpdated: '🔥 سلسلة {{count}} أيام!',
+        streakStarted: '🔥 بدأت السلسلة! اليوم {{count}}',
         next: 'التالي',
         previous: 'السابق',
         practicalExamples: 'أمثلة عملية',
@@ -3796,6 +3840,25 @@ const resources = {
           batchAudioComplete: 'اكتمل إنشاء الصوت!',
           videoUploaded: 'تم رفع الفيديو بنجاح!'
         }
+      },
+      streak: {
+        modal: {
+          title: 'كيف تعمل السلاسل',
+          rule1: 'أكمل درسًا واحدًا على الأقل يوميًا للحفاظ على سلسلتك. كل يوم متتالٍ يضيف يومًا إلى عدادك.',
+          rule2: 'إذا فاتك يوم، تُعاد السلسلة إلى الصفر. الانتظام هو المفتاح.',
+          rule3: 'حقق معالم (7، 14، 30، 60، 100، 365 يومًا) لتكسب XP ومكافآت إضافية.',
+          exGoodLabel: 'الحفاظ على السلسلة',
+          exGoodResult: 'سلسلة 5 أيام — أحسنت!',
+          exBrokenLabel: 'تفويت يوم يكسر السلسلة',
+          exBrokenResult: 'تمت إعادة السلسلة — ابدأ من جديد اليوم',
+          exMon: 'الاثن',
+          exTue: 'الثلا',
+          exWed: 'الأرب',
+          exThu: 'الخمي',
+          exFri: 'الجمع',
+          exSat: 'السبت',
+          exSun: 'اليوم',
+        }
       }
     }
   },
@@ -4434,6 +4497,8 @@ const resources = {
         lessonOf: 'Aula {{current}} de {{total}}',
         toastCompleted: 'Aula concluída! +50 XP',
         toastError: 'Erro de validação',
+        streakUpdated: '🔥 Sequência de {{count}} dias!',
+        streakStarted: '🔥 Sequência iniciada! Dia {{count}}',
         next: 'Próximo',
         previous: 'Anterior',
         practicalExamples: 'Exemplos Práticos',
@@ -5060,6 +5125,25 @@ const resources = {
           batchStarted: 'Geração de áudio em lote iniciada...',
           batchAudioComplete: 'Geração de áudio concluída!',
           videoUploaded: 'Vídeo enviado com sucesso!'
+        }
+      },
+      streak: {
+        modal: {
+          title: 'Como Funcionam as Sequências',
+          rule1: 'Complete pelo menos uma aula por dia para construir sua sequência. Cada dia consecutivo adiciona um ao seu contador.',
+          rule2: 'Perder um dia zera sua sequência. A consistência é fundamental.',
+          rule3: 'Alcance marcos (7, 14, 30, 60, 100, 365 dias) para ganhar XP e moedas de bônus.',
+          exGoodLabel: 'Mantendo sua sequência viva',
+          exGoodResult: 'Sequência de 5 dias — muito bem!',
+          exBrokenLabel: 'Perder um dia quebra a sequência',
+          exBrokenResult: 'Sequência zerada — comece de novo hoje',
+          exMon: 'Seg',
+          exTue: 'Ter',
+          exWed: 'Qua',
+          exThu: 'Qui',
+          exFri: 'Sex',
+          exSat: 'Sáb',
+          exSun: 'Hoje',
         }
       }
     }

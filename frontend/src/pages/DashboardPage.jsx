@@ -15,8 +15,10 @@ import {
   Flame,
   Target,
   Zap,
-  Crown
+  Crown,
+  HelpCircle
 } from 'lucide-react';
+import { StreakInfoModal } from '../components/StreakInfoModal';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Progress } from '../components/ui/progress';
@@ -26,6 +28,7 @@ export default function DashboardPage() {
   const { user, token } = useAuth();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [streakModalOpen, setStreakModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -89,8 +92,16 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
                 <Flame className="w-5 h-5 text-amber-500" />
                 <span className="text-amber-500 font-medium">{t('dashboard.dayStreak', { count: user?.streak_days || 0 })}</span>
+                <button
+                  onClick={() => setStreakModalOpen(true)}
+                  className="text-amber-500/60 hover:text-amber-500 transition-colors ml-1"
+                  aria-label={t('streak.modal.title')}
+                >
+                  <HelpCircle className="w-4 h-4" />
+                </button>
               </div>
             </div>
+            <StreakInfoModal open={streakModalOpen} onClose={() => setStreakModalOpen(false)} />
           </div>
         </motion.div>
 

@@ -218,13 +218,25 @@ export default function LessonPage() {
 
   const completeLesson = async () => {
     if (!token) return;
-    
+
     setCompleting(true);
     try {
-      await axios.post(`${API}/lessons/${lessonId}/complete`, {}, {
+      const res = await axios.post(`${API}/lessons/${lessonId}/complete`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success(t('lesson.toastCompleted'));
+      const streak = res.data?.streak;
+      if (streak?.streak_updated) {
+        toast(t('lesson.streakUpdated', { count: streak.streak_days }), {
+          icon: '🔥',
+          duration: 4000,
+        });
+      } else if (streak?.streak_lost) {
+        toast(t('lesson.streakStarted', { count: streak.streak_days }), {
+          icon: '🔥',
+          duration: 4000,
+        });
+      }
       await refreshUser();
     } catch (e) {
       toast.error(t('lesson.toastError'));

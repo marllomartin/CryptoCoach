@@ -642,6 +642,24 @@ async def login(request: Request, credentials: UserLogin):
 
 @api_router.get("/auth/me", response_model=UserResponse)
 async def get_me(current_user: dict = Depends(get_current_user)):
+    # Passively reset streak if user missed a day (without awarding XP)
+    last_activity = current_user.get("last_activity")
+    if last_activity and current_user.get("streak_days", 0) > 0:
+        try:
+            last_date = datetime.fromisoformat(last_activity.replace("Z", "+00:00")).date()
+            today = datetime.now(timezone.utc).date()
+            days_diff = (today - last_date).days
+            streak_freezes = current_user.get("streak_freezes", 0)
+            # Reset if missed more than 1 day (or exactly 2 days with no freeze)
+            if days_diff > 1 and not (days_diff == 2 and streak_freezes > 0):
+                await db.users.update_one(
+                    {"id": current_user["id"]},
+                    {"$set": {"streak_days": 0}}
+                )
+                current_user["streak_days"] = 0
+        except Exception:
+            pass
+
     # Read role from DB, fall back to email lists for legacy bootstrap
     email = current_user.get("email", "")
     role = current_user.get("role", "none")
@@ -703,6 +721,7 @@ async def get_course(course_id: str, lang: str = "en"):
     return localized
 
 from services.lesson_images import get_lesson_images, LESSON_IMAGES
+from services.streak_service import StreakService
 from services.content_aggregator import get_localized_lesson, get_all_lessons_for_course, ALL_LESSONS, get_content_stats
 
 @api_router.get("/courses/{course_id}/lessons", response_model=List[Lesson])
@@ -850,11 +869,16 @@ async def complete_lesson(lesson_id: str, current_user: dict = Depends(get_curre
             new_achievements.append({"id": "knowledge_seeker", "name": "Chercheur de Savoir", "xp": 200})
             xp_earned += 200
     
+    # Update streak (always, even if lesson was already completed — counts as daily activity)
+    streak_service = StreakService(db)
+    streak_result = await streak_service.check_and_update_streak(current_user["id"])
+
     return {
         "status": "completed",
         "xp_earned": xp_earned,
         "level_up": level_up,
-        "new_achievements": new_achievements
+        "new_achievements": new_achievements,
+        "streak": streak_result
     }
 
 def calculate_level(xp: int) -> int:

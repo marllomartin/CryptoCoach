@@ -3,11 +3,12 @@ import { useAuth, API } from '../App';
 import { useTranslation } from 'react-i18next';
 import Layout from '../components/Layout';
 import axios from 'axios';
-import { 
-  User, Edit2, Save, Camera, Trophy, Flame, Zap, 
-  Calendar, Target, TrendingUp, Award, Shield, 
-  BookOpen, Star, Crown, Clock, X
+import {
+  User, Edit2, Save, Camera, Trophy, Flame, Zap,
+  Calendar, Target, TrendingUp, Award, Shield,
+  BookOpen, Star, Crown, Clock, X, HelpCircle
 } from 'lucide-react';
+import { StreakInfoModal } from '../components/StreakInfoModal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Progress } from '../components/ui/progress';
@@ -18,6 +19,7 @@ const ProfilePage = () => {
   const { t } = useTranslation();
   const [profile, setProfile] = useState(null);
   const [streakInfo, setStreakInfo] = useState(null);
+  const [streakModalOpen, setStreakModalOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [loading, setLoading] = useState(true);
@@ -151,7 +153,14 @@ const ProfilePage = () => {
 
               {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+                <div className="relative text-center p-3 bg-gray-800/50 rounded-lg">
+                  <button
+                    onClick={() => setStreakModalOpen(true)}
+                    className="absolute top-2 right-2 text-gray-600 hover:text-orange-400 transition-colors"
+                    aria-label={t('streak.modal.title')}
+                  >
+                    <HelpCircle className="w-3.5 h-3.5" />
+                  </button>
                   <Flame className="w-6 h-6 text-orange-500 mx-auto mb-1" />
                   <p className="text-xl font-bold text-white">{streakInfo?.current_streak || 0}</p>
                   <p className="text-xs text-gray-400">{t('profile.streak')}</p>
@@ -191,6 +200,13 @@ const ProfilePage = () => {
               <h2 className="font-bold text-white mb-4 flex items-center gap-2">
                 <Flame className="w-5 h-5 text-orange-500" />
                 {t('profile.streakMilestones')}
+                <button
+                  onClick={() => setStreakModalOpen(true)}
+                  className="text-gray-600 hover:text-orange-400 transition-colors ml-auto"
+                  aria-label={t('streak.modal.title')}
+                >
+                  <HelpCircle className="w-4 h-4" />
+                </button>
               </h2>
 
               <div className="mb-4 p-4 bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-lg">
@@ -266,6 +282,7 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
+      <StreakInfoModal open={streakModalOpen} onClose={() => setStreakModalOpen(false)} />
     </Layout>
   );
 };
