@@ -258,6 +258,9 @@ export const Layout = ({ children }) => {
               </p>
             </div>
 
+            {/* Spacer */}
+            <div className="hidden md:block" />
+
             {/* Legal */}
             <div>
               <h4 className="font-heading font-semibold mb-4">{t('footer.legal')}</h4>
