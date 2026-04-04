@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Check, Zap, Crown, Rocket, Star, Loader2 } from 'lucide-react';
+import { Check, Crown, Rocket, Star, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
@@ -49,10 +49,10 @@ const PricingPage = () => {
   const [loading, setLoading] = useState(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
   const [isAnnual, setIsAnnual] = useState(true);
-  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [, setAppliedCoupon] = useState(null);
 
   const tiers = TIER_META.map(meta => {
-    const featuresCount = { free: 5, pro: 6, elite: 5 };
+    const featuresCount = { free: 6, pro: 6, elite: 4 };
     const count = featuresCount[meta.id];
     const features = Array.from({ length: count }, (_, i) =>
       t(`pricing.tiers.${meta.id}.feature${i + 1}`)

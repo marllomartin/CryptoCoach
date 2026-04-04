@@ -700,41 +700,31 @@ const resources = {
         },
         tiers: {
           free: {
-            description: 'Start your crypto journey',
-            feature1: 'Level 1: Crypto Foundations (8 lessons)',
-            feature2: 'Crypto Glossary Access',
-            feature3: 'Blog & Insights',
-            feature4: 'Basic Leaderboard',
-            feature5: '3-day video trial (Lesson 1)',
+            description: 'Everything you need to start strong',
+            feature1: 'Crypto Glossary — master the language of the market',
+            feature2: '3 foundational courses to build your knowledge base',
+            feature3: 'Blog & market insights updated regularly',
+            feature4: 'Watchlist — track up to 3 assets',
+            feature5: '1 price alert to never miss a move',
+            feature6: '3 market news articles per day',
             cta: 'Get Started Free'
           },
-          starter: {
-            description: 'For beginner investors',
-            feature1: 'Everything in Free +',
-            feature2: 'Level 2: Crypto Investor (8 lessons)',
-            feature3: 'Interactive Quizzes',
-            feature4: 'Trading Simulator',
-            feature5: 'Progress Tracking',
-            feature6: 'Audio & Premium Video',
-            cta: 'Get Started'
-          },
           pro: {
-            description: 'For serious investors',
-            feature1: 'Everything in Starter +',
-            feature2: 'Level 3: Advanced Strategist (7 lessons)',
-            feature3: 'Certification Exams',
-            feature4: 'PDF Certificates with QR',
-            feature5: 'Full Leaderboard Access',
-            feature6: 'Video Presentations',
+            description: 'Unlock your full investing potential',
+            feature1: 'Everything in Standard, and more',
+            feature2: 'All premium courses — go deeper, invest smarter',
+            feature3: 'Trading Simulator — practice risk-free with real data',
+            feature4: 'Unlimited watchlist & price alerts',
+            feature5: 'Full news feed — stay ahead of the market',
+            feature6: 'Daily AI market briefing delivered to you',
             cta: 'Go Pro'
           },
           elite: {
-            description: 'Unlimited access and AI Mentor',
-            feature1: 'Everything in Pro +',
-            feature2: 'AI Crypto Mentor (CryptoCoach AI)',
-            feature3: 'Exclusive Advanced Strategies',
-            feature4: 'Priority Support',
-            feature5: 'Early Access to New Content',
+            description: 'The ultimate edge for serious investors',
+            feature1: 'Everything in Pro, elevated',
+            feature2: 'CryptoCoach AI Mentor — your personal AI strategist',
+            feature3: 'Exclusive high-performance trading strategies',
+            feature4: 'Priority support — get answers when it matters most',
             cta: 'Join Elite'
           }
         }
@@ -1925,42 +1915,32 @@ const resources = {
         },
         tiers: {
           free: {
-            description: 'Commencez votre voyage crypto',
-            feature1: 'Niveau 1 : Fondamentaux Crypto (8 leçons)',
-            feature2: 'Accès au Glossaire Crypto',
-            feature3: 'Blog & Actualités',
-            feature4: 'Classement basique',
-            feature5: '3 jours d\'essai vidéo (Leçon 1)',
+            description: 'Tout ce qu\'il faut pour bien démarrer',
+            feature1: 'Glossaire Crypto — maîtrisez le langage des marchés',
+            feature2: '3 cours fondamentaux pour construire vos bases',
+            feature3: 'Blog & analyses de marché mis à jour régulièrement',
+            feature4: 'Liste de suivi — suivez jusqu\'à 3 actifs',
+            feature5: '1 alerte de prix pour ne jamais rater une opportunité',
+            feature6: '3 articles d\'actualité marché par jour',
             cta: 'Commencer gratuitement'
           },
-          starter: {
-            description: 'Pour les investisseurs débutants',
-            feature1: 'Tout dans Free +',
-            feature2: 'Niveau 2 : Crypto Investor (8 leçons)',
-            feature3: 'Quiz interactifs',
-            feature4: 'Simulateur de Trading',
-            feature5: 'Suivi de progression',
-            feature6: 'Audio & Vidéo Premium',
-            cta: 'Commencer'
-          },
           pro: {
-            description: 'Pour les investisseurs sérieux',
-            feature1: 'Tout dans Starter +',
-            feature2: 'Niveau 3 : Stratège Avancé (7 leçons)',
-            feature3: 'Examens de certification',
-            feature4: 'Certificats PDF avec QR',
-            feature5: 'Accès complet au classement',
-            feature6: 'Présentations Vidéo',
+            description: 'Libérez votre plein potentiel d\'investisseur',
+            feature1: 'Tout du Standard, et bien plus',
+            feature2: 'Tous les cours premium — approfondissez, investissez mieux',
+            feature3: 'Simulateur de Trading — pratiquez sans risque avec de vraies données',
+            feature4: 'Liste de suivi & alertes illimitées',
+            feature5: 'Fil d\'actualités complet — gardez une longueur d\'avance',
+            feature6: 'Briefing IA quotidien sur les marchés',
             cta: 'Devenir Pro'
           },
           elite: {
-            description: 'Accès illimité et AI Mentor',
-            feature1: 'Tout dans Pro +',
-            feature2: 'AI Crypto Mentor (CryptoCoach AI)',
-            feature3: 'Stratégies avancées exclusives',
-            feature4: 'Support prioritaire',
-            feature5: 'Accès anticipé au nouveau contenu',
-            cta: 'Rejoindre l\'Elite'
+            description: 'L\'avantage ultime pour les investisseurs sérieux',
+            feature1: 'Tout du Pro, en mieux',
+            feature2: 'CryptoCoach AI Mentor — votre stratégiste IA personnel',
+            feature3: 'Stratégies de trading haute performance exclusives',
+            feature4: 'Support prioritaire — des réponses quand ça compte',
+            cta: 'Rejoindre l\'Élite'
           }
         }
       },
@@ -2956,41 +2936,31 @@ const resources = {
         },
         tiers: {
           free: {
-            description: 'ابدأ رحلتك في العملات المشفرة',
-            feature1: 'المستوى 1: أساسيات الكريبتو (8 دروس)',
-            feature2: 'الوصول إلى مصطلحات الكريبتو',
-            feature3: 'المدونة والأخبار',
-            feature4: 'الترتيب الأساسي',
-            feature5: '3 أيام تجربة فيديو (الدرس 1)',
+            description: 'كل ما تحتاجه للبدء بقوة',
+            feature1: 'مصطلحات الكريبتو — أتقن لغة الأسواق',
+            feature2: '3 دورات أساسية لبناء معرفتك',
+            feature3: 'مدونة وتحليلات السوق محدثة باستمرار',
+            feature4: 'قائمة المتابعة — تابع حتى 3 أصول',
+            feature5: 'تنبيه سعر واحد لا تفوّت أي فرصة',
+            feature6: '3 مقالات إخبارية يومياً عن الأسواق',
             cta: 'ابدأ مجاناً'
           },
-          starter: {
-            description: 'للمستثمرين المبتدئين',
-            feature1: 'كل شيء في المجاني +',
-            feature2: 'المستوى 2: مستثمر الكريبتو (8 دروس)',
-            feature3: 'اختبارات تفاعلية',
-            feature4: 'محاكي التداول',
-            feature5: 'تتبع التقدم',
-            feature6: 'صوت وفيديو مميز',
-            cta: 'ابدأ الآن'
-          },
           pro: {
-            description: 'للمستثمرين الجادين',
-            feature1: 'كل شيء في Starter +',
-            feature2: 'المستوى 3: الاستراتيجي المتقدم (7 دروس)',
-            feature3: 'امتحانات الشهادات',
-            feature4: 'شهادات PDF مع QR',
-            feature5: 'الوصول الكامل للترتيب',
-            feature6: 'عروض الفيديو',
+            description: 'أطلق إمكاناتك الاستثمارية الكاملة',
+            feature1: 'كل شيء من Standard وأكثر',
+            feature2: 'جميع الدورات المميزة — تعمّق واستثمر بذكاء',
+            feature3: 'محاكي التداول — تدرّب بدون مخاطر ببيانات حقيقية',
+            feature4: 'قائمة متابعة وتنبيهات غير محدودة',
+            feature5: 'تغطية إخبارية كاملة — تقدم على السوق دائماً',
+            feature6: 'تقرير ذكاء اصطناعي يومي عن الأسواق',
             cta: 'احترف الآن'
           },
           elite: {
-            description: 'وصول غير محدود ومرشد ذكي',
-            feature1: 'كل شيء في Pro +',
-            feature2: 'مرشد ذكي للكريبتو (CryptoCoach AI)',
-            feature3: 'استراتيجيات متقدمة حصرية',
-            feature4: 'دعم ذو أولوية',
-            feature5: 'وصول مبكر للمحتوى الجديد',
+            description: 'الميزة المطلقة للمستثمرين الجادين',
+            feature1: 'كل شيء من Pro، بمستوى أعلى',
+            feature2: 'مرشد CryptoCoach AI — استراتيجيك الذكي الشخصي',
+            feature3: 'استراتيجيات تداول حصرية عالية الأداء',
+            feature4: 'دعم ذو أولوية — احصل على إجابات عند الحاجة',
             cta: 'انضم للنخبة'
           }
         }
@@ -4375,41 +4345,31 @@ const resources = {
         },
         tiers: {
           free: {
-            description: 'Comece sua jornada em cripto',
-            feature1: 'Nível 1: Fundamentos de Cripto (8 aulas)',
-            feature2: 'Acesso ao Glossário Cripto',
-            feature3: 'Blog & Insights',
-            feature4: 'Classificação Básica',
-            feature5: 'Teste de vídeo por 3 dias (Aula 1)',
+            description: 'Tudo que você precisa para começar com força',
+            feature1: 'Glossário Cripto — domine a linguagem do mercado',
+            feature2: '3 cursos fundamentais para construir sua base',
+            feature3: 'Blog & análises de mercado atualizadas regularmente',
+            feature4: 'Lista de acompanhamento — monitore até 3 ativos',
+            feature5: '1 alerta de preço para nunca perder uma oportunidade',
+            feature6: '3 artigos de notícias do mercado por dia',
             cta: 'Começar Grátis'
           },
-          starter: {
-            description: 'Para investidores iniciantes',
-            feature1: 'Tudo do Grátis +',
-            feature2: 'Nível 2: Investidor em Cripto (8 aulas)',
-            feature3: 'Quizzes Interativos',
-            feature4: 'Simulador de Trading',
-            feature5: 'Acompanhamento de Progresso',
-            feature6: 'Áudio & Vídeo Premium',
-            cta: 'Começar'
-          },
           pro: {
-            description: 'Para investidores sérios',
-            feature1: 'Tudo do Iniciante +',
-            feature2: 'Nível 3: Estrategista Avançado (7 aulas)',
-            feature3: 'Exames de Certificação',
-            feature4: 'Certificados PDF com QR',
-            feature5: 'Acesso Completo à Classificação',
-            feature6: 'Apresentações em Vídeo',
+            description: 'Libere todo o seu potencial como investidor',
+            feature1: 'Tudo do Standard, e muito mais',
+            feature2: 'Todos os cursos premium — aprofunde-se, invista com inteligência',
+            feature3: 'Simulador de Trading — pratique sem risco com dados reais',
+            feature4: 'Lista de acompanhamento e alertas ilimitados',
+            feature5: 'Feed completo de notícias — sempre à frente do mercado',
+            feature6: 'Briefing diário de IA sobre o mercado',
             cta: 'Ir Pro'
           },
           elite: {
-            description: 'Acesso ilimitado e Mentor IA',
-            feature1: 'Tudo do Pro +',
-            feature2: 'Mentor IA de Cripto (CryptoCoach IA)',
-            feature3: 'Estratégias Avançadas Exclusivas',
-            feature4: 'Suporte Prioritário',
-            feature5: 'Acesso Antecipado a Novos Conteúdos',
+            description: 'A vantagem definitiva para investidores sérios',
+            feature1: 'Tudo do Pro, elevado ao máximo',
+            feature2: 'CryptoCoach AI Mentor — seu estrategista pessoal com IA',
+            feature3: 'Estratégias de trading exclusivas e de alta performance',
+            feature4: 'Suporte prioritário — respostas quando mais importa',
             cta: 'Entrar no Elite'
           }
         }
