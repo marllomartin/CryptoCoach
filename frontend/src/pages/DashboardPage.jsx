@@ -14,7 +14,8 @@ import {
   ChevronRight,
   Flame,
   Target,
-  Zap
+  Zap,
+  Crown
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -42,8 +43,10 @@ export default function DashboardPage() {
 
   const getCourseProgress = (course) => {
     if (!user) return 0;
-    const completedInCourse = user.completed_lessons?.filter(l => l.startsWith(course.id)).length || 0;
-    return Math.round((completedInCourse / course.lessons_count) * 100);
+    const completed = course.lesson_ids
+      ? user.completed_lessons?.filter(l => course.lesson_ids.includes(l)).length || 0
+      : user.completed_lessons?.filter(l => l.startsWith(course.id + '-')).length || 0;
+    return Math.round((completed / course.lessons_count) * 100);
   };
 
   const totalLessonsCompleted = user?.completed_lessons?.length || 0;
@@ -167,37 +170,76 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {courses.filter((course) => getCourseProgress(course) > 0).map((course) => {
                 const progress = getCourseProgress(course);
-                const colors = {
-                  1: { border: 'border-blue-500/30', text: 'text-blue-500', bg: 'bg-blue-500' },
-                  2: { border: 'border-purple-500/30', text: 'text-purple-500', bg: 'bg-purple-500' },
-                  3: { border: 'border-amber-500/30', text: 'text-amber-500', bg: 'bg-amber-500' }
+                const isPremium = !course.is_trial;
+                const cf = course.color_from || '#f59e0b';
+                const ct = course.color_to || '#b45309';
+                const levelStyles = {
+                  1: { border: 'border-amber-700/40', text: 'text-amber-600', gradient: 'from-amber-800/25 to-orange-900/25' },
+                  2: { border: 'border-slate-400/40',  text: 'text-slate-300',  gradient: 'from-slate-400/20 to-zinc-500/20'  },
+                  3: { border: 'border-yellow-400/40', text: 'text-yellow-300', gradient: 'from-yellow-400/20 to-amber-300/20' }
                 };
-                const color = colors[course.level];
+                const ls = levelStyles[course.level] || levelStyles[1];
 
                 return (
                   <Link key={course.id} to={`/course/${course.id}`}>
-                    <Card className={`bg-card border ${color.border} hover:border-opacity-100 transition-colors h-full`}>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <span className={`text-sm font-medium ${color.text}`}>{t('academy.level')} {course.level}</span>
-                          <span className="text-sm text-slate-400">{progress}%</span>
-                        </div>
-                        <h3 className="font-heading font-bold text-lg mb-2">{course.title}</h3>
-                        <p className="text-sm text-slate-400 mb-4 line-clamp-2">{course.description}</p>
-                        <Progress value={progress} className="h-2" />
-                        <div className="mt-4 flex items-center justify-between text-sm">
-                          <span className="text-slate-500">{course.lessons_count} {t('academy.lessons')}</span>
-                          {progress === 100 ? (
-                            <span className="text-green-500 flex items-center gap-1">
-                              <Award className="w-4 h-4" />
-                              {t('dashboard.completed')}
+                    {isPremium ? (
+                      <Card
+                        className="border h-full transition-all hover:brightness-110"
+                        style={{
+                          background: `linear-gradient(to bottom right, ${cf}33, ${ct}33)`,
+                          borderColor: `${cf}55`,
+                        }}
+                      >
+                        <CardContent className="p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <span
+                              className="text-sm font-medium flex items-center gap-1"
+                              style={{ color: cf }}
+                            >
+                              <Crown className="w-3.5 h-3.5" /> Premium
                             </span>
-                          ) : (
-                            <span className={color.text}>Continue →</span>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
+                            <span className="text-sm text-slate-400">{progress}%</span>
+                          </div>
+                          <h3 className="font-heading font-bold text-lg mb-2">{course.title}</h3>
+                          <p className="text-sm text-slate-400 mb-4 line-clamp-2">{course.description}</p>
+                          <Progress value={progress} className="h-2" />
+                          <div className="mt-4 flex items-center justify-between text-sm">
+                            <span className="text-slate-500">{course.lessons_count} {t('academy.lessons')}</span>
+                            {progress === 100 ? (
+                              <span className="text-green-500 flex items-center gap-1">
+                                <Award className="w-4 h-4" />
+                                {t('dashboard.completed')}
+                              </span>
+                            ) : (
+                              <span style={{ color: cf }}>Continue →</span>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <Card className={`bg-gradient-to-br ${ls.gradient} border ${ls.border} hover:brightness-110 transition-all h-full`}>
+                        <CardContent className="p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <span className={`text-sm font-medium ${ls.text}`}>{t('academy.level')} {course.level}</span>
+                            <span className="text-sm text-slate-400">{progress}%</span>
+                          </div>
+                          <h3 className="font-heading font-bold text-lg mb-2">{course.title}</h3>
+                          <p className="text-sm text-slate-400 mb-4 line-clamp-2">{course.description}</p>
+                          <Progress value={progress} className="h-2" />
+                          <div className="mt-4 flex items-center justify-between text-sm">
+                            <span className="text-slate-500">{course.lessons_count} {t('academy.lessons')}</span>
+                            {progress === 100 ? (
+                              <span className="text-green-500 flex items-center gap-1">
+                                <Award className="w-4 h-4" />
+                                {t('dashboard.completed')}
+                              </span>
+                            ) : (
+                              <span className={ls.text}>Continue →</span>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
                   </Link>
                 );
               })}
