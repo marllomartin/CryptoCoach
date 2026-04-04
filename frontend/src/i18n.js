@@ -1126,12 +1126,18 @@ const resources = {
           deleteConfirm: 'Delete this article?',
           publish: 'Publish',
           cancel: 'Cancel',
+          imageUploaded: 'Image uploaded',
+          imageUploadError: 'Image upload failed',
           form: {
             title: 'Title',
             slug: 'Slug',
             excerpt: 'Excerpt',
             content: 'Content (Markdown)',
-            category: 'Category'
+            category: 'Category',
+            readTime: 'Read time',
+            minutes: 'min',
+            uploadImage: 'Upload thumbnail',
+            uploading: 'Uploading…'
           }
         },
         newsletter: {
@@ -2342,12 +2348,18 @@ const resources = {
           deleteConfirm: 'Supprimer cet article ?',
           publish: 'Publier',
           cancel: 'Annuler',
+          imageUploaded: 'Image téléchargée',
+          imageUploadError: 'Échec du téléchargement',
           form: {
             title: 'Titre',
             slug: 'Slug',
             excerpt: 'Extrait',
             content: 'Contenu (Markdown)',
-            category: 'Catégorie'
+            category: 'Catégorie',
+            readTime: 'Temps de lecture',
+            minutes: 'min',
+            uploadImage: 'Télécharger l\'image',
+            uploading: 'Téléchargement…'
           }
         },
         newsletter: {
@@ -3558,12 +3570,18 @@ const resources = {
           deleteConfirm: 'هل تريد حذف هذا المقال؟',
           publish: 'نشر',
           cancel: 'إلغاء',
+          imageUploaded: 'تم رفع الصورة',
+          imageUploadError: 'فشل رفع الصورة',
           form: {
             title: 'العنوان',
             slug: 'الرابط المختصر',
             excerpt: 'مقتطف',
             content: 'المحتوى (Markdown)',
-            category: 'الفئة'
+            category: 'الفئة',
+            readTime: 'وقت القراءة',
+            minutes: 'دقيقة',
+            uploadImage: 'رفع صورة مصغرة',
+            uploading: 'جارٍ الرفع…'
           }
         },
         newsletter: {
@@ -4774,12 +4792,18 @@ const resources = {
           deleteConfirm: 'Excluir este artigo?',
           publish: 'Publicar',
           cancel: 'Cancelar',
+          imageUploaded: 'Imagem enviada',
+          imageUploadError: 'Falha no envio da imagem',
           form: {
             title: 'Título',
             slug: 'Slug',
             excerpt: 'Resumo',
             content: 'Conteúdo (Markdown)',
-            category: 'Categoria'
+            category: 'Categoria',
+            readTime: 'Tempo de leitura',
+            minutes: 'min',
+            uploadImage: 'Enviar thumbnail',
+            uploading: 'Enviando…'
           }
         },
         newsletter: {

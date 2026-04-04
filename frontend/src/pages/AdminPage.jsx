@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
@@ -1348,13 +1348,17 @@ function BlogTab({ token, currentUser }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
     excerpt: '',
     content: '',
     category: 'Education',
-    tags: []
+    tags: [],
+    thumbnail: '',
+    read_time: 5
   });
 
   useEffect(() => {
@@ -1374,19 +1378,34 @@ function BlogTab({ token, currentUser }) {
     }
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await axios.post(`${API}/admin/upload-image`, fd, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+      });
+      setFormData(prev => ({ ...prev, thumbnail: res.data.url }));
+      toast.success(t('admin.blog.imageUploaded'));
+    } catch (err) {
+      toast.error(t('admin.blog.imageUploadError'));
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const createPost = async () => {
     try {
-      await axios.post(
-        `${API}/admin/blog`,
-        null,
-        {
-          params: formData,
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      await axios.post(`${API}/admin/blog`, null, {
+        params: formData,
+        headers: { Authorization: `Bearer ${token}` }
+      });
       toast.success(t('admin.blog.created'));
       setShowForm(false);
-      setFormData({ title: '', slug: '', excerpt: '', content: '', category: 'Education', tags: [] });
+      setFormData({ title: '', slug: '', excerpt: '', content: '', category: 'Education', tags: [], thumbnail: '', read_time: 5 });
       fetchPosts();
     } catch (error) {
       toast.error(t('admin.errors.creationError'));
@@ -1405,7 +1424,7 @@ function BlogTab({ token, currentUser }) {
       toast.error(t('admin.errors.deletionError'));
     }
   };
-  
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -1415,7 +1434,7 @@ function BlogTab({ token, currentUser }) {
           {t('admin.blog.newPost')}
         </Button>
       </div>
-      
+
       {showForm && (
         <Card className="bg-card border-border">
           <CardContent className="p-6 space-y-4">
@@ -1445,6 +1464,52 @@ function BlogTab({ token, currentUser }) {
               value={formData.category}
               onChange={(e) => setFormData({...formData, category: e.target.value})}
             />
+            <div className="flex items-center gap-3">
+              <Input
+                type="number"
+                min={1}
+                placeholder={t('admin.blog.form.readTime')}
+                value={formData.read_time}
+                onChange={(e) => setFormData({...formData, read_time: parseInt(e.target.value) || 5})}
+                className="w-32"
+              />
+              <span className="text-sm text-slate-400">{t('admin.blog.form.minutes')}</span>
+            </div>
+
+            {/* Thumbnail upload */}
+            <div className="space-y-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingImage}
+                >
+                  {uploadingImage
+                    ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t('admin.blog.form.uploading')}</>
+                    : <><Image className="w-4 h-4 mr-2" />{t('admin.blog.form.uploadImage')}</>
+                  }
+                </Button>
+                {formData.thumbnail && (
+                  <span className="text-xs text-green-400 truncate max-w-xs">{formData.thumbnail}</span>
+                )}
+              </div>
+              {formData.thumbnail && (
+                <img
+                  src={formData.thumbnail.startsWith('/api') ? `${API.replace('/api', '')}${formData.thumbnail}` : formData.thumbnail}
+                  alt="thumbnail preview"
+                  className="h-24 w-auto rounded-lg object-cover border border-border"
+                />
+              )}
+            </div>
+
             <div className="flex gap-2">
               <Button onClick={createPost}>{t('admin.blog.publish')}</Button>
               <Button variant="outline" onClick={() => setShowForm(false)}>{t('admin.blog.cancel')}</Button>
@@ -1452,17 +1517,23 @@ function BlogTab({ token, currentUser }) {
           </CardContent>
         </Card>
       )}
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {posts.map((post) => (
-          <Card key={post.id} className="bg-card border-border">
+          <Card key={post.id} className="bg-card border-border overflow-hidden">
+            {post.thumbnail && (
+              <img
+                src={post.thumbnail.startsWith('/api') ? `${API.replace('/api', '')}${post.thumbnail}` : post.thumbnail}
+                alt={post.title}
+                className="w-full h-32 object-cover"
+              />
+            )}
             <CardContent className="p-4">
               <h3 className="font-medium mb-2 line-clamp-2">{post.title}</h3>
               <p className="text-xs text-slate-400 mb-3 line-clamp-2">{post.excerpt}</p>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-primary">{post.category}</span>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
                   {canDelete && (
                     <Button size="sm" variant="ghost" onClick={() => deletePost(post.id)}>
                       <Trash2 className="w-4 h-4 text-red-500" />

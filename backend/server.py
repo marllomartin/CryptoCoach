@@ -1,4 +1,5 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, Request, BackgroundTasks
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, Request, BackgroundTasks, UploadFile, File
+from fastapi.responses import Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
@@ -409,8 +410,8 @@ class BlogPost(BaseModel):
     tags: List[str]
     author: str
     published_at: str
-    read_time: int
-    thumbnail: str
+    read_time: int = 5
+    thumbnail: str = "https://images.unsplash.com/photo-1639825752750-5061ded5503b?w=800"
 
 class ChatMessage(BaseModel):
     message: str
@@ -4195,7 +4196,7 @@ async def get_admin_stats(admin: dict = Depends(get_admin_user)):
     
     courses_count = await db.courses.count_documents({})
     lessons_count = await db.lessons.count_documents({})
-    blog_posts_count = await db.blog_posts.count_documents({})
+    blog_posts_count = await db.blog.count_documents({})
     
     # Popular courses
     courses = await db.courses.find({}, {"_id": 0}).to_list(length=10)
@@ -4725,10 +4726,50 @@ async def generate_all_media(
 
 # ==================== BLOG ADMIN ROUTES ====================
 
+@api_router.post("/admin/upload-image")
+async def upload_image(
+    file: UploadFile = File(...),
+    admin: dict = Depends(get_admin_user)
+):
+    """Upload an image and return its serving URL."""
+    ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+    MAX_SIZE = 5 * 1024 * 1024  # 5 MB
+
+    if file.content_type not in ALLOWED_TYPES:
+        raise HTTPException(status_code=400, detail="Only JPEG, PNG, WebP and GIF images are allowed.")
+
+    data = await file.read()
+    if len(data) > MAX_SIZE:
+        raise HTTPException(status_code=400, detail="Image must be under 5 MB.")
+
+    image_id = f"img-{uuid.uuid4().hex[:12]}"
+    await db.images.insert_one({
+        "id": image_id,
+        "content_type": file.content_type,
+        "data": data,
+        "filename": file.filename,
+        "uploaded_at": datetime.now(timezone.utc).isoformat(),
+        "uploaded_by": admin.get("email", "")
+    })
+
+    return {"url": f"/api/images/{image_id}"}
+
+@api_router.get("/images/{image_id}")
+async def serve_image(image_id: str):
+    """Serve an uploaded image by ID."""
+    record = await db.images.find_one({"id": image_id})
+    if not record:
+        raise HTTPException(status_code=404, detail="Image not found")
+    return Response(
+        content=record["data"],
+        media_type=record["content_type"],
+        headers={"Cache-Control": "public, max-age=31536000, immutable"}
+    )
+
 @api_router.get("/admin/blog")
 async def get_admin_blog_posts(admin: dict = Depends(get_admin_user)):
     """Get all blog posts for admin"""
-    posts = await db.blog_posts.find({}, {"_id": 0}).to_list(length=100)
+    posts = await db.blog.find({}, {"_id": 0}).sort("published_at", -1).to_list(length=100)
     return {"posts": posts}
 
 @api_router.post("/admin/blog")
@@ -4739,7 +4780,8 @@ async def create_blog_post_admin(
     content: str,
     category: str,
     tags: List[str] = [],
-    featured_image: Optional[str] = None,
+    thumbnail: Optional[str] = None,
+    read_time: int = 5,
     admin: dict = Depends(get_admin_user)
 ):
     """Create a new blog post"""
@@ -4752,13 +4794,12 @@ async def create_blog_post_admin(
         "content": content,
         "category": category,
         "tags": tags,
-        "featured_image": featured_image or "https://images.unsplash.com/photo-1639825752750-5061ded5503b?w=800",
+        "thumbnail": thumbnail or "https://images.unsplash.com/photo-1639825752750-5061ded5503b?w=800",
         "author": "Mehdi Arbi",
         "published_at": datetime.now(timezone.utc).isoformat(),
-        "is_published": True,
-        "views": 0
+        "read_time": read_time
     }
-    await db.blog_posts.insert_one(post)
+    await db.blog.insert_one(post)
     del post["_id"]
     return post
 
@@ -4771,8 +4812,8 @@ async def update_blog_post_admin(
     content: Optional[str] = None,
     category: Optional[str] = None,
     tags: Optional[List[str]] = None,
-    featured_image: Optional[str] = None,
-    is_published: Optional[bool] = None,
+    thumbnail: Optional[str] = None,
+    read_time: Optional[int] = None,
     admin: dict = Depends(get_admin_user)
 ):
     """Update a blog post"""
@@ -4783,18 +4824,18 @@ async def update_blog_post_admin(
     if content: update_data["content"] = content
     if category: update_data["category"] = category
     if tags: update_data["tags"] = tags
-    if featured_image: update_data["featured_image"] = featured_image
-    if is_published is not None: update_data["is_published"] = is_published
-    
+    if thumbnail: update_data["thumbnail"] = thumbnail
+    if read_time is not None: update_data["read_time"] = read_time
+
     if update_data:
-        await db.blog_posts.update_one({"id": post_id}, {"$set": update_data})
-    
+        await db.blog.update_one({"id": post_id}, {"$set": update_data})
+
     return {"status": "success", "updated": update_data}
 
 @api_router.delete("/admin/blog/{post_id}")
 async def delete_blog_post_admin(post_id: str, admin: dict = Depends(require_moderator_or_above)):
     """Delete a blog post"""
-    await db.blog_posts.delete_one({"id": post_id})
+    await db.blog.delete_one({"id": post_id})
     return {"status": "deleted"}
 
 # ==================== ROOT ====================
