@@ -14,7 +14,7 @@ export function StreakInfoModal({ open, onClose }) {
     { label: t('streak.modal.exMon'), done: true },
     { label: t('streak.modal.exTue'), done: true },
     { label: t('streak.modal.exWed'), done: true },
-    { label: t('streak.modal.exThu'), done: false },
+    { label: t('streak.modal.exThu'), done: true },
     { label: t('streak.modal.exFri'), done: true },
     { label: t('streak.modal.exSat'), done: true },
     { label: t('streak.modal.exSun'), today: true },
