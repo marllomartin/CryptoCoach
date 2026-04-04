@@ -165,7 +165,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {courses.map((course) => {
+              {courses.filter((course) => getCourseProgress(course) > 0).map((course) => {
                 const progress = getCourseProgress(course);
                 const colors = {
                   1: { border: 'border-blue-500/30', text: 'text-blue-500', bg: 'bg-blue-500' },

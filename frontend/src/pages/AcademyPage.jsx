@@ -13,8 +13,7 @@ import {
   Award,
   ChevronRight,
   CheckCircle,
-  Crown,
-  Lock
+  Crown
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -309,8 +308,8 @@ export default function AcademyPage() {
                               <Button
                                 className="w-full transition-colors border bg-muted/40 text-slate-400 border-slate-600/40 hover:bg-muted/60"
                               >
-                                <Lock className="w-4 h-4 mr-2" />
                                 {t('academy.viewCourse')}
+                                <ChevronRight className="w-4 h-4 ml-2" />
                               </Button>
                             )}
                           </Link>
