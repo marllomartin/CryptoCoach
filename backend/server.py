@@ -301,16 +301,24 @@ class LessonUpdateRequest(BaseModel):
 
 # ==================== LOCALIZATION HELPERS ====================
 
+def _pick_translation(translations: dict, lang: str) -> Optional[dict]:
+    """Return the best available translation, preferring lang → en → any other."""
+    for try_lang in [lang, "en"] + [l for l in SUPPORTED_LANGUAGES if l not in (lang, "en")]:
+        trans = translations.get(try_lang)
+        if trans and trans.get("title", "").strip():
+            return trans
+    return None
+
 def localize_course(course: dict, lang: str) -> Optional[dict]:
     """Flatten course translations for a given language.
-    Returns None if the requested language has no usable content.
-    Falls back gracefully for unmigrated records that still use top-level fields."""
+    Falls back to English, then any available language, when the requested
+    language has no usable content. Returns as-is for unmigrated records."""
     translations = course.get("translations")
     if not translations:
         return course  # Unmigrated record — return as-is
 
-    trans = translations.get(lang)
-    if not trans or not trans.get("title", "").strip():
+    trans = _pick_translation(translations, lang)
+    if not trans:
         return None
 
     result = {k: v for k, v in course.items() if k != "translations"}
@@ -321,14 +329,14 @@ def localize_course(course: dict, lang: str) -> Optional[dict]:
 
 def localize_lesson(lesson: dict, lang: str) -> Optional[dict]:
     """Flatten lesson translations for a given language.
-    Returns None if the requested language has no usable content.
-    Falls back gracefully for unmigrated records that still use top-level fields."""
+    Falls back to English, then any available language, when the requested
+    language has no usable content. Returns as-is for unmigrated records."""
     translations = lesson.get("translations")
     if not translations:
         return lesson  # Unmigrated record — return as-is
 
-    trans = translations.get(lang)
-    if not trans or not trans.get("title", "").strip():
+    trans = _pick_translation(translations, lang)
+    if not trans:
         return None
 
     result = {k: v for k, v in lesson.items() if k != "translations"}
@@ -676,7 +684,7 @@ async def get_course(course_id: str, lang: str = "en"):
         raise HTTPException(status_code=404, detail="Course not found")
     localized = localize_course(course, lang)
     if not localized:
-        raise HTTPException(status_code=404, detail=f"Course not available in language '{lang}'")
+        raise HTTPException(status_code=404, detail="Course has no available translations")
     return localized
 
 from services.lesson_images import get_lesson_images, LESSON_IMAGES
