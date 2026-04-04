@@ -769,7 +769,9 @@ const resources = {
       // Subscription Gate
       subscriptionGate: {
         title: 'Pro Feature',
+        titleElite: 'Elite Feature',
         message: '{{feature}} is available on the {{tier}} plan and above.',
+        messageElite: '{{feature}} is available on the {{tier}} plan.',
         perMonth: '/month',
         viewPlans: 'View Plans',
         signIn: 'Sign In',
@@ -1991,7 +1993,9 @@ const resources = {
       // Subscription Gate
       subscriptionGate: {
         title: 'Fonctionnalité Pro',
+        titleElite: 'Fonctionnalité Elite',
         message: '{{feature}} est disponible avec le plan {{tier}} et supérieur.',
+        messageElite: '{{feature}} est disponible avec le plan {{tier}}.',
         perMonth: '/mois',
         viewPlans: 'Voir les abonnements',
         signIn: 'Se connecter',
@@ -3019,7 +3023,9 @@ const resources = {
       // Subscription Gate
       subscriptionGate: {
         title: 'ميزة Pro',
+        titleElite: 'ميزة Elite',
         message: '{{feature}} متاح في خطة {{tier}} وما فوقها.',
+        messageElite: '{{feature}} متاح في خطة {{tier}}.',
         perMonth: '/شهر',
         viewPlans: 'عرض الخطط',
         signIn: 'تسجيل الدخول',
@@ -4435,7 +4441,9 @@ const resources = {
       // Subscription Gate
       subscriptionGate: {
         title: 'Recurso Pro',
+        titleElite: 'Recurso Elite',
         message: '{{feature}} está disponível no plano {{tier}} e acima.',
+        messageElite: '{{feature}} está disponível no plano {{tier}}.',
         perMonth: '/mês',
         viewPlans: 'Ver Planos',
         signIn: 'Entrar',

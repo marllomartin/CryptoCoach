@@ -58,11 +58,13 @@ export const SubscriptionGate = ({
         </div>
 
         <h2 className="font-heading text-2xl font-bold mb-3">
-          {t('subscriptionGate.title')}
+          {requiredTier === 'elite' ? t('subscriptionGate.titleElite') : t('subscriptionGate.title')}
         </h2>
 
         <p className="text-slate-400 mb-6">
-          {t('subscriptionGate.message', { feature, tier: tierNames[requiredTier] })}
+          {requiredTier === 'elite'
+            ? t('subscriptionGate.messageElite', { feature, tier: tierNames[requiredTier] })
+            : t('subscriptionGate.message', { feature, tier: tierNames[requiredTier] })}
         </p>
 
         <div className="bg-card border border-border rounded-xl p-6 mb-6">
