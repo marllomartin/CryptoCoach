@@ -1378,13 +1378,30 @@ function BlogTab({ token, currentUser }) {
     }
   };
 
+  const compressImage = (file) => new Promise((resolve, reject) => {
+    const MAX_PX = 1200;
+    const QUALITY = 0.82;
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, MAX_PX / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Compression failed')), 'image/jpeg', QUALITY);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadingImage(true);
     try {
+      const compressed = await compressImage(file);
       const fd = new FormData();
-      fd.append('file', file);
+      fd.append('file', new File([compressed], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
       const res = await axios.post(`${API}/admin/upload-image`, fd, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
       });
@@ -1392,9 +1409,11 @@ function BlogTab({ token, currentUser }) {
       setFormData(prev => ({ ...prev, thumbnail: absoluteUrl }));
       toast.success(t('admin.blog.imageUploaded'));
     } catch (err) {
-      toast.error(t('admin.blog.imageUploadError'));
+      const serverMsg = err?.response?.data?.detail;
+      toast.error(serverMsg || t('admin.blog.imageUploadError'));
     } finally {
       setUploadingImage(false);
+      e.target.value = '';
     }
   };
 
