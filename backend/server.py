@@ -944,8 +944,7 @@ async def submit_quiz(submission: QuizSubmission, current_user: dict = Depends(g
             {"id": current_user["id"]},
             {
                 "$addToSet": {"completed_quizzes": submission.quiz_id},
-                "$inc": {"xp_points": xp_earned},
-                "$set": {"last_activity": datetime.now(timezone.utc).isoformat()}
+                "$inc": {"xp_points": xp_earned}
             }
         )
     
@@ -994,8 +993,7 @@ async def submit_exam(submission: ExamSubmission, current_user: dict = Depends(g
             {"id": current_user["id"]},
             {
                 "$addToSet": {"completed_exams": submission.exam_id, "certificates": cert_id},
-                "$inc": {"xp_points": 500},
-                "$set": {"last_activity": datetime.now(timezone.utc).isoformat()}
+                "$inc": {"xp_points": 500}
             }
         )
         

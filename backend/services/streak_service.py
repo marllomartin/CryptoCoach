@@ -66,8 +66,8 @@ class StreakService:
             if last_date:
                 days_diff = (today - last_date).days
                 
-                if days_diff == 0:
-                    # Already active today
+                if days_diff == 0 and current_streak > 0:
+                    # Already counted today's lesson for the streak
                     result["streak_days"] = current_streak
                     return result
                 
