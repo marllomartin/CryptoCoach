@@ -258,17 +258,6 @@ export const Layout = ({ children }) => {
               </p>
             </div>
 
-            {/* Quick Links */}
-            <div>
-              <h4 className="font-heading font-semibold mb-4">{t('footer.learn')}</h4>
-              <ul className="space-y-2">
-                <li><Link to="/academy" className="text-slate-400 hover:text-primary text-sm">{t('nav.academy')}</Link></li>
-                <li><Link to="/glossary" className="text-slate-400 hover:text-primary text-sm">{t('nav.glossary')}</Link></li>
-                <li><Link to="/blog" className="text-slate-400 hover:text-primary text-sm">{t('nav.insights')}</Link></li>
-                <li><Link to="/simulator" className="text-slate-400 hover:text-primary text-sm">{t('nav.simulator')}</Link></li>
-              </ul>
-            </div>
-
             {/* Legal */}
             <div>
               <h4 className="font-heading font-semibold mb-4">{t('footer.legal')}</h4>
@@ -282,7 +271,7 @@ export const Layout = ({ children }) => {
           </div>
 
           <div className="border-t border-border mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-slate-500 text-sm">
+            <p className="text-slate-500 text-xs">
               © {new Date().getFullYear()} TheCryptoCoach.io. {t('footer.allRights')}
             </p>
             <p className="text-slate-500 text-xs">
