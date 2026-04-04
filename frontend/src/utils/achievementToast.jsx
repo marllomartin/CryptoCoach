@@ -1,5 +1,6 @@
 import React from 'react';
 import { toast } from 'sonner';
+import i18n from '../i18n';
 import {
   Footprints, Flame, TrendingUp, BookOpen, GraduationCap,
   Trophy, BarChart2, Zap, Star, Award, Gem, Crown
@@ -35,6 +36,8 @@ export function showAchievementToasts(newAchievements) {
     const config = LEVEL_CONFIG[ach.level] || LEVEL_CONFIG[1];
     const IconComponent = ICONS[ach.icon] || Trophy;
 
+    const displayName = i18n.t(`achievements.${ach.id}.name`, { defaultValue: ach.name });
+
     setTimeout(() => {
       toast.custom(() => (
         <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xl ${config.bg} ${config.border} min-w-[260px]`}>
@@ -42,8 +45,8 @@ export function showAchievementToasts(newAchievements) {
             <IconComponent className={`w-5 h-5 ${config.icon}`} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Achievement Unlocked</p>
-            <p className="text-sm font-bold text-white leading-tight truncate">{ach.name}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">{i18n.t('achievements.unlocked', { defaultValue: 'Achievement Unlocked' })}</p>
+            <p className="text-sm font-bold text-white leading-tight truncate">{displayName}</p>
             <p className={`text-[11px] font-medium ${config.labelClass}`}>{config.label} · +{ach.xp} XP</p>
           </div>
         </div>

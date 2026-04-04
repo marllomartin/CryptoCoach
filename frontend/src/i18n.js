@@ -193,8 +193,24 @@ const resources = {
         currentStreak: 'Current Streak',
         days: 'days',
         longestStreak: 'Longest Streak',
-        achievementsCount: 'Achievements ({{count}}/12)',
+        achievementsCount: 'Achievements ({{count}}/13)',
         noAchievements: 'No achievements yet. Complete lessons, quizzes, and trades to earn them!'
+      },
+      achievements: {
+        unlocked: 'Achievement Unlocked',
+        first_steps: { name: 'First Steps', description: 'Complete your first lesson' },
+        streak_beginner: { name: 'Streak Beginner', description: 'Start a streak for the first time' },
+        first_trade: { name: 'First Trade', description: 'Execute your first trade in the simulator' },
+        knowledge_seeker: { name: 'Knowledge Seeker', description: 'Complete 10 lessons' },
+        crypto_scholar: { name: 'Crypto Scholar', description: 'Complete all trial courses' },
+        quiz_master: { name: 'Quiz Master', description: 'Get 100% on 5 quizzes' },
+        trader_apprentice: { name: 'Trade Apprentice', description: 'Execute 50 trades' },
+        streak_warrior: { name: 'Streak Warrior', description: 'Maintain a 7-day streak' },
+        crypto_connoisseur: { name: 'Crypto Connoisseur', description: 'Complete 25 lessons' },
+        profit_hunter: { name: 'Profit Hunter', description: 'Reach $1,000 total profit in simulation' },
+        streak_legend: { name: 'Streak Legend', description: 'Maintain a 30-day streak' },
+        certified_pro: { name: 'Certified Pro', description: 'Earn your first certification' },
+        crypto_master: { name: 'Crypto Master', description: 'Reach level 20' },
       },
       // Contact Page
       contact: {
@@ -1480,8 +1496,24 @@ const resources = {
         currentStreak: 'Série actuelle',
         days: 'jours',
         longestStreak: 'Plus longue série',
-        achievementsCount: 'Succès ({{count}}/12)',
+        achievementsCount: 'Succès ({{count}}/13)',
         noAchievements: 'Aucun succès pour l\'instant. Complétez des leçons, quiz et trades pour en gagner !'
+      },
+      achievements: {
+        unlocked: 'Succès Débloqué',
+        first_steps: { name: 'Premiers Pas', description: 'Complétez votre première leçon' },
+        streak_beginner: { name: 'Débutant en Série', description: 'Démarrez une série pour la première fois' },
+        first_trade: { name: 'Premier Trade', description: 'Effectuez votre premier trade dans le simulateur' },
+        knowledge_seeker: { name: 'Chercheur de Savoir', description: 'Complétez 10 leçons' },
+        crypto_scholar: { name: 'Érudit Crypto', description: 'Complétez tous les cours d\'essai' },
+        quiz_master: { name: 'Maître des Quiz', description: 'Obtenez 100% dans 5 quiz' },
+        trader_apprentice: { name: 'Apprenti Trader', description: 'Effectuez 50 trades' },
+        streak_warrior: { name: 'Guerrier des Séries', description: 'Maintenez une série de 7 jours' },
+        crypto_connoisseur: { name: 'Connaisseur Crypto', description: 'Complétez 25 leçons' },
+        profit_hunter: { name: 'Chasseur de Profits', description: 'Atteignez 1 000 $ de profit total en simulation' },
+        streak_legend: { name: 'Légende des Séries', description: 'Maintenez une série de 30 jours' },
+        certified_pro: { name: 'Pro Certifié', description: 'Obtenez votre première certification' },
+        crypto_master: { name: 'Maître Crypto', description: 'Atteignez le niveau 20' },
       },
       // Contact Page
       contact: {
@@ -3434,8 +3466,24 @@ const resources = {
         currentStreak: 'السلسلة الحالية',
         days: 'أيام',
         longestStreak: 'أطول سلسلة',
-        achievementsCount: 'الإنجازات ({{count}}/12)',
+        achievementsCount: 'الإنجازات ({{count}}/13)',
         noAchievements: 'لا توجد إنجازات بعد. أكمل الدروس والاختبارات والصفقات لكسبها!'
+      },
+      achievements: {
+        unlocked: 'إنجاز مفتوح',
+        first_steps: { name: 'الخطوات الأولى', description: 'أكمل درسك الأول' },
+        streak_beginner: { name: 'مبتدئ السلسلة', description: 'ابدأ سلسلة لأول مرة' },
+        first_trade: { name: 'أول صفقة', description: 'نفّذ صفقتك الأولى في المحاكي' },
+        knowledge_seeker: { name: 'باحث المعرفة', description: 'أكمل 10 دروس' },
+        crypto_scholar: { name: 'عالم الكريبتو', description: 'أكمل جميع الدورات التجريبية' },
+        quiz_master: { name: 'سيد الاختبارات', description: 'احصل على 100% في 5 اختبارات' },
+        trader_apprentice: { name: 'متدرب التداول', description: 'نفّذ 50 صفقة' },
+        streak_warrior: { name: 'محارب السلسلة', description: 'حافظ على سلسلة لمدة 7 أيام' },
+        crypto_connoisseur: { name: 'خبير الكريبتو', description: 'أكمل 25 درساً' },
+        profit_hunter: { name: 'صائد الأرباح', description: 'حقق 1,000 دولار ربحاً إجمالياً في المحاكاة' },
+        streak_legend: { name: 'أسطورة السلسلة', description: 'حافظ على سلسلة لمدة 30 يوماً' },
+        certified_pro: { name: 'محترف معتمد', description: 'احصل على أول شهادة' },
+        crypto_master: { name: 'سيد الكريبتو', description: 'بلغ المستوى 20' },
       },
       // Contact Page
       contact: {
@@ -4054,8 +4102,24 @@ const resources = {
         currentStreak: 'Sequência Atual',
         days: 'dias',
         longestStreak: 'Maior Sequência',
-        achievementsCount: 'Conquistas ({{count}}/12)',
+        achievementsCount: 'Conquistas ({{count}}/13)',
         noAchievements: 'Nenhuma conquista ainda. Complete lições, questionários e trades para ganhar!'
+      },
+      achievements: {
+        unlocked: 'Conquista Desbloqueada',
+        first_steps: { name: 'Primeiros Passos', description: 'Conclua sua primeira lição' },
+        streak_beginner: { name: 'Iniciante em Sequência', description: 'Inicie uma sequência pela primeira vez' },
+        first_trade: { name: 'Primeiro Trade', description: 'Execute seu primeiro trade no simulador' },
+        knowledge_seeker: { name: 'Buscador do Conhecimento', description: 'Conclua 10 lições' },
+        crypto_scholar: { name: 'Estudioso de Cripto', description: 'Conclua todos os cursos de avaliação' },
+        quiz_master: { name: 'Mestre dos Quizzes', description: 'Obtenha 100% em 5 quizzes' },
+        trader_apprentice: { name: 'Aprendiz de Trader', description: 'Execute 50 trades' },
+        streak_warrior: { name: 'Guerreiro de Sequência', description: 'Mantenha uma sequência de 7 dias' },
+        crypto_connoisseur: { name: 'Conhecedor de Cripto', description: 'Conclua 25 lições' },
+        profit_hunter: { name: 'Caçador de Lucros', description: 'Alcance $1.000 de lucro total na simulação' },
+        streak_legend: { name: 'Lenda de Sequência', description: 'Mantenha uma sequência de 30 dias' },
+        certified_pro: { name: 'Pro Certificado', description: 'Obtenha sua primeira certificação' },
+        crypto_master: { name: 'Mestre Cripto', description: 'Alcance o nível 20' },
       },
       // Contact Page
       contact: {

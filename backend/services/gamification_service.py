@@ -144,15 +144,6 @@ ACHIEVEMENTS = {
         "xp_reward": 400,
         "condition": {"certificates": 1}
     },
-    "diamond_hands": {
-        "id": "diamond_hands",
-        "name": "Diamond Hands",
-        "description": "Hold a position for 30 days",
-        "icon": "gem",
-        "level": 3,
-        "xp_reward": 150,
-        "condition": {"hold_days": 30}
-    },
     # ── Level 4 (Prismatic) ──────────────────────────────────────────────────
     "crypto_master": {
         "id": "crypto_master",
