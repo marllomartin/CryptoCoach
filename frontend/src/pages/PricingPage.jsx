@@ -49,7 +49,8 @@ const PricingPage = () => {
   const [loading, setLoading] = useState(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
   const [isAnnual, setIsAnnual] = useState(true);
-  const [, setAppliedCoupon] = useState(null);
+  const [activePromo, setActivePromo] = useState(null);
+  const [appliedCoupons, setAppliedCoupons] = useState({});  // tierId -> { code, discount_pct }
 
   const tiers = TIER_META.map(meta => {
     const featuresCount = { free: 6, pro: 6, elite: 4 };
@@ -64,6 +65,13 @@ const PricingPage = () => {
       cta: t(`pricing.tiers.${meta.id}.cta`)
     };
   });
+
+  // Fetch active promotion
+  useEffect(() => {
+    axios.get(`${API}/promotions/active`)
+      .then(res => setActivePromo(res.data))
+      .catch(() => {});
+  }, []);
 
   // Check for payment success
   useEffect(() => {
@@ -131,11 +139,13 @@ const PricingPage = () => {
     setLoading(tierId);
 
     try {
+      const coupon = appliedCoupons[tierId];
       const response = await axios.post(
         `${API}/subscription/create-checkout`,
         {
           tier: tierId,
-          origin_url: window.location.origin
+          origin_url: window.location.origin,
+          coupon_code: coupon?.code || null
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -162,10 +172,16 @@ const PricingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            {/* Urgency Badge */}
-            <div className="flex justify-center mb-6">
-              <UrgencyBadge language={i18n.language} type="countdown" />
-            </div>
+            {/* Urgency Badge — only shown when a real promotion is active */}
+            {activePromo && (
+              <div className="flex justify-center mb-6">
+                <UrgencyBadge
+                  language={i18n.language}
+                  type="countdown"
+                  endDate={activePromo.ends_at}
+                />
+              </div>
+            )}
 
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
               {t('pricing.title')}
@@ -271,22 +287,40 @@ const PricingPage = () => {
                   <div className="mb-6">
                     {(() => {
                       const price = isAnnual ? tier.annualPrice : tier.monthlyPrice;
-                      const savings = isAnnual && tier.monthlyPrice > 0 
-                        ? Math.round((tier.monthlyPrice * 12) - tier.annualPrice) 
+                      const coupon = appliedCoupons[tier.id];
+                      const promoDiscount = !coupon && activePromo && price > 0 ? activePromo.discount_pct : 0;
+                      const effectiveDiscount = coupon ? coupon.discount_pct : promoDiscount;
+                      const discountedPrice = effectiveDiscount > 0
+                        ? Math.round(price * (1 - effectiveDiscount / 100) * 100) / 100
+                        : price;
+                      const savings = isAnnual && tier.monthlyPrice > 0
+                        ? Math.round((tier.monthlyPrice * 12) - tier.annualPrice)
                         : 0;
                       return (
                         <>
-                          <div className="flex items-baseline">
+                          <div className="flex items-baseline gap-2">
+                            {promoDiscount > 0 && (
+                              <span className="text-2xl font-semibold text-muted-foreground line-through">
+                                €{price.toFixed(2)}
+                              </span>
+                            )}
                             <span className="text-4xl font-bold text-foreground">
-                              €{price.toFixed(2)}
+                              €{discountedPrice.toFixed(2)}
                             </span>
                             {price > 0 && (
-                              <span className="text-muted-foreground ml-2">
+                              <span className="text-muted-foreground">
                                 {isAnnual ? t('pricing.perYear') : t('pricing.perMonth')}
                               </span>
                             )}
                           </div>
-                          {isAnnual && savings > 0 && (
+                          {effectiveDiscount > 0 && (
+                            <div className="mt-1">
+                              <span className="text-sm font-medium text-orange-400">
+                                -{effectiveDiscount}%{coupon ? ` (${coupon.code})` : ` ${activePromo.name}`}
+                              </span>
+                            </div>
+                          )}
+                          {isAnnual && savings > 0 && !effectiveDiscount && (
                             <div className="mt-1">
                               <span className="text-sm text-green-400">
                                 {t('pricing.savePerYear', { savings })}
@@ -295,7 +329,7 @@ const PricingPage = () => {
                           )}
                           {isAnnual && price > 0 && (
                             <p className="text-xs text-muted-foreground mt-1">
-                              {t('pricing.perMonthBilled', { price: (price / 12).toFixed(2) })}
+                              {t('pricing.perMonthBilled', { price: (discountedPrice / 12).toFixed(2) })}
                             </p>
                           )}
                         </>
@@ -314,11 +348,12 @@ const PricingPage = () => {
                     ))}
                   </ul>
 
-                  {/* Coupon Input for paid tiers */}
                   {tier.monthlyPrice > 0 && (
                     <div className="mb-4">
                       <CouponInput
-                        onApply={setAppliedCoupon}
+                        onApply={(coupon) =>
+                          setAppliedCoupons(prev => ({ ...prev, [tier.id]: coupon || undefined }))
+                        }
                         language={i18n.language}
                         originalPrice={isAnnual ? tier.annualPrice : tier.monthlyPrice}
                       />

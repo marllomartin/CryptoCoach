@@ -30,6 +30,14 @@ export function UrgencyBadge({ endDate, language = 'en', type = 'countdown' }) {
       hours: 'س',
       minutes: 'د',
       seconds: 'ث'
+    },
+    pt: {
+      ending: 'Oferta termina em',
+      limited: 'Oferta por tempo limitado',
+      lastChance: 'Última chance!',
+      hours: 'h',
+      minutes: 'm',
+      seconds: 's'
     }
   };
   

@@ -30,7 +30,11 @@ import {
   TrendingUp,
   Mail,
   Globe,
-  HelpCircle
+  HelpCircle,
+  Tag,
+  Calendar,
+  Percent,
+  XCircle
 } from 'lucide-react';
 import { AnalyticsDashboard } from '../components/AnalyticsDashboard';
 import NewsletterAdminTab from '../components/NewsletterAdminTab';
@@ -141,6 +145,12 @@ export default function AdminPage() {
                 <Volume2 className="w-4 h-4" />
                 {t('admin.tabs.media')}
               </TabsTrigger>
+              {isAdmin && (
+                <TabsTrigger value="promotions" className="flex items-center gap-2">
+                  <Tag className="w-4 h-4" />
+                  {t('admin.tabs.promotions')}
+                </TabsTrigger>
+              )}
             </TabsList>
             
             <TabsContent value="dashboard">
@@ -169,6 +179,10 @@ export default function AdminPage() {
             
             <TabsContent value="media">
               <MediaTab token={token} />
+            </TabsContent>
+
+            <TabsContent value="promotions">
+              <PromotionsTab token={token} />
             </TabsContent>
           </Tabs>
         </div>
@@ -2068,6 +2082,353 @@ function MediaTab({ token }) {
               </div>
             ))}
           </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ==================== PROMOTIONS TAB ====================
+
+function PromotionsTab({ token }) {
+  const { t } = useTranslation();
+  const [promotions, setPromotions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ name: '', discount_pct: 20, ends_at: '' });
+  const [coupons, setCoupons] = useState([]);
+  const [couponsLoading, setCouponsLoading] = useState(true);
+  const [couponSaving, setCouponSaving] = useState(false);
+  const [couponForm, setCouponForm] = useState({ code: '', discount_pct: 15, expires_at: '' });
+
+  const fetchPromotions = async () => {
+    try {
+      const res = await axios.get(`${API}/admin/promotions`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPromotions(res.data);
+    } catch {
+      toast.error(t('admin.promotions.loadError'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCoupons = async () => {
+    try {
+      const res = await axios.get(`${API}/admin/coupons`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCoupons(res.data);
+    } catch {
+      toast.error(t('admin.coupons.loadError'));
+    } finally {
+      setCouponsLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchPromotions(); fetchCoupons(); }, []);
+
+  const handleCreateCoupon = async (e) => {
+    e.preventDefault();
+    if (!couponForm.code || !couponForm.expires_at) return toast.error(t('admin.coupons.fillAll'));
+    setCouponSaving(true);
+    try {
+      const expiresAtIso = new Date(couponForm.expires_at).toISOString();
+      await axios.post(
+        `${API}/admin/coupons`,
+        { code: couponForm.code, discount_pct: Number(couponForm.discount_pct), expires_at: expiresAtIso },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(t('admin.coupons.created'));
+      setCouponForm({ code: '', discount_pct: 15, expires_at: '' });
+      fetchCoupons();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || t('admin.coupons.createError'));
+    } finally {
+      setCouponSaving(false);
+    }
+  };
+
+  const handleDeleteCoupon = async (id) => {
+    try {
+      await axios.delete(`${API}/admin/coupons/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(t('admin.coupons.deleted'));
+      fetchCoupons();
+    } catch {
+      toast.error(t('admin.coupons.deleteError'));
+    }
+  };
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    if (!form.name || !form.ends_at) return toast.error(t('admin.promotions.fillAll'));
+    setSaving(true);
+    try {
+      const endsAtIso = new Date(form.ends_at).toISOString();
+      await axios.post(
+        `${API}/admin/promotions`,
+        { name: form.name, discount_pct: Number(form.discount_pct), ends_at: endsAtIso },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(t('admin.promotions.created'));
+      setForm({ name: '', discount_pct: 20, ends_at: '' });
+      fetchPromotions();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || t('admin.promotions.createError'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeactivate = async (id) => {
+    try {
+      await axios.delete(`${API}/admin/promotions/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(t('admin.promotions.deactivated'));
+      fetchPromotions();
+    } catch {
+      toast.error(t('admin.promotions.deactivateError'));
+    }
+  };
+
+  const activePromo = promotions.find(p => p.is_active && new Date(p.ends_at) > new Date());
+
+  return (
+    <div className="space-y-6">
+      {/* Active promotion banner */}
+      {activePromo && (
+        <div className="flex items-center gap-3 p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
+          <Tag className="w-5 h-5 text-orange-400 shrink-0" />
+          <div className="flex-1">
+            <p className="font-semibold text-orange-300">{activePromo.name}</p>
+            <p className="text-sm text-muted-foreground">
+              -{activePromo.discount_pct}% &mdash; {t('admin.promotions.endsAt')}{' '}
+              {new Date(activePromo.ends_at).toLocaleString()}
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-red-500/40 text-red-400 hover:bg-red-500/10"
+            onClick={() => handleDeactivate(activePromo.id)}
+          >
+            <XCircle className="w-4 h-4 mr-1" />
+            {t('admin.promotions.end')}
+          </Button>
+        </div>
+      )}
+
+      {/* Create form */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Percent className="w-5 h-5 text-primary" />
+            {t('admin.promotions.create')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleCreate} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="sm:col-span-1">
+              <label className="text-sm font-medium text-muted-foreground mb-1 block">
+                {t('admin.promotions.name')}
+              </label>
+              <Input
+                placeholder={t('admin.promotions.namePlaceholder')}
+                value={form.name}
+                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-1 block">
+                {t('admin.promotions.discount')}
+              </label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  min={1}
+                  max={99}
+                  value={form.discount_pct}
+                  onChange={e => setForm(f => ({ ...f, discount_pct: e.target.value }))}
+                  required
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">%</span>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-1 block">
+                {t('admin.promotions.endDate')}
+              </label>
+              <Input
+                type="datetime-local"
+                value={form.ends_at}
+                onChange={e => setForm(f => ({ ...f, ends_at: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="sm:col-span-3">
+              <Button type="submit" disabled={saving} className="w-full sm:w-auto">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Tag className="w-4 h-4 mr-2" />}
+                {t('admin.promotions.launch')}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* History */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            {t('admin.promotions.history')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          ) : promotions.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">{t('admin.promotions.none')}</p>
+          ) : (
+            <div className="space-y-2">
+              {promotions.map(promo => {
+                const expired = new Date(promo.ends_at) <= new Date();
+                const statusLabel = !promo.is_active
+                  ? t('admin.promotions.statusEnded')
+                  : expired
+                    ? t('admin.promotions.statusExpired')
+                    : t('admin.promotions.statusActive');
+                const statusColor = !promo.is_active || expired
+                  ? 'text-muted-foreground'
+                  : 'text-green-400';
+                return (
+                  <div key={promo.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                    <div>
+                      <p className="font-medium">{promo.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        -{promo.discount_pct}% &mdash; {t('admin.promotions.endsAt')}{' '}
+                        {new Date(promo.ends_at).toLocaleString()}
+                      </p>
+                    </div>
+                    <span className={`text-sm font-medium ${statusColor}`}>{statusLabel}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ── Coupon Codes ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Tag className="w-5 h-5 text-primary" />
+            {t('admin.coupons.create')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleCreateCoupon} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-1 block">
+                {t('admin.coupons.code')}
+              </label>
+              <Input
+                placeholder={t('admin.coupons.codePlaceholder')}
+                value={couponForm.code}
+                onChange={e => setCouponForm(f => ({ ...f, code: e.target.value.toUpperCase() }))}
+                className="uppercase font-mono"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-1 block">
+                {t('admin.coupons.discount')}
+              </label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  min={1}
+                  max={99}
+                  value={couponForm.discount_pct}
+                  onChange={e => setCouponForm(f => ({ ...f, discount_pct: e.target.value }))}
+                  required
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">%</span>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-1 block">
+                {t('admin.coupons.expiry')}
+              </label>
+              <Input
+                type="datetime-local"
+                value={couponForm.expires_at}
+                onChange={e => setCouponForm(f => ({ ...f, expires_at: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="sm:col-span-3">
+              <Button type="submit" disabled={couponSaving} className="w-full sm:w-auto">
+                {couponSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                {t('admin.coupons.add')}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            {t('admin.coupons.list')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {couponsLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          ) : coupons.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">{t('admin.coupons.none')}</p>
+          ) : (
+            <div className="space-y-2">
+              {coupons.map(coupon => {
+                const expired = new Date(coupon.expires_at) <= new Date();
+                return (
+                  <div key={coupon.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                    <div>
+                      <span className="font-mono font-bold mr-3">{coupon.code}</span>
+                      <span className="text-sm text-muted-foreground">
+                        -{coupon.discount_pct}% &mdash; {t('admin.coupons.expires')}{' '}
+                        {new Date(coupon.expires_at).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-sm font-medium ${expired ? 'text-muted-foreground' : 'text-green-400'}`}>
+                        {expired ? t('admin.coupons.statusExpired') : t('admin.coupons.statusActive')}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-red-500/40 text-red-400 hover:bg-red-500/10"
+                        onClick={() => handleDeleteCoupon(coupon.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

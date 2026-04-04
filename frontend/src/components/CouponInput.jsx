@@ -3,15 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Tag, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-
-// Valid coupon codes with their discounts
-const VALID_COUPONS = {
-  'CRYPTO15': { discount: 15, type: 'percent', description: 'First month discount' },
-  'WELCOME20': { discount: 20, type: 'percent', description: 'Welcome bonus' },
-  'LAUNCH10': { discount: 10, type: 'percent', description: 'Launch special' },
-  'VIP25': { discount: 25, type: 'percent', description: 'VIP discount' },
-  'ANNUAL50': { discount: 50, type: 'fixed', description: '€50 off annual plans' }
-};
+import axios from 'axios';
+import { API } from '../App';
 
 export function CouponInput({ onApply, language = 'en', originalPrice = 0 }) {
   const [code, setCode] = useState('');
@@ -19,15 +12,13 @@ export function CouponInput({ onApply, language = 'en', originalPrice = 0 }) {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [error, setError] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   const labels = {
     en: {
       title: 'Have a coupon code?',
       placeholder: 'Enter code',
       apply: 'Apply',
-      applied: 'Applied!',
-      invalid: 'Invalid coupon code',
-      expired: 'This coupon has expired',
+      invalid: 'Invalid or expired coupon code',
       discount: 'off',
       remove: 'Remove',
       saved: 'You save'
@@ -36,9 +27,7 @@ export function CouponInput({ onApply, language = 'en', originalPrice = 0 }) {
       title: 'Avez-vous un code promo ?',
       placeholder: 'Entrez le code',
       apply: 'Appliquer',
-      applied: 'Appliqué !',
-      invalid: 'Code promo invalide',
-      expired: 'Ce code promo a expiré',
+      invalid: 'Code promo invalide ou expiré',
       discount: 'de réduction',
       remove: 'Supprimer',
       saved: 'Vous économisez'
@@ -47,71 +36,55 @@ export function CouponInput({ onApply, language = 'en', originalPrice = 0 }) {
       title: 'هل لديك رمز قسيمة؟',
       placeholder: 'أدخل الرمز',
       apply: 'تطبيق',
-      applied: 'تم التطبيق!',
-      invalid: 'رمز قسيمة غير صالح',
-      expired: 'انتهت صلاحية هذه القسيمة',
+      invalid: 'رمز قسيمة غير صالح أو منتهي الصلاحية',
       discount: 'خصم',
       remove: 'إزالة',
       saved: 'توفر'
+    },
+    pt: {
+      title: 'Tem um código de cupom?',
+      placeholder: 'Digite o código',
+      apply: 'Aplicar',
+      invalid: 'Código de cupom inválido ou expirado',
+      discount: 'de desconto',
+      remove: 'Remover',
+      saved: 'Você economiza'
     }
   };
-  
+
   const t = labels[language] || labels.en;
-  
-  const calculateDiscount = (coupon) => {
-    if (!coupon) return 0;
-    if (coupon.type === 'percent') {
-      return (originalPrice * coupon.discount) / 100;
-    }
-    return Math.min(coupon.discount, originalPrice);
-  };
-  
+
   const handleApply = async () => {
     if (!code.trim()) return;
-    
     setIsValidating(true);
     setError(null);
-    
-    // Simulate API validation delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const coupon = VALID_COUPONS[code.toUpperCase()];
-    
-    if (coupon) {
-      setAppliedCoupon({ ...coupon, code: code.toUpperCase() });
-      setError(null);
-      onApply?.({
-        code: code.toUpperCase(),
-        discount: calculateDiscount(coupon),
-        discountPercent: coupon.type === 'percent' ? coupon.discount : null
-      });
-    } else {
+    try {
+      const res = await axios.post(`${API}/coupons/validate`, { code: code.trim() });
+      const coupon = res.data;
+      setAppliedCoupon(coupon);
+      onApply?.({ code: coupon.code, discount_pct: coupon.discount_pct });
+    } catch {
       setError(t.invalid);
       setAppliedCoupon(null);
       onApply?.(null);
+    } finally {
+      setIsValidating(false);
     }
-    
-    setIsValidating(false);
   };
-  
+
   const handleRemove = () => {
     setAppliedCoupon(null);
     setCode('');
     setError(null);
     onApply?.(null);
   };
-  
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleApply();
-    }
-  };
-  
-  const discountAmount = calculateDiscount(appliedCoupon);
-  
+
+  const discountAmount = appliedCoupon
+    ? Math.round(originalPrice * appliedCoupon.discount_pct) / 100
+    : 0;
+
   return (
     <div className="space-y-3">
-      {/* Toggle button */}
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -120,7 +93,7 @@ export function CouponInput({ onApply, language = 'en', originalPrice = 0 }) {
         <Tag className="w-4 h-4" />
         {t.title}
       </button>
-      
+
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -134,7 +107,7 @@ export function CouponInput({ onApply, language = 'en', originalPrice = 0 }) {
                 <Input
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={(e) => e.key === 'Enter' && handleApply()}
                   placeholder={t.placeholder}
                   className="flex-1 uppercase font-mono"
                   disabled={isValidating}
@@ -147,11 +120,7 @@ export function CouponInput({ onApply, language = 'en', originalPrice = 0 }) {
                   variant="outline"
                   data-testid="coupon-apply-btn"
                 >
-                  {isValidating ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    t.apply
-                  )}
+                  {isValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : t.apply}
                 </Button>
               </div>
             ) : (
@@ -164,14 +133,9 @@ export function CouponInput({ onApply, language = 'en', originalPrice = 0 }) {
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-5 h-5 text-green-500" />
                     <div>
-                      <span className="font-mono font-bold text-green-400">
-                        {appliedCoupon.code}
-                      </span>
+                      <span className="font-mono font-bold text-green-400">{appliedCoupon.code}</span>
                       <span className="ml-2 text-sm text-slate-400">
-                        {appliedCoupon.type === 'percent' 
-                          ? `${appliedCoupon.discount}% ${t.discount}`
-                          : `€${appliedCoupon.discount} ${t.discount}`
-                        }
+                        {appliedCoupon.discount_pct}% {t.discount}
                       </span>
                     </div>
                   </div>
@@ -190,7 +154,7 @@ export function CouponInput({ onApply, language = 'en', originalPrice = 0 }) {
                 )}
               </motion.div>
             )}
-            
+
             {error && (
               <motion.div
                 initial={{ opacity: 0 }}

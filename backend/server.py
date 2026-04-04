@@ -432,6 +432,20 @@ class ContactForm(BaseModel):
 class SubscriptionCheckoutRequest(BaseModel):
     tier: str
     origin_url: str
+    coupon_code: Optional[str] = None
+
+class CreatePromotionRequest(BaseModel):
+    name: str
+    discount_pct: int  # 1–99
+    ends_at: str       # ISO datetime string (UTC)
+
+class CreateCouponRequest(BaseModel):
+    code: str          # Admin-defined code, e.g. "SUMMER25"
+    discount_pct: int  # 1–99
+    expires_at: str    # ISO datetime string (UTC)
+
+class ValidateCouponRequest(BaseModel):
+    code: str
 
 class SubscriptionResponse(BaseModel):
     tier: str
@@ -3919,36 +3933,75 @@ async def create_subscription_checkout(
     
     tier_info = SUBSCRIPTION_TIERS[tier]
     amount = float(tier_info["price"])
-    
+
+    # Resolve discount: user-provided coupon code takes priority over active promotion
+    now_iso = datetime.now(timezone.utc).isoformat()
+    applied_discount = None  # {"stripe_coupon_id": ..., "discount_pct": ..., "source": "coupon"|"promo", "id": ...}
+
+    if request.coupon_code:
+        code = request.coupon_code.upper().strip()
+        coupon_doc = await db.coupons.find_one(
+            {"code": code, "is_active": True, "expires_at": {"$gt": now_iso}},
+            {"_id": 0}
+        )
+        if coupon_doc:
+            applied_discount = {
+                "stripe_coupon_id": coupon_doc["stripe_coupon_id"],
+                "discount_pct": coupon_doc["discount_pct"],
+                "source": "coupon",
+                "id": coupon_doc["id"],
+            }
+
+    if not applied_discount:
+        active_promo = await db.promotions.find_one(
+            {"is_active": True, "ends_at": {"$gt": now_iso}},
+            {"_id": 0}
+        )
+        if active_promo:
+            applied_discount = {
+                "stripe_coupon_id": active_promo["stripe_coupon_id"],
+                "discount_pct": active_promo["discount_pct"],
+                "source": "promo",
+                "id": active_promo["id"],
+            }
+
     try:
         host_url = request.origin_url.rstrip('/')
 
         success_url = f"{host_url}/subscription/success?session_id={{CHECKOUT_SESSION_ID}}"
         cancel_url = f"{host_url}/pricing"
 
-        session = await asyncio.to_thread(
-            lambda: stripe_lib.checkout.Session.create(
-                api_key=STRIPE_API_KEY,
-                payment_method_types=["card"],
-                line_items=[{
-                    "price_data": {
-                        "currency": "usd",
-                        "product_data": {"name": tier_info["name"]},
-                        "unit_amount": int(amount * 100),
-                    },
-                    "quantity": 1,
-                }],
-                mode="payment",
-                success_url=success_url,
-                cancel_url=cancel_url,
-                metadata={
-                    "user_id": current_user["id"],
-                    "user_email": current_user["email"],
-                    "tier": tier,
-                    "tier_name": tier_info["name"]
-                }
-            )
+        session_params = dict(
+            api_key=STRIPE_API_KEY,
+            payment_method_types=["card"],
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {"name": tier_info["name"]},
+                    "unit_amount": int(amount * 100),
+                },
+                "quantity": 1,
+            }],
+            mode="payment",
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={
+                "user_id": current_user["id"],
+                "user_email": current_user["email"],
+                "tier": tier,
+                "tier_name": tier_info["name"],
+                "discount_ref": applied_discount["id"] if applied_discount else "",
+            }
         )
+
+        if applied_discount:
+            session_params["discounts"] = [{"coupon": applied_discount["stripe_coupon_id"]}]
+
+        session = await asyncio.to_thread(
+            lambda: stripe_lib.checkout.Session.create(**session_params)
+        )
+
+        discounted_amount = round(amount * (1 - applied_discount["discount_pct"] / 100), 2) if applied_discount else amount
 
         # Create payment transaction record
         await db.payment_transactions.insert_one({
@@ -3957,9 +4010,11 @@ async def create_subscription_checkout(
             "user_id": current_user["id"],
             "user_email": current_user["email"],
             "tier": tier,
-            "amount": amount,
+            "amount": discounted_amount,
             "currency": "usd",
             "payment_status": "pending",
+            "discount_source": applied_discount["source"] if applied_discount else None,
+            "discount_ref_id": applied_discount["id"] if applied_discount else None,
             "created_at": datetime.now(timezone.utc).isoformat()
         })
 
@@ -4836,6 +4891,162 @@ async def update_blog_post_admin(
 async def delete_blog_post_admin(post_id: str, admin: dict = Depends(require_moderator_or_above)):
     """Delete a blog post"""
     await db.blog.delete_one({"id": post_id})
+    return {"status": "deleted"}
+
+# ==================== PROMOTIONS ====================
+
+@api_router.get("/promotions/active")
+async def get_active_promotion():
+    """Return the currently active promotion, or null if none."""
+    now = datetime.now(timezone.utc).isoformat()
+    promo = await db.promotions.find_one(
+        {"is_active": True, "ends_at": {"$gt": now}},
+        {"_id": 0}
+    )
+    if not promo:
+        return None
+    return promo
+
+@api_router.get("/admin/promotions")
+async def list_promotions(admin: dict = Depends(require_admin_only)):
+    """List all promotions (most recent first)."""
+    promos = await db.promotions.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return promos
+
+@api_router.post("/admin/promotions")
+async def create_promotion(request: CreatePromotionRequest, admin: dict = Depends(require_admin_only)):
+    """Create a promotion and a matching Stripe coupon."""
+    if not 1 <= request.discount_pct <= 99:
+        raise HTTPException(status_code=400, detail="Discount must be between 1 and 99%")
+
+    try:
+        ends_at_dt = datetime.fromisoformat(request.ends_at.replace("Z", "+00:00"))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid ends_at format. Use ISO 8601.")
+
+    if ends_at_dt <= datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="End date must be in the future")
+
+    # Deactivate any currently active promotions
+    await db.promotions.update_many({"is_active": True}, {"$set": {"is_active": False}})
+
+    try:
+        coupon = await asyncio.to_thread(
+            lambda: stripe_lib.Coupon.create(
+                api_key=STRIPE_API_KEY,
+                percent_off=request.discount_pct,
+                duration="once",
+                name=request.name,
+            )
+        )
+    except Exception as e:
+        logger.error(f"Failed to create Stripe coupon: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create Stripe coupon")
+
+    promo = {
+        "id": str(uuid.uuid4()),
+        "name": request.name,
+        "discount_pct": request.discount_pct,
+        "ends_at": request.ends_at,
+        "is_active": True,
+        "stripe_coupon_id": coupon.id,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.promotions.insert_one(promo)
+    promo.pop("_id", None)
+    return promo
+
+@api_router.delete("/admin/promotions/{promo_id}")
+async def deactivate_promotion(promo_id: str, admin: dict = Depends(require_admin_only)):
+    """Deactivate a promotion (does not delete the Stripe coupon)."""
+    promo = await db.promotions.find_one({"id": promo_id}, {"_id": 0})
+    if not promo:
+        raise HTTPException(status_code=404, detail="Promotion not found")
+    await db.promotions.update_one({"id": promo_id}, {"$set": {"is_active": False}})
+    return {"status": "deactivated"}
+
+# ==================== COUPONS ====================
+
+@api_router.post("/coupons/validate")
+async def validate_coupon(request: ValidateCouponRequest):
+    """Validate a coupon code. Returns coupon info if valid and not expired."""
+    now_iso = datetime.now(timezone.utc).isoformat()
+    coupon = await db.coupons.find_one(
+        {"code": request.code.upper().strip(), "is_active": True, "expires_at": {"$gt": now_iso}},
+        {"_id": 0}
+    )
+    if not coupon:
+        raise HTTPException(status_code=404, detail="Invalid or expired coupon code")
+    return {"code": coupon["code"], "discount_pct": coupon["discount_pct"]}
+
+@api_router.get("/admin/coupons")
+async def list_coupons(admin: dict = Depends(require_admin_only)):
+    """List all coupons (most recent first)."""
+    coupons = await db.coupons.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
+    return coupons
+
+@api_router.post("/admin/coupons")
+async def create_coupon(request: CreateCouponRequest, admin: dict = Depends(require_admin_only)):
+    """Create a coupon code with a real Stripe coupon backing it."""
+    if not 1 <= request.discount_pct <= 99:
+        raise HTTPException(status_code=400, detail="Discount must be between 1 and 99%")
+
+    code = request.code.upper().strip()
+    if not code:
+        raise HTTPException(status_code=400, detail="Coupon code cannot be empty")
+
+    try:
+        expires_at_dt = datetime.fromisoformat(request.expires_at.replace("Z", "+00:00"))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid expires_at format. Use ISO 8601.")
+
+    if expires_at_dt <= datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="Expiry date must be in the future")
+
+    existing = await db.coupons.find_one({"code": code, "is_active": True})
+    if existing:
+        raise HTTPException(status_code=409, detail="A coupon with this code already exists")
+
+    try:
+        stripe_coupon = await asyncio.to_thread(
+            lambda: stripe_lib.Coupon.create(
+                api_key=STRIPE_API_KEY,
+                percent_off=request.discount_pct,
+                duration="once",
+                name=code,
+            )
+        )
+    except Exception as e:
+        logger.error(f"Failed to create Stripe coupon: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create Stripe coupon")
+
+    coupon = {
+        "id": str(uuid.uuid4()),
+        "code": code,
+        "discount_pct": request.discount_pct,
+        "expires_at": request.expires_at,
+        "is_active": True,
+        "stripe_coupon_id": stripe_coupon.id,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.coupons.insert_one(coupon)
+    coupon.pop("_id", None)
+    return coupon
+
+@api_router.delete("/admin/coupons/{coupon_id}")
+async def delete_coupon(coupon_id: str, admin: dict = Depends(require_admin_only)):
+    """Delete a coupon and its Stripe coupon."""
+    coupon = await db.coupons.find_one({"id": coupon_id}, {"_id": 0})
+    if not coupon:
+        raise HTTPException(status_code=404, detail="Coupon not found")
+    # Delete the Stripe coupon so it can't be used directly
+    try:
+        await asyncio.to_thread(
+            lambda: stripe_lib.Coupon.delete(coupon["stripe_coupon_id"], api_key=STRIPE_API_KEY)
+        )
+    except Exception as e:
+        logger.warning(f"Could not delete Stripe coupon {coupon['stripe_coupon_id']}: {e}")
+    await db.coupons.delete_one({"id": coupon_id})
     return {"status": "deleted"}
 
 # ==================== ROOT ====================
