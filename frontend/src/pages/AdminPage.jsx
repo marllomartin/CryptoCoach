@@ -1388,7 +1388,8 @@ function BlogTab({ token, currentUser }) {
       const res = await axios.post(`${API}/admin/upload-image`, fd, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
       });
-      setFormData(prev => ({ ...prev, thumbnail: res.data.url }));
+      const absoluteUrl = API.replace('/api', '') + res.data.url;
+      setFormData(prev => ({ ...prev, thumbnail: absoluteUrl }));
       toast.success(t('admin.blog.imageUploaded'));
     } catch (err) {
       toast.error(t('admin.blog.imageUploadError'));
@@ -1523,7 +1524,7 @@ function BlogTab({ token, currentUser }) {
           <Card key={post.id} className="bg-card border-border overflow-hidden">
             {post.thumbnail && (
               <img
-                src={post.thumbnail.startsWith('/api') ? `${API.replace('/api', '')}${post.thumbnail}` : post.thumbnail}
+                src={post.thumbnail}
                 alt={post.title}
                 className="w-full h-32 object-cover"
               />
