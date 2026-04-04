@@ -13,6 +13,7 @@ import { GlobalProgressBar } from '../components/GlobalProgressBar';
 import { TrialBadge } from '../components/TrialBadge';
 import { CoachTip } from '../components/CoachTip';
 import { CertificateProgress } from '../components/CertificateProgress';
+import { showAchievementToasts } from '../utils/achievementToast';
 import { 
   BookOpen, 
   Clock, 
@@ -237,6 +238,7 @@ export default function LessonPage() {
           duration: 4000,
         });
       }
+      showAchievementToasts(res.data?.new_achievements);
       await refreshUser();
     } catch (e) {
       toast.error(t('lesson.toastError'));

@@ -725,6 +725,7 @@ async def get_course(course_id: str, lang: str = "en"):
 
 from services.lesson_images import get_lesson_images, LESSON_IMAGES
 from services.streak_service import StreakService
+from services.gamification_service import GamificationService
 from services.content_aggregator import get_localized_lesson, get_all_lessons_for_course, ALL_LESSONS, get_content_stats
 
 @api_router.get("/courses/{course_id}/lessons", response_model=List[Lesson])
@@ -844,36 +845,22 @@ async def complete_lesson(lesson_id: str, current_user: dict = Depends(get_curre
         )
         
         # Check for achievements
-        updated_user = await db.users.find_one({"id": current_user["id"]}, {"_id": 0})
-        lessons_count = len(updated_user.get("completed_lessons", []))
-        
-        # First Steps achievement
-        if lessons_count == 1 and "first_steps" not in updated_user.get("achievements", []):
-            await db.users.update_one(
-                {"id": current_user["id"]},
-                {
-                    "$addToSet": {"achievements": "first_steps"},
-                    "$inc": {"xp_points": 50}
-                }
-            )
-            new_achievements.append({"id": "first_steps", "name": "Premiers Pas", "xp": 50})
-            xp_earned += 50
-        
-        # Knowledge Seeker achievement (10 lessons)
-        if lessons_count == 10 and "knowledge_seeker" not in updated_user.get("achievements", []):
-            await db.users.update_one(
-                {"id": current_user["id"]},
-                {
-                    "$addToSet": {"achievements": "knowledge_seeker"},
-                    "$inc": {"xp_points": 200}
-                }
-            )
-            new_achievements.append({"id": "knowledge_seeker", "name": "Chercheur de Savoir", "xp": 200})
-            xp_earned += 200
-    
+        gamification_service = GamificationService(db)
+        awarded = await gamification_service.check_and_award_achievements(current_user["id"])
+        for a in awarded:
+            new_achievements.append({"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)})
+            xp_earned += a["xp_reward"]
+
     # Update streak (always, even if lesson was already completed — counts as daily activity)
     streak_service = StreakService(db)
     streak_result = await streak_service.check_and_update_streak(current_user["id"])
+
+    # Re-check achievements after streak update (catches streak_beginner, streak_warrior, etc.)
+    gamification_service_streak = GamificationService(db)
+    streak_achievements = await gamification_service_streak.check_and_award_achievements(current_user["id"])
+    for a in streak_achievements:
+        if not any(x["id"] == a["id"] for x in new_achievements):
+            new_achievements.append({"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)})
 
     return {
         "status": "completed",
@@ -939,6 +926,7 @@ async def submit_quiz(submission: QuizSubmission, current_user: dict = Depends(g
     score = round((correct_count / total) * 100, 1)
     xp_earned = int(score / 10) * 10
     
+    new_achievements = []
     if submission.quiz_id not in current_user.get("completed_quizzes", []):
         await db.users.update_one(
             {"id": current_user["id"]},
@@ -947,8 +935,12 @@ async def submit_quiz(submission: QuizSubmission, current_user: dict = Depends(g
                 "$inc": {"xp_points": xp_earned}
             }
         )
-    
-    return {"score": score, "correct": correct_count, "total": total, "results": results, "xp_earned": xp_earned}
+        gamification_service = GamificationService(db)
+        awarded = await gamification_service.check_and_award_achievements(current_user["id"])
+        for a in awarded:
+            new_achievements.append({"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)})
+
+    return {"score": score, "correct": correct_count, "total": total, "results": results, "xp_earned": xp_earned, "new_achievements": new_achievements}
 
 # ==================== EXAM ROUTES ====================
 
@@ -1009,7 +1001,15 @@ async def submit_exam(submission: ExamSubmission, current_user: dict = Depends(g
         
         result["certificate_id"] = cert_id
         result["certificate_name"] = cert_name
-    
+        gamification_service = GamificationService(db)
+        awarded = await gamification_service.check_and_award_achievements(current_user["id"])
+        result["new_achievements"] = [
+            {"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)}
+            for a in awarded
+        ]
+    else:
+        result["new_achievements"] = []
+
     return result
 
 # ==================== CERTIFICATE ROUTES ====================
@@ -1198,9 +1198,12 @@ async def execute_trade(trade: Trade, current_user: dict = Depends(get_current_u
     
     await db.users.update_one(
         {"id": current_user["id"]},
-        {"$set": {"virtual_balance": new_balance, "portfolio": portfolio}}
+        {
+            "$set": {"virtual_balance": new_balance, "portfolio": portfolio},
+            "$inc": {"trades_count": 1}
+        }
     )
-    
+
     await db.trades.insert_one({
         "id": str(uuid.uuid4()),
         "user_id": current_user["id"],
@@ -1210,7 +1213,10 @@ async def execute_trade(trade: Trade, current_user: dict = Depends(get_current_u
         "price": trade.price,
         "timestamp": datetime.now(timezone.utc).isoformat()
     })
-    
+
+    gamification_service = GamificationService(db)
+    await gamification_service.check_and_award_achievements(current_user["id"])
+
     return {"balance": new_balance, "portfolio": portfolio, "trade": trade.model_dump()}
 
 # ==================== CONTACT ROUTE ====================

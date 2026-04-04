@@ -6,6 +6,7 @@ import axios from 'axios';
 import { API, useAuth } from '../App';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { showAchievementToasts } from '../utils/achievementToast';
 import { 
   Clock, 
   AlertTriangle,
@@ -107,6 +108,7 @@ export default function ExamPage() {
       } else {
         toast.error(t('exam.toastFailed', { score: response.data.score }));
       }
+      showAchievementToasts(response.data?.new_achievements);
     } catch (e) {
       toast.error(t('exam.toastError'));
     } finally {

@@ -6,6 +6,7 @@ import axios from 'axios';
 import { API, useAuth } from '../App';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { showAchievementToasts } from '../utils/achievementToast';
 import { 
   CheckCircle, 
   XCircle,
@@ -67,12 +68,13 @@ export default function QuizPage() {
       setResults(response.data);
       setSubmitted(true);
       await refreshUser();
-      
+
       if (response.data.score >= 80) {
         toast.success(t('quiz.toastGreat', { score: response.data.score, xp: response.data.xp_earned }));
       } else {
         toast.info(t('quiz.toastReview', { score: response.data.score }));
       }
+      showAchievementToasts(response.data?.new_achievements);
     } catch (e) {
       toast.error(t('quiz.toastError'));
     } finally {

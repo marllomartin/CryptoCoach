@@ -193,7 +193,8 @@ const resources = {
         currentStreak: 'Current Streak',
         days: 'days',
         longestStreak: 'Longest Streak',
-        achievementsCount: 'Achievements ({{count}}/12)'
+        achievementsCount: 'Achievements ({{count}}/12)',
+        noAchievements: 'No achievements yet. Complete lessons, quizzes, and trades to earn them!'
       },
       // Contact Page
       contact: {
@@ -1479,7 +1480,8 @@ const resources = {
         currentStreak: 'Série actuelle',
         days: 'jours',
         longestStreak: 'Plus longue série',
-        achievementsCount: 'Succès ({{count}}/12)'
+        achievementsCount: 'Succès ({{count}}/12)',
+        noAchievements: 'Aucun succès pour l\'instant. Complétez des leçons, quiz et trades pour en gagner !'
       },
       // Contact Page
       contact: {
@@ -3432,7 +3434,8 @@ const resources = {
         currentStreak: 'السلسلة الحالية',
         days: 'أيام',
         longestStreak: 'أطول سلسلة',
-        achievementsCount: 'الإنجازات ({{count}}/12)'
+        achievementsCount: 'الإنجازات ({{count}}/12)',
+        noAchievements: 'لا توجد إنجازات بعد. أكمل الدروس والاختبارات والصفقات لكسبها!'
       },
       // Contact Page
       contact: {
@@ -4051,7 +4054,8 @@ const resources = {
         currentStreak: 'Sequência Atual',
         days: 'dias',
         longestStreak: 'Maior Sequência',
-        achievementsCount: 'Conquistas ({{count}}/12)'
+        achievementsCount: 'Conquistas ({{count}}/12)',
+        noAchievements: 'Nenhuma conquista ainda. Complete lições, questionários e trades para ganhar!'
       },
       // Contact Page
       contact: {

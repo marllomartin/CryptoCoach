@@ -31,100 +31,135 @@ XP_REWARDS = {
 }
 
 # Achievement definitions
+# level: 1=Bronze(easy), 2=Silver(medium), 3=Gold(hard), 4=Prismatic(extreme)
 ACHIEVEMENTS = {
+    # ── Level 1 (Bronze) ─────────────────────────────────────────────────────
     "first_steps": {
         "id": "first_steps",
-        "name": "Premiers Pas",
-        "description": "Complétez votre première leçon",
+        "name": "First Steps",
+        "description": "Complete your first lesson",
         "icon": "footprints",
+        "level": 1,
         "xp_reward": 50,
         "condition": {"lessons_completed": 1}
     },
+    "streak_beginner": {
+        "id": "streak_beginner",
+        "name": "Streak Beginner",
+        "description": "Start a streak for the first time",
+        "icon": "flame",
+        "level": 1,
+        "xp_reward": 50,
+        "condition": {"streak_days": 1}
+    },
+    "first_trade": {
+        "id": "first_trade",
+        "name": "First Trade",
+        "description": "Execute your first trade in the simulator",
+        "icon": "trending-up",
+        "level": 1,
+        "xp_reward": 100,
+        "condition": {"trades_count": 1}
+    },
+    # ── Level 2 (Silver) ─────────────────────────────────────────────────────
     "knowledge_seeker": {
         "id": "knowledge_seeker",
-        "name": "Chercheur de Savoir",
-        "description": "Complétez 10 leçons",
+        "name": "Knowledge Seeker",
+        "description": "Complete 10 lessons",
         "icon": "book-open",
+        "level": 2,
         "xp_reward": 200,
         "condition": {"lessons_completed": 10}
     },
     "crypto_scholar": {
         "id": "crypto_scholar",
-        "name": "Érudit Crypto",
-        "description": "Complétez toutes les leçons du niveau 1",
+        "name": "Crypto Scholar",
+        "description": "Complete all trial courses",
         "icon": "graduation-cap",
+        "level": 2,
         "xp_reward": 300,
-        "condition": {"level_1_complete": True}
+        "condition": {"trial_courses_complete": True}
     },
     "quiz_master": {
         "id": "quiz_master",
-        "name": "Maître des Quiz",
-        "description": "Obtenez 100% sur 5 quiz",
+        "name": "Quiz Master",
+        "description": "Get 100% on 5 quizzes",
         "icon": "trophy",
+        "level": 2,
         "xp_reward": 250,
         "condition": {"perfect_quizzes": 5}
     },
-    "first_trade": {
-        "id": "first_trade",
-        "name": "Premier Trade",
-        "description": "Effectuez votre premier trade dans l'arène",
-        "icon": "trending-up",
-        "xp_reward": 100,
-        "condition": {"trades_count": 1}
-    },
     "trader_apprentice": {
         "id": "trader_apprentice",
-        "name": "Apprenti Trader",
-        "description": "Réalisez 50 trades",
-        "icon": "bar-chart",
+        "name": "Trade Apprentice",
+        "description": "Execute 50 trades",
+        "icon": "bar-chart-2",
+        "level": 2,
         "xp_reward": 200,
         "condition": {"trades_count": 50}
     },
-    "profit_hunter": {
-        "id": "profit_hunter",
-        "name": "Chasseur de Profits",
-        "description": "Réalisez un profit total de 1000$ en simulation",
-        "icon": "dollar-sign",
-        "xp_reward": 300,
-        "condition": {"total_profit": 1000}
-    },
-    "diamond_hands": {
-        "id": "diamond_hands",
-        "name": "Mains de Diamant",
-        "description": "Gardez une position pendant 30 jours",
-        "icon": "gem",
-        "xp_reward": 150,
-        "condition": {"hold_days": 30}
-    },
     "streak_warrior": {
         "id": "streak_warrior",
-        "name": "Guerrier du Streak",
-        "description": "Maintenez un streak de 7 jours",
-        "icon": "flame",
+        "name": "Streak Warrior",
+        "description": "Maintain a 7-day streak",
+        "icon": "zap",
+        "level": 2,
         "xp_reward": 175,
         "condition": {"streak_days": 7}
     },
+    # ── Level 3 (Gold) ───────────────────────────────────────────────────────
+    "crypto_connoisseur": {
+        "id": "crypto_connoisseur",
+        "name": "Crypto Connoisseur",
+        "description": "Complete 25 lessons",
+        "icon": "star",
+        "level": 3,
+        "xp_reward": 350,
+        "condition": {"lessons_completed": 25}
+    },
+    "profit_hunter": {
+        "id": "profit_hunter",
+        "name": "Profit Hunter",
+        "description": "Reach $1,000 total profit in simulation",
+        "icon": "trending-up",
+        "level": 3,
+        "xp_reward": 300,
+        "condition": {"total_profit": 1000}
+    },
     "streak_legend": {
         "id": "streak_legend",
-        "name": "Légende du Streak",
-        "description": "Maintenez un streak de 30 jours",
+        "name": "Streak Legend",
+        "description": "Maintain a 30-day streak",
         "icon": "fire",
+        "level": 3,
         "xp_reward": 500,
         "condition": {"streak_days": 30}
     },
     "certified_pro": {
         "id": "certified_pro",
-        "name": "Certifié Pro",
-        "description": "Obtenez votre première certification",
+        "name": "Certified Pro",
+        "description": "Earn your first certification",
         "icon": "award",
+        "level": 3,
         "xp_reward": 400,
         "condition": {"certificates": 1}
     },
+    "diamond_hands": {
+        "id": "diamond_hands",
+        "name": "Diamond Hands",
+        "description": "Hold a position for 30 days",
+        "icon": "gem",
+        "level": 3,
+        "xp_reward": 150,
+        "condition": {"hold_days": 30}
+    },
+    # ── Level 4 (Prismatic) ──────────────────────────────────────────────────
     "crypto_master": {
         "id": "crypto_master",
-        "name": "Maître Crypto",
-        "description": "Atteignez le niveau 20",
+        "name": "Crypto Master",
+        "description": "Reach level 20",
         "icon": "crown",
+        "level": 4,
         "xp_reward": 1000,
         "condition": {"level": 20}
     }
@@ -321,15 +356,23 @@ class GamificationService:
         current_achievements = set(user.get("achievements", []))
         new_achievements = []
         
+        # Fetch trial course lesson IDs from DB to check completion
+        trial_courses = await self.db.courses.find({"is_trial": True}, {"_id": 0, "lesson_ids": 1}).to_list(20)
+        trial_lesson_ids = set()
+        for c in trial_courses:
+            trial_lesson_ids.update(c.get("lesson_ids", []))
+        completed = set(user.get("completed_lessons", []))
+        trial_courses_complete = len(trial_lesson_ids) > 0 and trial_lesson_ids.issubset(completed)
+
         stats = {
-            "lessons_completed": len(user.get("completed_lessons", [])),
+            "lessons_completed": len(completed),
             "perfect_quizzes": user.get("perfect_quizzes_count", 0),
             "trades_count": user.get("trades_count", 0),
             "total_profit": user.get("total_profit", 0),
             "streak_days": user.get("streak_days", 0),
             "certificates": len(user.get("certificates", [])),
             "level": self.calculate_level(user.get("xp_points", 0)),
-            "level_1_complete": len([l for l in user.get("completed_lessons", []) if l.startswith("lesson-1")]) >= 8
+            "trial_courses_complete": trial_courses_complete,
         }
         
         for ach_id, achievement in ACHIEVEMENTS.items():
