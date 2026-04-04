@@ -157,6 +157,7 @@ export const useSubscriptionAccess = () => {
     userTier: isExpired ? 'free' : userTier,
     hasAccess,
     canAccessCourse,
+    canAccessPremiumCourses: hasAccess('pro'),
     canAccessSimulator: hasAccess('pro'),
     canAccessExams: hasAccess('pro'),
     canAccessCertificates: hasAccess('pro'),

@@ -6,14 +6,15 @@ import axios from 'axios';
 import { API, useAuth } from '../App';
 import { useSubscriptionAccess } from '../components/SubscriptionGate';
 import { useTranslation } from 'react-i18next';
-import { 
+import {
   GraduationCap,
   Clock,
   BookOpen,
   Award,
   ChevronRight,
   CheckCircle,
-  Crown
+  Crown,
+  Lock
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -22,7 +23,7 @@ import { Progress } from '../components/ui/progress';
 export default function AcademyPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  useSubscriptionAccess();
+  const { canAccessPremiumCourses } = useSubscriptionAccess();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -91,7 +92,7 @@ export default function AcademyPage() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="py-24 relative overflow-hidden">
+      <section className="py-14 relative overflow-hidden">
         <div className="absolute inset-0 hero-glow opacity-50" />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -112,7 +113,7 @@ export default function AcademyPage() {
       </section>
 
       {/* Trial Courses Grid */}
-      <section className="py-16">
+      <section className="py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-8">
             <GraduationCap className="w-6 h-6 text-primary" />
@@ -209,7 +210,7 @@ export default function AcademyPage() {
 
       {/* Premium Courses Section */}
       {!loading && courses.some(c => !c.is_trial) && (
-        <section className="py-16 bg-card/30">
+        <section className="py-10 bg-card/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3 mb-8">
               <Crown className="w-6 h-6 text-amber-400" />
@@ -271,7 +272,7 @@ export default function AcademyPage() {
                               </div>
                             )}
                           </div>
-                          {user && (
+                          {user && canAccessPremiumCourses && (
                             <div className="space-y-2">
                               <div className="flex justify-between text-sm">
                                 <span className="text-slate-400">{t('academy.progress')}</span>
@@ -292,17 +293,26 @@ export default function AcademyPage() {
                             ))}
                           </div>
                           <Link to={`/course/${course.id}`} className="block pt-4">
-                            <Button
-                              className="w-full transition-colors border"
-                              style={{
-                                background: `${cf}28`,
-                                color: cf,
-                                borderColor: `${cf}55`,
-                              }}
-                            >
-                              {progress > 0 ? t('academy.continueLearning') : t('academy.startCourse')}
-                              <ChevronRight className="w-4 h-4 ml-2" />
-                            </Button>
+                            {canAccessPremiumCourses ? (
+                              <Button
+                                className="w-full transition-colors border"
+                                style={{
+                                  background: `${cf}28`,
+                                  color: cf,
+                                  borderColor: `${cf}55`,
+                                }}
+                              >
+                                {progress > 0 ? t('academy.continueLearning') : t('academy.startCourse')}
+                                <ChevronRight className="w-4 h-4 ml-2" />
+                              </Button>
+                            ) : (
+                              <Button
+                                className="w-full transition-colors border bg-muted/40 text-slate-400 border-slate-600/40 hover:bg-muted/60"
+                              >
+                                <Lock className="w-4 h-4 mr-2" />
+                                {t('academy.viewCourse')}
+                              </Button>
+                            )}
                           </Link>
                         </div>
                       </CardContent>

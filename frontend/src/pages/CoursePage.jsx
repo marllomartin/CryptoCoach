@@ -4,16 +4,17 @@ import { Layout } from '../components/Layout';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API, useAuth } from '../App';
+import { useSubscriptionAccess } from '../components/SubscriptionGate';
 import { useTranslation } from 'react-i18next';
-import { 
-  BookOpen, 
-  Clock, 
-  CheckCircle, 
-  Circle,
+import {
+  BookOpen,
+  Clock,
+  CheckCircle,
   ChevronRight,
   Award,
   Play,
-  Lock
+  Lock,
+  Crown
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -22,6 +23,7 @@ import { Progress } from '../components/ui/progress';
 export default function CoursePage() {
   const { courseId } = useParams();
   const { user, token } = useAuth();
+  const { canAccessPremiumCourses } = useSubscriptionAccess();
   const { t, i18n } = useTranslation();
   const [course, setCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
@@ -86,6 +88,7 @@ export default function CoursePage() {
   }
 
   const progress = getProgress();
+  const isPremiumLocked = !course.is_trial && !canAccessPremiumCourses;
 
   return (
     <Layout>
@@ -129,13 +132,27 @@ export default function CoursePage() {
                   </div>
                 </div>
 
-                {user && (
+                {user && !isPremiumLocked && (
                   <div className="space-y-2 mb-6">
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-400">{t('course.yourProgress')}</span>
                       <span className="text-primary font-medium">{progress}%</span>
                     </div>
                     <Progress value={progress} className="h-3" />
+                  </div>
+                )}
+
+                {isPremiumLocked && (
+                  <div className="flex items-center gap-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 mb-6">
+                    <Crown className="w-6 h-6 text-amber-400 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-amber-300">{t('course.premiumRequired')}</p>
+                    </div>
+                    <Link to="/pricing">
+                      <Button size="sm" className="bg-amber-500 hover:bg-amber-400 text-black whitespace-nowrap">
+                        {t('course.upgradeToPro')}
+                      </Button>
+                    </Link>
                   </div>
                 )}
 
@@ -179,7 +196,8 @@ export default function CoursePage() {
           <div className="space-y-4">
             {lessons.map((lesson, index) => {
               const completed = isLessonCompleted(lesson.id);
-              const isLocked = !user && index > 0;
+              const isLockedNoAuth = !user && index > 0;
+              const isLocked = isLockedNoAuth || isPremiumLocked;
 
               return (
                 <motion.div
@@ -188,7 +206,7 @@ export default function CoursePage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <Card className={`bg-card border-border transition-all ${!isLocked && 'hover:border-primary/50 cursor-pointer'} ${completed && 'border-green-500/30'}`}>
+                  <Card className={`bg-card border-border transition-all ${!isLocked && 'hover:border-primary/50 cursor-pointer'} ${completed && !isPremiumLocked && 'border-green-500/30'}`}>
                     <CardContent className="p-0">
                       {isLocked ? (
                         <div className="flex items-center gap-4 p-6 opacity-60">
@@ -198,10 +216,18 @@ export default function CoursePage() {
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-1">
                               <span className="text-sm text-slate-500">{t('course.lessonNumber', { n: lesson.order })}</span>
+                              {lesson.duration_minutes && (
+                                <>
+                                  <span className="text-sm text-slate-500">•</span>
+                                  <span className="text-sm text-slate-500">{lesson.duration_minutes} min</span>
+                                </>
+                              )}
                             </div>
                             <h3 className="font-semibold text-slate-400">{lesson.title}</h3>
                           </div>
-                          <span className="text-sm text-slate-500">{t('course.signInToAccess')}</span>
+                          <span className="text-sm text-slate-500">
+                            {isPremiumLocked ? t('course.proRequired') : t('course.signInToAccess')}
+                          </span>
                         </div>
                       ) : (
                         <Link to={`/lesson/${lesson.id}`} className="flex items-center gap-4 p-6">
@@ -233,7 +259,7 @@ export default function CoursePage() {
       </section>
 
       {/* Exam CTA */}
-      {user && (
+      {user && !isPremiumLocked && (
         <section className="py-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <Card className={`border ${allLessonsCompleted() ? 'border-primary bg-primary/5' : 'border-border bg-card'}`}>

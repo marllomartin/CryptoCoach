@@ -804,7 +804,7 @@ const resources = {
         progress: 'Progress',
         continueLearning: 'Continue Learning',
         startCourse: 'Start Course',
-        freeCourses: 'Free Courses',
+        freeCourses: 'Standard Courses',
         freeForEveryone: 'Free for everyone',
         premiumCourses: 'Premium Courses',
         expertCurated: 'Expert curated',
@@ -1006,7 +1006,10 @@ const resources = {
         allCompleted: "You've completed all lessons! Take the exam to earn your certificate.",
         completeToUnlock: 'Complete all {{count}} lessons to unlock the certification exam.',
         takeCertExam: 'Take Certification Exam',
-        completeAllLessons: 'Complete all lessons to unlock'
+        completeAllLessons: 'Complete all lessons to unlock',
+        premiumRequired: 'This is a Pro course. Upgrade your plan to access all lessons.',
+        upgradeToPro: 'Upgrade to Pro',
+        proRequired: 'Pro subscription required'
       },
       // Certificates Page
       certificates: {
@@ -2016,7 +2019,7 @@ const resources = {
         progress: 'Progression',
         continueLearning: 'Continuer l\'apprentissage',
         startCourse: 'Commencer le cours',
-        freeCourses: 'Cours Gratuits',
+        freeCourses: 'Cours Standard',
         freeForEveryone: 'Gratuit pour tous',
         premiumCourses: 'Cours Premium',
         expertCurated: 'Sélectionnés par des experts',
@@ -2218,7 +2221,10 @@ const resources = {
         allCompleted: "Vous avez terminé toutes les leçons ! Passez l'examen pour obtenir votre certificat.",
         completeToUnlock: "Terminez les {{count}} leçons pour débloquer l'examen de certification.",
         takeCertExam: "Passer l'examen de certification",
-        completeAllLessons: 'Terminez toutes les leçons pour débloquer'
+        completeAllLessons: 'Terminez toutes les leçons pour débloquer',
+        premiumRequired: 'Ce cours est réservé aux abonnés Pro. Mettez à niveau votre plan pour accéder à toutes les leçons.',
+        upgradeToPro: 'Passer à Pro',
+        proRequired: 'Abonnement Pro requis'
       },
       // Certificates Page
       certificates: {
@@ -3034,7 +3040,7 @@ const resources = {
         progress: 'التقدم',
         continueLearning: 'متابعة التعلم',
         startCourse: 'ابدأ الدورة',
-        freeCourses: 'دورات مجانية',
+        freeCourses: 'الدورات الأساسية',
         freeForEveryone: 'مجاني للجميع',
         premiumCourses: 'دورات مميزة',
         expertCurated: 'منتقاة من قِبل خبراء',
@@ -3236,7 +3242,10 @@ const resources = {
         allCompleted: 'لقد أكملت جميع الدروس! أجرِ الاختبار للحصول على شهادتك.',
         completeToUnlock: 'أكمل {{count}} دروس لفتح اختبار الشهادة.',
         takeCertExam: 'إجراء اختبار الشهادة',
-        completeAllLessons: 'أكمل جميع الدروس للفتح'
+        completeAllLessons: 'أكمل جميع الدروس للفتح',
+        premiumRequired: 'هذه دورة Pro. قم بترقية خطتك للوصول إلى جميع الدروس.',
+        upgradeToPro: 'الترقية إلى Pro',
+        proRequired: 'مطلوب اشتراك Pro'
       },
       // Certificates Page
       certificates: {
@@ -4440,7 +4449,7 @@ const resources = {
         progress: 'Progresso',
         continueLearning: 'Continuar Aprendendo',
         startCourse: 'Iniciar Curso',
-        freeCourses: 'Cursos Gratuitos',
+        freeCourses: 'Cursos Standard',
         freeForEveryone: 'Gratuito para todos',
         premiumCourses: 'Cursos Premium',
         expertCurated: 'Curado por especialistas',
@@ -4642,7 +4651,10 @@ const resources = {
         allCompleted: 'Você concluiu todas as aulas! Faça o exame para ganhar seu certificado.',
         completeToUnlock: 'Conclua todas as {{count}} aulas para desbloquear o exame de certificação.',
         takeCertExam: 'Fazer Exame de Certificação',
-        completeAllLessons: 'Conclua todas as aulas para desbloquear'
+        completeAllLessons: 'Conclua todas as aulas para desbloquear',
+        premiumRequired: 'Este é um curso Pro. Faça upgrade do seu plano para acessar todas as aulas.',
+        upgradeToPro: 'Fazer Upgrade para Pro',
+        proRequired: 'Assinatura Pro necessária'
       },
       // Certificates Page
       certificates: {
