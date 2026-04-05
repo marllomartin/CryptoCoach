@@ -88,7 +88,7 @@ export default function CoursePage() {
   }
 
   const progress = getProgress();
-  const isPremiumLocked = course.id !== 'course-foundations' && !canAccessPremiumCourses;
+  const isPremiumLocked = !!user && course.id !== 'course-foundations' && !canAccessPremiumCourses;
 
   return (
     <Layout>
@@ -196,7 +196,7 @@ export default function CoursePage() {
           <div className="space-y-4">
             {lessons.map((lesson, index) => {
               const completed = isLessonCompleted(lesson.id);
-              const isLockedNoAuth = !user && index > 0;
+              const isLockedNoAuth = !user;
               const isFoundationsFreeTierLock =
                 courseId === 'course-foundations' && !canAccessPremiumCourses && index >= 3;
               const isLocked = isLockedNoAuth || isPremiumLocked || isFoundationsFreeTierLock;
@@ -228,7 +228,7 @@ export default function CoursePage() {
                             <h3 className="font-semibold text-slate-400">{lesson.title}</h3>
                           </div>
                           <span className="text-sm text-slate-500">
-                            {isPremiumLocked || isFoundationsFreeTierLock ? t('course.proRequired') : t('course.signInToAccess')}
+                            {user && (isPremiumLocked || isFoundationsFreeTierLock) ? t('course.proRequired') : t('course.signInToAccess')}
                           </span>
                         </div>
                       ) : (

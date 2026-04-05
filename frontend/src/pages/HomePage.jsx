@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { motion } from 'framer-motion';
@@ -13,7 +13,8 @@ import {
   Bot,
   BookOpen,
   ChevronRight,
-  Play
+  Play,
+  CheckCircle
 } from 'lucide-react';
 import founderImg from '../assets/founder.jpeg';
 import { Button } from '../components/ui/button';
@@ -36,16 +37,24 @@ const stagger = {
 
 export default function HomePage() {
   const { t, i18n } = useTranslation();
+  const [allCourses, setAllCourses] = useState([]);
   const [totalLessons, setTotalLessons] = useState(null);
   const [totalCourses, setTotalCourses] = useState(null);
 
   useEffect(() => {
     axios.get(`${API}/courses`).then(res => {
-      const courses = res.data;
-      setTotalCourses(courses.length);
-      setTotalLessons(courses.reduce((sum, c) => sum + (c.lessons_count || 0), 0));
+      const data = res.data;
+      setAllCourses(data);
+      setTotalCourses(data.length);
+      setTotalLessons(data.reduce((sum, c) => sum + (c.lessons_count || 0), 0));
     }).catch(() => {});
   }, []);
+
+  const randomCourses = useMemo(() => {
+    if (!allCourses.length) return [];
+    const shuffled = [...allCourses].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 3);
+  }, [allCourses]);
   
   const features = [
     {
@@ -77,36 +86,6 @@ export default function HomePage() {
       icon: BookOpen,
       title: t('homepage.features.knowledge'),
       description: t('homepage.features.knowledgeDesc')
-    }
-  ];
-
-  const courses = [
-    {
-      level: 1,
-      title: t('homepage.courses.level1'),
-      description: t('homepage.courses.level1Desc'),
-      lessons: 8,
-      tier: t('homepage.courses.free'),
-      color: "from-blue-500/20 to-cyan-500/20",
-      border: "border-blue-500/30"
-    },
-    {
-      level: 2,
-      title: t('homepage.courses.level2'),
-      description: t('homepage.courses.level2Desc'),
-      lessons: 8,
-      tier: t('homepage.courses.starter'),
-      color: "from-purple-500/20 to-pink-500/20",
-      border: "border-purple-500/30"
-    },
-    {
-      level: 3,
-      title: t('homepage.courses.level3'),
-      description: t('homepage.courses.level3Desc'),
-      lessons: 7,
-      tier: t('homepage.courses.pro'),
-      color: "from-amber-500/20 to-orange-500/20",
-      border: "border-amber-500/30"
     }
   ];
 
@@ -246,7 +225,7 @@ export default function HomePage() {
       {/* Courses Section */}
       <section className="py-24 bg-card/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -261,35 +240,68 @@ export default function HomePage() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {courses.map((course, index) => (
-              <motion.div
-                key={course.level}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.15 }}
-              >
-                <Card className={`bg-gradient-to-br ${course.color} border ${course.border} h-full hover:scale-[1.02] transition-transform`}>
-                  <CardContent className="p-8">
-                    <div className="text-5xl font-heading font-bold text-white/20 mb-4">
-                      0{course.level}
-                    </div>
-                    <h3 className="font-heading font-bold text-2xl mb-3">{course.title}</h3>
-                    <p className="text-slate-300 mb-6">{course.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-400">{course.lessons} {t('homepage.lessons')}</span>
-                      <Link to={`/course/course-${course.level === 1 ? 'foundations' : course.level === 2 ? 'investor' : 'strategist'}`}>
-                        <Button variant="ghost" size="sm" className="text-primary hover:text-primary">
-                          {t('homepage.viewCourse')}
-                          <ChevronRight className="w-4 h-4 ml-1" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+            {randomCourses.map((course, index) => {
+              const cf = course.color_from;
+              const ct = course.color_to;
+              const hasColor = cf && ct;
+              return (
+                <motion.div
+                  key={course.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.15 }}
+                  className="h-full"
+                >
+                  <Card
+                    className={`h-full hover:scale-[1.02] transition-transform ${hasColor ? 'border' : 'bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/30'}`}
+                    style={hasColor ? {
+                      background: `linear-gradient(to bottom right, ${cf}33, ${ct}33)`,
+                      borderColor: `${cf}55`
+                    } : undefined}
+                  >
+                    <CardContent className="p-8 flex flex-col h-full">
+                      <h3 className="font-heading font-bold text-2xl mb-3">{course.title}</h3>
+                      <p className="text-slate-300 text-sm mb-5 line-clamp-2">{course.description}</p>
+                      {course.topics?.length > 0 && (
+                        <div className="space-y-1.5 mb-6 flex-1">
+                          {course.topics.slice(0, 4).map((topic, i) => (
+                            <div key={i} className="flex items-center gap-2 text-sm text-slate-400">
+                              <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                              <span>{topic}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+                        <span className="text-sm text-slate-400">{course.lessons_count} {t('homepage.lessons')}</span>
+                        <Link to={`/course/${course.id}`}>
+                          <Button variant="ghost" size="sm" className="text-primary hover:text-primary">
+                            {t('homepage.viewCourse')}
+                            <ChevronRight className="w-4 h-4 ml-1" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </div>
+
+          <motion.div
+            className="text-center mt-12"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Link to="/academy">
+              <Button variant="outline" size="lg" className="border-slate-700 hover:border-slate-600">
+                {t('homepage.browseAllCourses')}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+          </motion.div>
         </div>
       </section>
 
