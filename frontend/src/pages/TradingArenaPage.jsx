@@ -150,7 +150,7 @@ const TradingArenaPage = () => {
           <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6">
 
             {/* Left Column - Market & Trading */}
-            <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
+            <div className="lg:col-span-2 space-y-6">
               
               {/* Portfolio Summary Cards */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="portfolio-summary-cards">
@@ -293,7 +293,7 @@ const TradingArenaPage = () => {
             </div>
 
             {/* Right Column - Trade Panel */}
-            <div className="space-y-6 order-1 lg:order-2">
+            <div className="space-y-6">
 
               {/* Trade Form */}
               <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6 lg:sticky lg:top-6" data-testid="trade-form">
