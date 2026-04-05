@@ -4,13 +4,14 @@ import { useAuth } from '../App';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { 
+import {
   GraduationCap,
   Mail,
   Lock,
   Eye,
   EyeOff,
-  Loader2
+  Loader2,
+  ArrowLeft
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -50,6 +51,13 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
+      {/* Back button */}
+      <div className="fixed top-4 left-4 z-50">
+        <Link to="/" className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          {t('auth.backToHome')}
+        </Link>
+      </div>
       {/* Language Switcher */}
       <div className="fixed top-4 right-4 z-50">
         <LanguageSwitcher variant="minimal" />
