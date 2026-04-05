@@ -66,7 +66,7 @@ export default function DashboardPage() {
   const quickActions = [
     { icon: GraduationCap, label: t('dashboard.continueLearning'), href: '/academy', color: 'bg-blue-500' },
     { icon: Bot, label: t('dashboard.aiMentor'), href: '/mentor', color: 'bg-purple-500' },
-    { icon: TrendingUp, label: t('dashboard.tradingSimulator'), href: '/simulator', color: 'bg-green-500' },
+    { icon: TrendingUp, label: t('dashboard.tradingSimulator'), href: '/trading-arena', color: 'bg-green-500' },
     { icon: BookOpen, label: t('dashboard.glossary'), href: '/glossary', color: 'bg-amber-500' },
   ];
 

@@ -54,7 +54,7 @@ export const Layout = ({ children }) => {
   const userLinks = [
     { to: '/market-intelligence', label: t('nav.marketIntel', 'Market Intel'), icon: BarChart3, highlight: true },
     { to: '/trading-arena', label: t('nav.tradingArena'), icon: TrendingUp },
-    { to: '/simulator', label: t('nav.simulator'), icon: TrendingUp },
+    { to: '/trading-arena', label: t('nav.simulator'), icon: TrendingUp },
     { to: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
     { to: '/mentor', label: t('nav.aiMentor'), icon: Bot },
     { to: '/profile', label: t('nav.profile', 'Profile'), icon: UserCircle },
@@ -89,7 +89,7 @@ export const Layout = ({ children }) => {
               <LanguageSwitcher variant="minimal" />
               {user ? (
                 <div className="flex items-center gap-2">
-                  <Link to="/simulator">
+                  <Link to="/trading-arena">
                     <Button variant="outline" size="sm" className="whitespace-nowrap text-primary border-primary/50 hover:bg-primary/10">
                       <TrendingUp className="w-4 h-4 mr-2 shrink-0" />
                       {t('nav.simulator')}
@@ -176,7 +176,7 @@ export const Layout = ({ children }) => {
                     </div>
 
                     {/* Simulator — prominent like desktop */}
-                    <Link to="/simulator" onClick={() => setMobileMenuOpen(false)}>
+                    <Link to="/trading-arena" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="outline" className="w-full justify-start mb-2 text-primary border-primary/50 hover:bg-primary/10">
                         <TrendingUp className="w-4 h-4 mr-2 shrink-0" />
                         {t('nav.simulator')}
@@ -202,7 +202,7 @@ export const Layout = ({ children }) => {
 
                     {/* App links */}
                     <div className="border-t border-border pt-3 mt-1 space-y-0.5">
-                      {userLinks.filter(l => l.to !== '/simulator').map(link => (
+                      {userLinks.filter(l => l.to !== '/trading-arena').map(link => (
                         <Link
                           key={link.to}
                           to={link.to}

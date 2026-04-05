@@ -24,7 +24,6 @@ import LessonPage from './pages/LessonPage';
 import QuizPage from './pages/QuizPage';
 import ExamPage from './pages/ExamPage';
 import DashboardPage from './pages/DashboardPage';
-import SimulatorPage from './pages/SimulatorPage';
 import MentorPage from './pages/MentorPage';
 import GlossaryPage from './pages/GlossaryPage';
 import BlogPage from './pages/BlogPage';
@@ -199,7 +198,7 @@ function App() {
           <Route path="/quiz/:lessonId" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
           <Route path="/exam/:level" element={<ProtectedRoute><ExamPage /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-          <Route path="/simulator" element={<ProtectedRoute><SimulatorPage /></ProtectedRoute>} />
+          <Route path="/simulator" element={<Navigate to="/trading-arena" replace />} />
           <Route path="/mentor" element={<ProtectedRoute><MentorPage /></ProtectedRoute>} />
           <Route path="/certificates" element={<ProtectedRoute><CertificatesPage /></ProtectedRoute>} />
           
