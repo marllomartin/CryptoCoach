@@ -149,7 +149,7 @@ ACHIEVEMENTS = {
         "id": "crypto_master",
         "name": "Crypto Master",
         "description": "Reach level 20",
-        "icon": "crown",
+        "icon": "wand-sparkles",
         "level": 4,
         "xp_reward": 1000,
         "condition": {"level": 20}
