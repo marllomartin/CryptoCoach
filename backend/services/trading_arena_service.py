@@ -102,12 +102,12 @@ class TradingArenaService:
         # Check cache
         cache_key = "live_prices"
         cached = self.price_cache.get(cache_key)
-        if cached and (datetime.now(timezone.utc) - cached["timestamp"]).seconds < self.cache_ttl:
+        if cached and (datetime.now(timezone.utc) - cached["timestamp"]).total_seconds() < self.cache_ttl:
             return cached["data"]
-        
+
         # Build CoinGecko IDs
         coin_ids = [SUPPORTED_CRYPTOS[s]["id"] for s in symbols if s in SUPPORTED_CRYPTOS]
-        
+
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.get(
@@ -128,7 +128,7 @@ class TradingArenaService:
             if cached:
                 return cached["data"]
             return self._get_fallback_prices(symbols)
-        
+
         # Transform data to our format
         prices = {}
         for symbol, crypto in SUPPORTED_CRYPTOS.items():
@@ -142,13 +142,23 @@ class TradingArenaService:
                     "volume_24h": coin_data.get("usd_24h_vol", 0),
                     "market_cap": coin_data.get("usd_market_cap", 0)
                 }
-        
-        # Update cache
-        self.price_cache[cache_key] = {
-            "data": prices,
-            "timestamp": datetime.now(timezone.utc)
-        }
-        
+
+        # Only cache if we got a complete response (all requested symbols present)
+        if len(prices) == len(symbols):
+            self.price_cache[cache_key] = {
+                "data": prices,
+                "timestamp": datetime.now(timezone.utc)
+            }
+        elif prices:
+            # Partial response — merge with existing cache to avoid losing coins
+            merged = dict(cached["data"]) if cached else {}
+            merged.update(prices)
+            self.price_cache[cache_key] = {
+                "data": merged,
+                "timestamp": datetime.now(timezone.utc)
+            }
+            prices = merged
+
         return prices
     
     def _get_fallback_prices(self, symbols: List[str]) -> Dict:
