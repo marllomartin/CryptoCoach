@@ -4785,6 +4785,58 @@ async def migrate_trial_courses(admin: dict = Depends(require_admin_only)):
     )
     return {"status": "success", "updated": result.modified_count}
 
+# ==================== TRIAL CONTENT RESTORE ====================
+
+@api_router.post("/admin/courses/{course_id}/restore-defaults")
+async def restore_trial_course_defaults(course_id: str, admin: dict = Depends(require_admin_only)):
+    """Repopulate a trial course's lessons from static default content."""
+    static_lessons = [l for l in ALL_LESSONS.values() if l.get("course_id") == course_id]
+    if not static_lessons:
+        raise HTTPException(status_code=404, detail="No static content found for this course")
+
+    lang_fields = ["title", "subtitle", "content", "summary",
+                   "learning_objectives", "examples", "recommended_readings"]
+    list_fields = {"learning_objectives", "examples", "recommended_readings"}
+    langs = ["en", "fr", "ar", "pt"]
+
+    await db.lessons.delete_many({"course_id": course_id})
+
+    docs = []
+    for lesson in static_lessons:
+        translations = {}
+        for lang in langs:
+            entry = {}
+            for field in lang_fields:
+                val = lesson.get(field)
+                if isinstance(val, dict):
+                    entry[field] = val.get(lang, val.get("en", [] if field in list_fields else ""))
+                elif val is not None:
+                    entry[field] = val
+                else:
+                    entry[field] = [] if field in list_fields else ""
+            translations[lang] = entry
+
+        docs.append({
+            "id": lesson["id"],
+            "course_id": course_id,
+            "order": lesson.get("order", 0),
+            "duration_minutes": lesson.get("duration_minutes"),
+            "hero_image": lesson.get("hero_image"),
+            "audio_full": lesson.get("audio_full"),
+            "checkpoints": lesson.get("checkpoints", []),
+            "translations": translations,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+
+    await db.lessons.insert_many(docs)
+    await db.courses.update_one(
+        {"id": course_id},
+        {"$set": {"lessons_count": len(docs), "content_managed": True}}
+    )
+
+    return {"status": "restored", "course_id": course_id, "lessons_restored": len(docs)}
+
+
 # ==================== MEDIA GENERATION ROUTES ====================
 
 @api_router.post("/admin/generate-audio/{lesson_id}")
