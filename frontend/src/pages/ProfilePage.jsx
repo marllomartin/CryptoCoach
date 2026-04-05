@@ -7,7 +7,7 @@ import {
   User, Edit2, Save, Camera, Trophy, Flame, Zap,
   Calendar, Target, TrendingUp, Award,
   BookOpen, Star, Crown, Clock, X, HelpCircle,
-  Footprints, GraduationCap, BarChart2, Gem, Lock, WandSparkles
+  Footprints, GraduationCap, BarChart2, Gem, Lock
 } from 'lucide-react';
 import { StreakInfoModal } from '../components/StreakInfoModal';
 import { Button } from '../components/ui/button';
@@ -314,7 +314,6 @@ const ACHIEVEMENT_ICONS = {
   'award': Award,
   'gem': Gem,
   'crown': Crown,
-  'wand-sparkles': WandSparkles,
 };
 
 const LEVEL_STYLES = {
@@ -338,7 +337,7 @@ const LEVEL_STYLES = {
   },
   4: {
     card: 'from-purple-500/20 via-pink-500/20 to-cyan-500/20 border-purple-400/50',
-    icon: 'text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400',
+    icon: 'text-fuchsia-300',
     badge: 'bg-purple-500/20 text-purple-300',
     label: 'Prismatic',
   },
