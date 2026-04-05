@@ -828,10 +828,6 @@ async def complete_lesson(lesson_id: str, current_user: dict = Depends(get_curre
             "$inc": {"xp_points": xp_earned},
         }
         
-        # Award coins on level up
-        if level_up:
-            update_data["$inc"]["coins"] = new_level * 10
-        
         await db.users.update_one({"id": current_user["id"]}, update_data)
         
         # Update quest progress for lesson completion

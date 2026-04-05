@@ -181,7 +181,6 @@ const resources = {
         levelBadge: 'Lv. {{level}}',
         toNextLevel: 'to Lv. {{level}}',
         streak: 'Streak',
-        coins: 'Coins',
         achievements: 'Achievements',
         statistics: 'Statistics',
         lessonsCompleted: 'Lessons Completed',
@@ -333,30 +332,6 @@ const resources = {
         removeFromWatchlist: 'Remove from watchlist',
         addToWatchlist: 'Add to watchlist',
         setAlertTitle: 'Set price alert'
-      },
-      // Shop Page
-      shop: {
-        badge: 'Shop',
-        title: 'CryptoCoach Shop',
-        subtitle: 'Spend your coins on boosters, power-ups, and cosmetics',
-        yourBalance: 'Your Balance',
-        coins: 'Coins',
-        activeBoosters: 'Active Boosters: {{count}}',
-        streakFreezes: 'Streak Freezes: {{count}}',
-        catBoosters: 'Boosters',
-        catQuizPowerups: 'Quiz Power-ups',
-        catCosmetics: 'Cosmetics',
-        catSpecial: 'Special',
-        owned: 'Owned: {{count}}',
-        ownedLabel: 'Owned',
-        maxOwned: 'Max owned',
-        locked: 'Locked',
-        buy: 'Buy',
-        activeBoostersTitle: 'Active Boosters',
-        expires: 'Expires: {{date}}',
-        loginToPurchase: 'Please login to purchase',
-        purchaseSuccess: 'Purchased successfully! New balance: {{balance}} coins',
-        purchaseFailed: 'Purchase failed'
       },
       // Quiz Page
       quiz: {
@@ -1484,7 +1459,6 @@ const resources = {
         levelBadge: 'Niv. {{level}}',
         toNextLevel: 'vers Niv. {{level}}',
         streak: 'Série',
-        coins: 'Pièces',
         achievements: 'Succès',
         statistics: 'Statistiques',
         lessonsCompleted: 'Leçons complétées',
@@ -1636,30 +1610,6 @@ const resources = {
         removeFromWatchlist: 'Retirer de la liste de suivi',
         addToWatchlist: 'Ajouter à la liste de suivi',
         setAlertTitle: 'Définir une alerte de prix'
-      },
-      // Shop Page
-      shop: {
-        badge: 'Boutique',
-        title: 'Boutique CryptoCoach',
-        subtitle: 'Dépensez vos pièces en boosters, power-ups et cosmétiques',
-        yourBalance: 'Votre solde',
-        coins: 'Pièces',
-        activeBoosters: 'Boosters actifs : {{count}}',
-        streakFreezes: 'Gels de série : {{count}}',
-        catBoosters: 'Boosters',
-        catQuizPowerups: 'Power-ups Quiz',
-        catCosmetics: 'Cosmétiques',
-        catSpecial: 'Spécial',
-        owned: 'Possédé : {{count}}',
-        ownedLabel: 'Possédé',
-        maxOwned: 'Maximum atteint',
-        locked: 'Verrouillé',
-        buy: 'Acheter',
-        activeBoostersTitle: 'Boosters Actifs',
-        expires: 'Expire : {{date}}',
-        loginToPurchase: 'Veuillez vous connecter pour acheter',
-        purchaseSuccess: 'Achat réussi ! Nouveau solde : {{balance}} pièces',
-        purchaseFailed: 'Achat échoué'
       },
       // Quiz Page
       quiz: {
@@ -3454,7 +3404,6 @@ const resources = {
         levelBadge: 'مست. {{level}}',
         toNextLevel: 'إلى مست. {{level}}',
         streak: 'سلسلة',
-        coins: 'عملات',
         achievements: 'إنجازات',
         statistics: 'إحصائيات',
         lessonsCompleted: 'الدروس المكتملة',
@@ -3606,30 +3555,6 @@ const resources = {
         removeFromWatchlist: 'إزالة من قائمة المتابعة',
         addToWatchlist: 'إضافة لقائمة المتابعة',
         setAlertTitle: 'تحديد تنبيه سعر'
-      },
-      // Shop Page
-      shop: {
-        badge: 'المتجر',
-        title: 'متجر CryptoCoach',
-        subtitle: 'أنفق عملاتك على المعززات وقوة الاختبارات والمستحضرات',
-        yourBalance: 'رصيدك',
-        coins: 'عملات',
-        activeBoosters: 'المعززات النشطة: {{count}}',
-        streakFreezes: 'تجميدات السلسلة: {{count}}',
-        catBoosters: 'المعززات',
-        catQuizPowerups: 'قوى الاختبار',
-        catCosmetics: 'المستحضرات',
-        catSpecial: 'خاص',
-        owned: 'مملوك: {{count}}',
-        ownedLabel: 'مملوك',
-        maxOwned: 'تم الوصول للحد الأقصى',
-        locked: 'مقفل',
-        buy: 'شراء',
-        activeBoostersTitle: 'المعززات النشطة',
-        expires: 'تنتهي: {{date}}',
-        loginToPurchase: 'يرجى تسجيل الدخول للشراء',
-        purchaseSuccess: 'تم الشراء بنجاح! الرصيد الجديد: {{balance}} عملة',
-        purchaseFailed: 'فشل الشراء'
       },
       // Quiz Page
       quiz: {
@@ -4090,7 +4015,6 @@ const resources = {
         levelBadge: 'Nív. {{level}}',
         toNextLevel: 'para Nív. {{level}}',
         streak: 'Sequência',
-        coins: 'Moedas',
         achievements: 'Conquistas',
         statistics: 'Estatísticas',
         lessonsCompleted: 'Aulas Concluídas',
@@ -4242,30 +4166,6 @@ const resources = {
         removeFromWatchlist: 'Remover da watchlist',
         addToWatchlist: 'Adicionar à watchlist',
         setAlertTitle: 'Definir alerta de preço'
-      },
-      // Shop Page
-      shop: {
-        badge: 'Loja',
-        title: 'Loja CryptoCoach',
-        subtitle: 'Gaste suas moedas em impulsionadores, power-ups e cosméticos',
-        yourBalance: 'Seu Saldo',
-        coins: 'Moedas',
-        activeBoosters: 'Impulsionadores Ativos: {{count}}',
-        streakFreezes: 'Congelamentos de Sequência: {{count}}',
-        catBoosters: 'Impulsionadores',
-        catQuizPowerups: 'Power-ups de Quiz',
-        catCosmetics: 'Cosméticos',
-        catSpecial: 'Especial',
-        owned: 'Possuídos: {{count}}',
-        ownedLabel: 'Possuído',
-        maxOwned: 'Máximo possuído',
-        locked: 'Bloqueado',
-        buy: 'Comprar',
-        activeBoostersTitle: 'Impulsionadores Ativos',
-        expires: 'Expira: {{date}}',
-        loginToPurchase: 'Faça login para comprar',
-        purchaseSuccess: 'Comprado com sucesso! Novo saldo: {{balance}} moedas',
-        purchaseFailed: 'Falha na compra'
       },
       // Quiz Page
       quiz: {

@@ -1,6 +1,6 @@
 """
 Gamification Service for TheCryptoCoach 2.0
-Handles XP, levels, achievements, quests, and avatar system
+Handles XP, levels, achievements, quests, and streaks
 """
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import Dict, List, Optional
@@ -166,34 +166,6 @@ STREAK_MILESTONES = [
     {"days": 100, "title": "100-Day Streak", "xp": 1000},
 ]
 
-# Avatar customization options
-AVATARS = {
-    "base": [
-        {"id": "avatar_default", "name": "Débutant", "unlock_level": 1, "cost": 0},
-        {"id": "avatar_trader", "name": "Trader", "unlock_level": 5, "cost": 50},
-        {"id": "avatar_analyst", "name": "Analyste", "unlock_level": 10, "cost": 100},
-        {"id": "avatar_whale", "name": "Whale", "unlock_level": 15, "cost": 200},
-        {"id": "avatar_legend", "name": "Légende", "unlock_level": 25, "cost": 500},
-    ],
-    "frames": [
-        {"id": "frame_none", "name": "Sans Cadre", "unlock_level": 1, "cost": 0},
-        {"id": "frame_bronze", "name": "Bronze", "unlock_level": 5, "cost": 25},
-        {"id": "frame_silver", "name": "Argent", "unlock_level": 10, "cost": 75},
-        {"id": "frame_gold", "name": "Or", "unlock_level": 15, "cost": 150},
-        {"id": "frame_diamond", "name": "Diamant", "unlock_level": 20, "cost": 300},
-        {"id": "frame_legendary", "name": "Légendaire", "unlock_level": 30, "cost": 500},
-    ],
-    "titles": [
-        {"id": "title_newbie", "name": "Nouveau Venu", "unlock_level": 1, "cost": 0},
-        {"id": "title_apprentice", "name": "Apprenti", "unlock_level": 3, "cost": 20},
-        {"id": "title_trader", "name": "Trader", "unlock_level": 7, "cost": 50},
-        {"id": "title_expert", "name": "Expert", "unlock_level": 12, "cost": 100},
-        {"id": "title_master", "name": "Maître", "unlock_level": 18, "cost": 200},
-        {"id": "title_legend", "name": "Légende Crypto", "unlock_level": 25, "cost": 400},
-        {"id": "title_god", "name": "Dieu du Trading", "unlock_level": 35, "cost": 1000},
-    ]
-}
-
 
 class GamificationService:
     def __init__(self, db: AsyncIOMotorDatabase):
@@ -244,13 +216,7 @@ class GamificationService:
             "xp_points": xp,
             "level": level_info["level"],
             "level_progress": level_info,
-            "coins": user.get("coins", 0),
             "streak_days": user.get("streak_days", 0),
-            "avatar": user.get("avatar", {
-                "base": "avatar_default",
-                "frame": "frame_none",
-                "title": "title_newbie"
-            }),
             "achievements": user_achievements,
             "achievements_count": len(user_achievements),
             "stats": {
@@ -295,11 +261,7 @@ class GamificationService:
         
         # Check for level up
         level_up = new_level > old_level
-        if level_up:
-            # Award coins for level up
-            coins_reward = new_level * 10
-            update_data["$inc"]["coins"] = coins_reward
-        
+
         await self.db.users.update_one({"id": user_id}, update_data)
         
         # Log XP transaction
@@ -323,21 +285,8 @@ class GamificationService:
             "level_progress": self.get_level_progress(new_xp)
         }
         
-        if level_up:
-            result["coins_earned"] = new_level * 10
-            result["unlocked_items"] = self._get_unlocked_items_at_level(new_level)
-        
         return result
-    
-    def _get_unlocked_items_at_level(self, level: int) -> List[Dict]:
-        """Get items unlocked at a specific level"""
-        unlocked = []
-        for category, items in AVATARS.items():
-            for item in items:
-                if item["unlock_level"] == level:
-                    unlocked.append({**item, "category": category})
-        return unlocked
-    
+
     async def check_and_award_achievements(self, user_id: str) -> List[Dict]:
         """Check and award any newly earned achievements"""
         user = await self.db.users.find_one({"id": user_id}, {"_id": 0})
@@ -394,94 +343,6 @@ class GamificationService:
                 )
         
         return new_achievements
-    
-    async def get_available_avatar_items(self, user_id: str) -> Dict:
-        """Get all avatar items available to a user"""
-        user = await self.db.users.find_one({"id": user_id}, {"_id": 0})
-        if not user:
-            return {}
-        
-        level = self.calculate_level(user.get("xp_points", 0))
-        owned_items = user.get("owned_avatar_items", [])
-        
-        result = {}
-        for category, items in AVATARS.items():
-            category_items = []
-            for item in items:
-                item_data = {
-                    **item,
-                    "unlocked": level >= item["unlock_level"],
-                    "owned": item["id"] in owned_items or item["cost"] == 0
-                }
-                category_items.append(item_data)
-            result[category] = category_items
-        
-        return result
-    
-    async def purchase_avatar_item(self, user_id: str, item_id: str) -> Dict:
-        """Purchase an avatar item with coins"""
-        user = await self.db.users.find_one({"id": user_id}, {"_id": 0})
-        if not user:
-            return {"success": False, "error": "User not found"}
-        
-        # Find the item
-        item = None
-        for category, items in AVATARS.items():
-            for i in items:
-                if i["id"] == item_id:
-                    item = {**i, "category": category}
-                    break
-        
-        if not item:
-            return {"success": False, "error": "Item not found"}
-        
-        level = self.calculate_level(user.get("xp_points", 0))
-        if level < item["unlock_level"]:
-            return {"success": False, "error": f"Niveau {item['unlock_level']} requis"}
-        
-        owned_items = user.get("owned_avatar_items", [])
-        if item_id in owned_items:
-            return {"success": False, "error": "Déjà possédé"}
-        
-        coins = user.get("coins", 0)
-        if coins < item["cost"]:
-            return {"success": False, "error": "Pas assez de coins"}
-        
-        # Purchase
-        await self.db.users.update_one(
-            {"id": user_id},
-            {
-                "$inc": {"coins": -item["cost"]},
-                "$addToSet": {"owned_avatar_items": item_id}
-            }
-        )
-        
-        return {"success": True, "item": item, "new_balance": coins - item["cost"]}
-    
-    async def update_avatar(self, user_id: str, avatar_data: Dict) -> Dict:
-        """Update user's avatar configuration"""
-        user = await self.db.users.find_one({"id": user_id}, {"_id": 0})
-        if not user:
-            return {"success": False, "error": "User not found"}
-        
-        owned_items = user.get("owned_avatar_items", [])
-        
-        # Validate that user owns or has access to all items
-        for key, value in avatar_data.items():
-            if value:
-                # Free items are always accessible
-                for category, items in AVATARS.items():
-                    for item in items:
-                        if item["id"] == value:
-                            if item["cost"] > 0 and value not in owned_items:
-                                return {"success": False, "error": f"Item {value} non possédé"}
-        
-        await self.db.users.update_one(
-            {"id": user_id},
-            {"$set": {"avatar": avatar_data}}
-        )
-        
-        return {"success": True, "avatar": avatar_data}
     
     async def get_streak_info(self, user_id: str) -> Dict:
         """Get streak information for a user"""
@@ -559,6 +420,3 @@ class GamificationService:
         """Get all available achievements"""
         return list(ACHIEVEMENTS.values())
     
-    def get_avatar_shop(self) -> Dict:
-        """Get all avatar items for the shop"""
-        return AVATARS

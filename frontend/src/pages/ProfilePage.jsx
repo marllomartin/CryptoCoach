@@ -158,7 +158,7 @@ const ProfilePage = () => {
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="relative text-center p-3 bg-gray-800/50 rounded-lg">
                   <button
                     onClick={() => setStreakModalOpen(true)}
@@ -170,11 +170,6 @@ const ProfilePage = () => {
                   <Flame className="w-6 h-6 text-orange-500 mx-auto mb-1" />
                   <p className="text-xl font-bold text-white">{streakInfo?.current_streak || 0}</p>
                   <p className="text-xs text-gray-400">{t('profile.streak')}</p>
-                </div>
-                <div className="text-center p-3 bg-gray-800/50 rounded-lg">
-                  <Star className="w-6 h-6 text-yellow-500 mx-auto mb-1" />
-                  <p className="text-xl font-bold text-white">{profile?.coins || 0}</p>
-                  <p className="text-xs text-gray-400">{t('profile.coins')}</p>
                 </div>
                 <div className="text-center p-3 bg-gray-800/50 rounded-lg">
                   <Trophy className="w-6 h-6 text-purple-500 mx-auto mb-1" />

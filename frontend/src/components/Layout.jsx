@@ -14,7 +14,6 @@ import {
   TrendingUp,
   Award,
   BarChart3,
-  Store,
   UserCircle,
   Shield
 } from 'lucide-react';
@@ -58,7 +57,6 @@ export const Layout = ({ children }) => {
     { to: '/simulator', label: t('nav.simulator'), icon: TrendingUp },
     { to: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
     { to: '/mentor', label: t('nav.aiMentor'), icon: Bot },
-    { to: '/shop', label: t('nav.shop', 'Shop'), icon: Store },
     { to: '/profile', label: t('nav.profile', 'Profile'), icon: UserCircle },
     { to: '/certificates', label: t('nav.certificates'), icon: Award },
   ];

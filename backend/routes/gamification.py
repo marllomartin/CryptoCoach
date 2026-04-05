@@ -10,7 +10,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 # Import the service
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from services.gamification_service import GamificationService, ACHIEVEMENTS, AVATARS
+from services.gamification_service import GamificationService, ACHIEVEMENTS
 
 router = APIRouter(prefix="/api/v2/gamification", tags=["Gamification"])
 
@@ -28,15 +28,6 @@ class AwardXPRequest(BaseModel):
     action: str
     metadata: Optional[Dict] = None
 
-
-class UpdateAvatarRequest(BaseModel):
-    base: Optional[str] = None
-    frame: Optional[str] = None
-    title: Optional[str] = None
-
-
-class PurchaseItemRequest(BaseModel):
-    item_id: str
 
 
 # Helper to get user from token (reuse from main server)
@@ -98,37 +89,6 @@ async def get_user_achievements(user_id: str):
     
     return result
 
-
-@router.get("/avatar/shop")
-async def get_avatar_shop():
-    """Get all avatar items in the shop"""
-    return gamification_service.get_avatar_shop()
-
-
-@router.get("/avatar/available/{user_id}")
-async def get_available_avatar_items(user_id: str):
-    """Get avatar items available to a user (unlocked/owned status)"""
-    items = await gamification_service.get_available_avatar_items(user_id)
-    return items
-
-
-@router.post("/avatar/purchase/{user_id}")
-async def purchase_avatar_item(user_id: str, request: PurchaseItemRequest):
-    """Purchase an avatar item"""
-    result = await gamification_service.purchase_avatar_item(user_id, request.item_id)
-    if not result["success"]:
-        raise HTTPException(status_code=400, detail=result["error"])
-    return result
-
-
-@router.put("/avatar/{user_id}")
-async def update_avatar(user_id: str, request: UpdateAvatarRequest):
-    """Update user's avatar configuration"""
-    avatar_data = request.model_dump(exclude_none=True)
-    result = await gamification_service.update_avatar(user_id, avatar_data)
-    if not result["success"]:
-        raise HTTPException(status_code=400, detail=result["error"])
-    return result
 
 
 @router.get("/streak/{user_id}")
