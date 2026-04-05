@@ -38,14 +38,16 @@ def set_database(database):
 COINGECKO_API = "https://api.coingecko.com/api/v3"
 
 # Cache for market data (simple in-memory cache)
-market_cache = {
-    "cryptos": None,
-    "global": None,
-    "fear_greed": None,
-    "last_update": None
-}
+market_cache = {}
+CACHE_TTL_CRYPTOS = 60   # seconds — crypto prices change slowly enough
+CACHE_TTL_GLOBAL  = 120  # global/fear-greed changes even more slowly
 
-CACHE_TTL = 30  # seconds
+
+def _cache_fresh(key: str, ttl: int) -> bool:
+    entry = market_cache.get(key)
+    if not entry:
+        return False
+    return (datetime.now(timezone.utc) - entry["ts"]).total_seconds() < ttl
 
 
 # ============ MARKET ROUTES ============
@@ -53,8 +55,12 @@ CACHE_TTL = 30  # seconds
 @market_router.get("/cryptos")
 async def get_cryptos(limit: int = 50):
     """Get top cryptocurrencies with market data"""
+    cache_key = f"cryptos_{limit}"
+    if _cache_fresh(cache_key, CACHE_TTL_CRYPTOS):
+        return {"cryptos": market_cache[cache_key]["data"]}
+
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(
                 f"{COINGECKO_API}/coins/markets",
                 params={
@@ -64,68 +70,78 @@ async def get_cryptos(limit: int = 50):
                     "page": 1,
                     "sparkline": True,
                     "price_change_percentage": "24h,7d"
-                },
-                timeout=10.0
+                }
             )
-            
+
             if response.status_code == 200:
-                return {"cryptos": response.json()}
+                data = response.json()
+                market_cache[cache_key] = {"data": data, "ts": datetime.now(timezone.utc)}
+                return {"cryptos": data}
             else:
-                # Return mock data on API error
+                # Return stale cache or mock on API error
+                if cache_key in market_cache:
+                    return {"cryptos": market_cache[cache_key]["data"]}
                 return {"cryptos": get_mock_cryptos()[:limit]}
-                
+
     except Exception as e:
-        print(f"CoinGecko API error: {e}")
+        logger.error(f"CoinGecko API error: {e}")
+        if cache_key in market_cache:
+            return {"cryptos": market_cache[cache_key]["data"]}
         return {"cryptos": get_mock_cryptos()[:limit]}
 
 
 @market_router.get("/global")
 async def get_global_data():
     """Get global market data including fear & greed index"""
+    if _cache_fresh("global", CACHE_TTL_GLOBAL):
+        return market_cache["global"]["data"]
+
+    fallback = {
+        "total_market_cap": {"usd": 2400000000000},
+        "total_volume": {"usd": 89000000000},
+        "market_cap_percentage": {"btc": 52.3, "eth": 17.8},
+        "market_cap_change_percentage_24h_usd": 1.5,
+        "fear_greed": {"value": 65, "label": "Greed"}
+    }
+
     try:
-        async with httpx.AsyncClient() as client:
-            # Get global market data
-            global_response = await client.get(
-                f"{COINGECKO_API}/global",
-                timeout=10.0
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            # Fetch both external sources concurrently
+            global_resp, fg_resp = await asyncio.gather(
+                client.get(f"{COINGECKO_API}/global"),
+                client.get("https://api.alternative.me/fng/", timeout=5.0),
+                return_exceptions=True
             )
-            
+
             global_data = {}
-            if global_response.status_code == 200:
-                data = global_response.json().get("data", {})
+            if not isinstance(global_resp, Exception) and global_resp.status_code == 200:
+                data = global_resp.json().get("data", {})
                 global_data = {
                     "total_market_cap": data.get("total_market_cap", {}),
                     "total_volume": data.get("total_volume", {}),
                     "market_cap_percentage": data.get("market_cap_percentage", {}),
                     "market_cap_change_percentage_24h_usd": data.get("market_cap_change_percentage_24h_usd", 0)
                 }
-            
-            # Get Fear & Greed Index from alternative.me
-            try:
-                fg_response = await client.get(
-                    "https://api.alternative.me/fng/",
-                    timeout=5.0
-                )
-                if fg_response.status_code == 200:
-                    fg_data = fg_response.json().get("data", [{}])[0]
-                    global_data["fear_greed"] = {
-                        "value": int(fg_data.get("value", 50)),
-                        "label": fg_data.get("value_classification", "Neutral")
-                    }
-            except Exception:
-                global_data["fear_greed"] = {"value": 50, "label": "Neutral"}
-            
-            return global_data
-            
+
+            if not isinstance(fg_resp, Exception) and fg_resp.status_code == 200:
+                fg_data = fg_resp.json().get("data", [{}])[0]
+                global_data["fear_greed"] = {
+                    "value": int(fg_data.get("value", 50)),
+                    "label": fg_data.get("value_classification", "Neutral")
+                }
+            else:
+                global_data["fear_greed"] = fallback["fear_greed"]
+
+            if global_data:
+                market_cache["global"] = {"data": global_data, "ts": datetime.now(timezone.utc)}
+                return global_data
+
     except Exception as e:
-        print(f"Global data API error: {e}")
-        return {
-            "total_market_cap": {"usd": 2400000000000},
-            "total_volume": {"usd": 89000000000},
-            "market_cap_percentage": {"btc": 52.3, "eth": 17.8},
-            "market_cap_change_percentage_24h_usd": 1.5,
-            "fear_greed": {"value": 65, "label": "Greed"}
-        }
+        logger.error(f"Global data API error: {e}")
+
+    if "global" in market_cache:
+        return market_cache["global"]["data"]
+    return fallback
 
 
 @market_router.get("/news")

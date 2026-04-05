@@ -388,7 +388,6 @@ export default function MarketIntelligencePage() {
   const [alerts, setAlerts] = useState([]);
   const [selectedCrypto, setSelectedCrypto] = useState(null);
   const [activeTab, setActiveTab] = useState('market');
-  const [aiBriefing, setAiBriefing] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(new Date());
   
   // Determine user tier limits
@@ -403,24 +402,19 @@ export default function MarketIntelligencePage() {
   // Fetch market data
   const fetchData = useCallback(async () => {
     try {
-      // Fetch from our backend which proxies to CoinGecko
-      const [cryptoRes, globalRes] = await Promise.all([
+      const [cryptoRes, globalRes, newsRes] = await Promise.all([
         axios.get(`${API}/market/cryptos?limit=${limits.cryptos}`),
-        axios.get(`${API}/market/global`)
+        axios.get(`${API}/market/global`),
+        axios.get(`${API}/market/news?limit=${limits.news}`)
       ]);
-      
+
       setCryptos(cryptoRes.data.cryptos || []);
       setGlobalData(globalRes.data);
       setFearGreed(globalRes.data.fear_greed);
-      setLastUpdate(new Date());
-      
-      // Fetch news
-      const newsRes = await axios.get(`${API}/market/news?limit=${limits.news}`);
       setNews(newsRes.data.articles || []);
-      
+      setLastUpdate(new Date());
     } catch (error) {
       console.error('Error fetching market data:', error);
-      // Use mock data on error
       setFearGreed({ value: 65, label: 'Greed' });
     } finally {
       setLoading(false);
@@ -504,18 +498,7 @@ export default function MarketIntelligencePage() {
   
   const fgData = fearGreed ? getFearGreedColor(fearGreed.value) : null;
   
-  if (loading) {
-    return (
-      <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-slate-400">{t('market.loading')}</p>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+  // Skeleton shown inline while loading — no full-page block
   
   return (
     <Layout>
@@ -658,18 +641,34 @@ export default function MarketIntelligencePage() {
                       </span>
                     </CardHeader>
                     <CardContent className="space-y-2 max-h-[600px] overflow-y-auto">
-                      {filteredCryptos.map((crypto, index) => (
-                        <CryptoRow
-                          key={crypto.id}
-                          crypto={crypto}
-                          rank={index + 1}
-                          isWatchlisted={watchlist.includes(crypto.id)}
-                          onToggleWatchlist={toggleWatchlist}
-                          hasAlert={alerts.some(a => a.cryptoId === crypto.id)}
-                          onSetAlert={setSelectedCrypto}
-                          userTier={userTier}
-                        />
-                      ))}
+                      {loading ? (
+                        Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="flex items-center gap-4 p-4 rounded-xl animate-pulse">
+                            <div className="w-8 h-4 bg-muted rounded" />
+                            <div className="w-8 h-8 bg-muted rounded-full" />
+                            <div className="flex-1 space-y-2">
+                              <div className="h-3 bg-muted rounded w-20" />
+                            </div>
+                            <div className="space-y-2 text-right">
+                              <div className="h-3 bg-muted rounded w-16" />
+                              <div className="h-3 bg-muted rounded w-10 ml-auto" />
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        filteredCryptos.map((crypto, index) => (
+                          <CryptoRow
+                            key={crypto.id}
+                            crypto={crypto}
+                            rank={index + 1}
+                            isWatchlisted={watchlist.includes(crypto.id)}
+                            onToggleWatchlist={toggleWatchlist}
+                            hasAlert={alerts.some(a => a.cryptoId === crypto.id)}
+                            onSetAlert={setSelectedCrypto}
+                            userTier={userTier}
+                          />
+                        ))
+                      )}
                     </CardContent>
                   </Card>
                 </>
@@ -793,15 +792,37 @@ export default function MarketIntelligencePage() {
               )}
               
               {activeTab === 'ai' && (
-                <AIBriefing userTier={userTier} briefing={aiBriefing} />
+                <Card className="bg-gradient-to-br from-primary/10 to-purple-500/10 border-primary/30">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bot className="w-5 h-5 text-primary" />
+                      {t('market.aiBriefing')}
+                      <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded-full ml-auto">{t('market.comingSoon')}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-slate-400 text-sm">{t('market.aiBriefingComingSoon')}</p>
+                  </CardContent>
+                </Card>
               )}
             </div>
-            
+
             {/* Sidebar */}
             <div className="space-y-6">
-              {/* AI Briefing Preview */}
+              {/* AI Briefing Coming Soon */}
               {activeTab !== 'ai' && (
-                <AIBriefing userTier={userTier} briefing={aiBriefing} />
+                <Card className="bg-gradient-to-br from-primary/10 to-purple-500/10 border-primary/30">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bot className="w-5 h-5 text-primary" />
+                      {t('market.aiBriefing')}
+                      <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded-full ml-auto">{t('market.comingSoon')}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-slate-400 text-sm">{t('market.aiBriefingComingSoon')}</p>
+                  </CardContent>
+                </Card>
               )}
               
               {/* Quick Stats */}
