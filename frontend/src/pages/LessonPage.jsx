@@ -716,9 +716,9 @@ export default function LessonPage() {
 
             {/* Certificate Progress */}
             <div className="mb-8">
-              <CertificateProgress 
-                completedLessons={user?.completed_lessons?.length || 0}
-                totalLessons={23}
+              <CertificateProgress
+                completedLessons={allLessons.filter(l => user?.completed_lessons?.includes(l.id)).length}
+                totalLessons={allLessons.length || 1}
                 language={appLanguage?.split('-')[0] || 'en'}
               />
             </div>

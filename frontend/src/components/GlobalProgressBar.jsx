@@ -37,7 +37,7 @@ export function GlobalProgressBar({ className = "", courseLessons }) {
   const xpProgress = Math.round(((xp - xpAtLevel) / (xpAtNext - xpAtLevel)) * 100);
   
   return (
-    <div className={`bg-card/50 backdrop-blur-sm border-b border-border ${className}`}>
+    <div className={`sticky top-16 z-40 bg-card/80 backdrop-blur-sm border-b border-border ${className}`}>
       <div className="max-w-7xl mx-auto px-4 py-2">
         <div className="flex items-center justify-between gap-4">
           {/* Level & XP */}
