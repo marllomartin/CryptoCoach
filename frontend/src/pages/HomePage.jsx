@@ -1,19 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { 
-  GraduationCap, 
-  TrendingUp, 
-  Shield, 
-  Award, 
-  Bot, 
+import axios from 'axios';
+import { API } from '../App';
+import {
+  GraduationCap,
+  TrendingUp,
+  Shield,
+  Award,
+  Bot,
   BookOpen,
   ChevronRight,
-  Play,
-  Users,
-  Star
+  Play
 } from 'lucide-react';
 import founderImg from '../assets/founder.jpeg';
 import { Button } from '../components/ui/button';
@@ -36,6 +36,16 @@ const stagger = {
 
 export default function HomePage() {
   const { t, i18n } = useTranslation();
+  const [totalLessons, setTotalLessons] = useState(null);
+  const [totalCourses, setTotalCourses] = useState(null);
+
+  useEffect(() => {
+    axios.get(`${API}/courses`).then(res => {
+      const courses = res.data;
+      setTotalCourses(courses.length);
+      setTotalLessons(courses.reduce((sum, c) => sum + (c.lessons_count || 0), 0));
+    }).catch(() => {});
+  }, []);
   
   const features = [
     {
@@ -137,13 +147,6 @@ export default function HomePage() {
             animate="animate"
             variants={stagger}
           >
-            <motion.div variants={fadeInUp} className="mb-6">
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium">
-                <Star className="w-4 h-4" />
-                {t('homepage.trustedBy')}
-              </span>
-            </motion.div>
-            
             <motion.h1 
               variants={fadeInUp}
               className="font-heading text-5xl md:text-7xl font-bold tracking-tight mb-6"
@@ -182,21 +185,17 @@ export default function HomePage() {
               </Link>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               variants={fadeInUp}
               className="mt-12 flex flex-wrap items-center gap-4 md:gap-8 text-sm text-slate-400"
             >
               <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-primary" />
-                <span>{t('homepage.stats.students')}</span>
-              </div>
-              <div className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-primary" />
-                <span>{t('homepage.stats.lessons')}</span>
+                <span>{totalLessons !== null ? `${totalLessons} ` : ''}{t('homepage.stats.lessonsLabel')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Award className="w-5 h-5 text-primary" />
-                <span>{t('homepage.stats.certifications')}</span>
+                <span>{totalCourses !== null ? `${totalCourses} ` : ''}{t('homepage.stats.certificationsLabel')}</span>
               </div>
             </motion.div>
           </motion.div>

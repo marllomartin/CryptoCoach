@@ -43,9 +43,8 @@ const resources = {
         startLearning: 'Start Learning Free',
         exploreCourses: 'Explore Courses',
         stats: {
-          students: '10,000+ Students',
-          lessons: '23 Expert Lessons',
-          certifications: '3 Certifications'
+          lessonsLabel: 'Expert Lessons',
+          certificationsLabel: 'Certifications'
         },
         featuresTitle: 'Everything You Need to ',
         featuresTitleHighlight: 'Succeed',
@@ -1323,9 +1322,8 @@ const resources = {
         startLearning: 'Commencer Gratuitement',
         exploreCourses: 'Explorer les Cours',
         stats: {
-          students: '10 000+ Étudiants',
-          lessons: '23 Leçons Expert',
-          certifications: '3 Certifications'
+          lessonsLabel: 'Leçons Expert',
+          certificationsLabel: 'Certifications'
         },
         featuresTitle: 'Tout ce dont vous avez besoin pour ',
         featuresTitleHighlight: 'Réussir',
@@ -2603,9 +2601,8 @@ const resources = {
         startLearning: 'ابدأ التعلم مجاناً',
         exploreCourses: 'استكشف الدورات',
         stats: {
-          students: '+10,000 طالب',
-          lessons: '23 درس متخصص',
-          certifications: '3 شهادات'
+          lessonsLabel: 'درس متخصص',
+          certificationsLabel: 'شهادات'
         },
         featuresTitle: 'كل ما تحتاجه ',
         featuresTitleHighlight: 'للنجاح',
@@ -3883,9 +3880,8 @@ const resources = {
         startLearning: 'Comece a Aprender Grátis',
         exploreCourses: 'Explorar Cursos',
         stats: {
-          students: '+10.000 Alunos',
-          lessons: '23 Aulas Especializadas',
-          certifications: '3 Certificações'
+          lessonsLabel: 'Aulas Especializadas',
+          certificationsLabel: 'Certificações'
         },
         featuresTitle: 'Tudo que Você Precisa para ',
         featuresTitleHighlight: 'Ter Sucesso',
