@@ -7,14 +7,17 @@ import { useAuth } from '../App';
 import { Trophy, BookOpen, Star, Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-export function GlobalProgressBar({ className = "" }) {
+export function GlobalProgressBar({ className = "", courseLessons }) {
   const { user } = useAuth();
   const { t } = useTranslation();
-  
+
   if (!user) return null;
-  
-  const completedLessons = user.completed_lessons?.length || 0;
-  const totalLessons = 23; // Total lessons in all courses
+
+  const completedInCourse = courseLessons?.length
+    ? courseLessons.filter(l => user.completed_lessons?.includes(l.id)).length
+    : null;
+  const totalLessons = courseLessons?.length || 23;
+  const completedLessons = completedInCourse ?? (user.completed_lessons?.length || 0);
   const progressPercent = Math.round((completedLessons / totalLessons) * 100);
   
   // Calculate level from XP

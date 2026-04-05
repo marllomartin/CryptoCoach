@@ -199,6 +199,7 @@ class UserResponse(BaseModel):
     subscription_tier: str = "free"
     subscription_expires: Optional[str] = None
     role: str = "none"  # none, editor, moderator, admin
+    achievements: List[str] = []
 
 class TokenResponse(BaseModel):
     access_token: str

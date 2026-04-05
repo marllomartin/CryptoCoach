@@ -389,7 +389,7 @@ export default function LessonPage() {
       </AnimatePresence>
       
       {/* Global Progress Bar */}
-      <GlobalProgressBar />
+      <GlobalProgressBar courseLessons={allLessons} />
       
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Breadcrumb */}
