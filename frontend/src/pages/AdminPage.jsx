@@ -1061,26 +1061,24 @@ function CoursesTab({ token, currentUser }) {
                     </p>
                     <LangBadges translations={course.translations} isTrial={course.is_trial} />
                   </div>
-                  {!course.is_trial && (
-                    <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                  <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => { setEditingCourse(course); setShowCourseForm(true); setShowLessonForm(false); }}
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                    </Button>
+                    {canDelete && !course.is_trial && (
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => { setEditingCourse(course); setShowCourseForm(true); setShowLessonForm(false); }}
+                        onClick={() => deleteCourse(course.id)}
                       >
-                        <Edit className="w-3.5 h-3.5" />
+                        <Trash2 className="w-3.5 h-3.5 text-red-500" />
                       </Button>
-                      {canDelete && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => deleteCourse(course.id)}
-                        >
-                          <Trash2 className="w-3.5 h-3.5 text-red-500" />
-                        </Button>
-                      )}
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -1131,35 +1129,33 @@ function CoursesTab({ token, currentUser }) {
                         <Button size="sm" variant="ghost" onClick={() => generateImage(lesson.id)} title="Generate image">
                           <Image className="w-4 h-4" />
                         </Button>
-                        {!courses.find(c => c.id === selectedCourse)?.is_trial && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              title="Manage quiz"
-                              onClick={() => {
-                                setSelectedLessonForQuiz(lesson);
-                                setShowQuizForm(true);
-                                setShowLessonForm(false);
-                                setShowCourseForm(false);
-                              }}
-                            >
-                              <HelpCircle className="w-4 h-4 text-primary" />
+                        <>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            title="Manage quiz"
+                            onClick={() => {
+                              setSelectedLessonForQuiz(lesson);
+                              setShowQuizForm(true);
+                              setShowLessonForm(false);
+                              setShowCourseForm(false);
+                            }}
+                          >
+                            <HelpCircle className="w-4 h-4 text-primary" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => { setEditingLesson(lesson); setShowLessonForm(true); setShowCourseForm(false); setShowQuizForm(false); }}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          {canDelete && !courses.find(c => c.id === selectedCourse)?.is_trial && (
+                            <Button size="sm" variant="ghost" onClick={() => deleteLesson(lesson.id)}>
+                              <Trash2 className="w-4 h-4 text-red-500" />
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => { setEditingLesson(lesson); setShowLessonForm(true); setShowCourseForm(false); setShowQuizForm(false); }}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            {canDelete && (
-                              <Button size="sm" variant="ghost" onClick={() => deleteLesson(lesson.id)}>
-                                <Trash2 className="w-4 h-4 text-red-500" />
-                              </Button>
-                            )}
-                          </>
-                        )}
+                          )}
+                        </>
                       </div>
                     </div>
 
