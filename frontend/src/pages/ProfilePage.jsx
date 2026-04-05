@@ -192,7 +192,7 @@ const ProfilePage = () => {
                 <StatRow icon={Target} label={t('profile.quizzesPassed')} value={profile?.stats?.quizzes_completed || 0} color="green" />
                 <StatRow icon={Award} label={t('profile.examsPassed')} value={profile?.stats?.exams_passed || 0} color="purple" />
                 <StatRow icon={TrendingUp} label={t('profile.tradesExecuted')} value={profile?.stats?.trades_count || 0} color="cyan" />
-                <StatRow icon={Crown} label={t('profile.certificatesEarned')} value={profile?.stats?.certificates_earned || 0} color="yellow" />
+                <StatRow icon={Award} label={t('profile.certificatesEarned')} value={profile?.stats?.certificates_earned || 0} color="yellow" />
               </div>
             </div>
 
@@ -298,6 +298,7 @@ const StatRow = ({ icon: Icon, label, value, color }) => {
 const ACHIEVEMENT_ICONS = {
   'footprints': Footprints,
   'flame': Flame,
+  'fire': Flame,
   'trending-up': TrendingUp,
   'book-open': BookOpen,
   'graduation-cap': GraduationCap,
@@ -305,10 +306,10 @@ const ACHIEVEMENT_ICONS = {
   'bar-chart-2': BarChart2,
   'zap': Zap,
   'star': Star,
-  'fire': Flame,
   'award': Award,
   'gem': Gem,
   'crown': Crown,
+  'target': Target,
 };
 
 const LEVEL_STYLES = {

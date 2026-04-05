@@ -84,7 +84,7 @@ ACHIEVEMENTS = {
         "id": "quiz_master",
         "name": "Quiz Master",
         "description": "Get 100% on 5 quizzes",
-        "icon": "trophy",
+        "icon": "target",
         "level": 2,
         "xp_reward": 250,
         "condition": {"perfect_quizzes": 5}
@@ -93,7 +93,7 @@ ACHIEVEMENTS = {
         "id": "trader_apprentice",
         "name": "Trade Apprentice",
         "description": "Execute 50 trades",
-        "icon": "bar-chart-2",
+        "icon": "trending-up",
         "level": 2,
         "xp_reward": 200,
         "condition": {"trades_count": 50}
@@ -102,7 +102,7 @@ ACHIEVEMENTS = {
         "id": "streak_warrior",
         "name": "Streak Warrior",
         "description": "Maintain a 7-day streak",
-        "icon": "zap",
+        "icon": "flame",
         "level": 2,
         "xp_reward": 175,
         "condition": {"streak_days": 7}
@@ -121,7 +121,7 @@ ACHIEVEMENTS = {
         "id": "profit_hunter",
         "name": "Profit Hunter",
         "description": "Reach $1,000 total profit in simulation",
-        "icon": "trending-up",
+        "icon": "bar-chart-2",
         "level": 3,
         "xp_reward": 300,
         "condition": {"total_profit": 1000}

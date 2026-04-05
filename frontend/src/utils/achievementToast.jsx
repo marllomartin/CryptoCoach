@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import i18n from '../i18n';
 import {
   Footprints, Flame, TrendingUp, BookOpen, GraduationCap,
-  Trophy, BarChart2, Zap, Star, Award, Gem, Crown
+  Trophy, BarChart2, Zap, Star, Award, Gem, Crown, Target
 } from 'lucide-react';
 
 const ICONS = {
@@ -20,6 +20,7 @@ const ICONS = {
   'award': Award,
   'gem': Gem,
   'crown': Crown,
+  'target': Target,
 };
 
 const LEVEL_CONFIG = {
