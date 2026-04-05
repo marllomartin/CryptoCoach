@@ -54,7 +54,6 @@ export const Layout = ({ children }) => {
   const userLinks = [
     { to: '/market-intelligence', label: t('nav.marketIntel', 'Market Intel'), icon: BarChart3, highlight: true },
     { to: '/trading-arena', label: t('nav.tradingArena'), icon: TrendingUp },
-    { to: '/trading-arena', label: t('nav.simulator'), icon: TrendingUp },
     { to: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
     { to: '/mentor', label: t('nav.aiMentor'), icon: Bot },
     { to: '/profile', label: t('nav.profile', 'Profile'), icon: UserCircle },
@@ -76,7 +75,7 @@ export const Layout = ({ children }) => {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center justify-center gap-6">
+            <div className="hidden md:flex items-center justify-center gap-4">
               {navLinks.map(link => (
                 <NavLink key={link.to} to={link.to}>
                   <span className="whitespace-nowrap">{link.label}</span>
@@ -92,7 +91,7 @@ export const Layout = ({ children }) => {
                   <Link to="/trading-arena">
                     <Button variant="outline" size="sm" className="whitespace-nowrap text-primary border-primary/50 hover:bg-primary/10">
                       <TrendingUp className="w-4 h-4 mr-2 shrink-0" />
-                      {t('nav.simulator')}
+                      {t('nav.tradingArena')}
                     </Button>
                   </Link>
                   {['admin', 'moderator', 'editor'].includes(user.role) && (() => {
@@ -179,7 +178,7 @@ export const Layout = ({ children }) => {
                     <Link to="/trading-arena" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="outline" className="w-full justify-start mb-2 text-primary border-primary/50 hover:bg-primary/10">
                         <TrendingUp className="w-4 h-4 mr-2 shrink-0" />
-                        {t('nav.simulator')}
+                        {t('nav.tradingArena')}
                       </Button>
                     </Link>
 
