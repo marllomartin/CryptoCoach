@@ -197,7 +197,9 @@ export default function CoursePage() {
             {lessons.map((lesson, index) => {
               const completed = isLessonCompleted(lesson.id);
               const isLockedNoAuth = !user && index > 0;
-              const isLocked = isLockedNoAuth || isPremiumLocked;
+              const isFoundationsFreeTierLock =
+                courseId === 'course-foundations' && !canAccessPremiumCourses && index >= 3;
+              const isLocked = isLockedNoAuth || isPremiumLocked || isFoundationsFreeTierLock;
 
               return (
                 <motion.div
@@ -226,7 +228,7 @@ export default function CoursePage() {
                             <h3 className="font-semibold text-slate-400">{lesson.title}</h3>
                           </div>
                           <span className="text-sm text-slate-500">
-                            {isPremiumLocked ? t('course.proRequired') : t('course.signInToAccess')}
+                            {isPremiumLocked || isFoundationsFreeTierLock ? t('course.proRequired') : t('course.signInToAccess')}
                           </span>
                         </div>
                       ) : (
