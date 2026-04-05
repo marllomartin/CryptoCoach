@@ -719,6 +719,7 @@ export default function LessonPage() {
               <CertificateProgress
                 completedLessons={allLessons.filter(l => user?.completed_lessons?.includes(l.id)).length}
                 totalLessons={allLessons.length || 1}
+                courseId={lesson?.course_id}
                 language={appLanguage?.split('-')[0] || 'en'}
               />
             </div>
