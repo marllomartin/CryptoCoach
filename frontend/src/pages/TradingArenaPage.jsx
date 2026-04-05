@@ -149,11 +149,8 @@ const TradingArenaPage = () => {
 
           <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6">
 
-            {/* Left Column - Market & Trading */}
-            <div className="lg:col-span-2 space-y-6">
-              
-              {/* Portfolio Summary Cards */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="portfolio-summary-cards">
+            {/* Portfolio Summary Cards — mobile: 2nd, desktop: col 1-2 row 1 */}
+            <div className="order-2 lg:col-span-2 lg:row-start-1 grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="portfolio-summary-cards">
                 <SummaryCard
                   icon={Wallet}
                   label={t('trading.totalValue')}
@@ -184,8 +181,8 @@ const TradingArenaPage = () => {
                 />
               </div>
 
-              {/* Market Prices Grid */}
-              <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="market-prices-section">
+            {/* Market Prices — mobile: 3rd, desktop: col 1-2 row 2 */}
+            <div className="order-3 lg:col-span-2 lg:row-start-2 bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="market-prices-section">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-white">{t('trading.marketPrices')}</h2>
                   <Button variant="ghost" size="sm" onClick={fetchData} data-testid="refresh-prices-btn">
@@ -207,9 +204,9 @@ const TradingArenaPage = () => {
                 </div>
               </div>
 
-              {/* Holdings */}
-              {portfolio?.holdings?.length > 0 && (
-                <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="holdings-section">
+            {/* Holdings — mobile: 5th, desktop: col 1-2 row 3 */}
+            {portfolio?.holdings?.length > 0 && (
+              <div className="order-5 lg:col-span-2 lg:row-start-3 bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="holdings-section">
                   <h2 className="text-xl font-bold text-white mb-4">{t('trading.myPositions')}</h2>
                   <div className="overflow-x-auto">
                     <table className="w-full" data-testid="holdings-table">
@@ -246,8 +243,8 @@ const TradingArenaPage = () => {
                 </div>
               )}
 
-              {/* Trade History */}
-              <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="trade-history-section">
+            {/* Trade History — mobile: 6th, desktop: col 1-2 row 4 */}
+            <div className="order-6 lg:col-span-2 lg:row-start-4 bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="trade-history-section">
                 <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <History className="w-5 h-5" />
                   {t('trading.tradeHistory')}
@@ -289,13 +286,10 @@ const TradingArenaPage = () => {
                     <p>{t('trading.noTrades')}</p>
                   </div>
                 )}
-              </div>
             </div>
 
-            {/* Right Column - Trade Panel */}
-            <div className="space-y-6">
-
-              {/* Trade Form */}
+            {/* Trade Form — mobile: 4th, desktop: col 3 rows 1-3 (sticky) */}
+            <div className="order-4 lg:col-start-3 lg:row-start-1 lg:row-span-3">
               <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6 lg:sticky lg:top-6" data-testid="trade-form">
                 <h2 className="text-xl font-bold text-white mb-4">{t('trading.placeOrder')}</h2>
                 
@@ -421,48 +415,48 @@ const TradingArenaPage = () => {
                   <RefreshCw className="w-4 h-4 mr-2" />
                   {t('trading.resetPortfolio')}
                 </Button>
-              </div>
-
-              {/* Career Progress */}
-              {careerLevels.length > 0 && portfolio?.career_level && (
-                <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="career-progress-section">
-                  <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                    <Award className="w-5 h-5 text-yellow-500" />
-                    {t('trading.careerProgress')}
-                  </h3>
-                  
-                  <div className="space-y-2">
-                    {careerLevels.slice(0, 5).map((level, index) => {
-                      const currentLevel = portfolio.career_level.current?.level || 1;
-                      const isUnlocked = currentLevel >= level.level;
-                      const isCurrent = currentLevel === level.level;
-                      
-                      return (
-                        <div 
-                          key={level.level}
-                          className={`p-3 rounded-lg ${
-                            isCurrent ? 'bg-primary/20 border border-primary' :
-                            isUnlocked ? 'bg-gray-800/50' : 'bg-gray-800/30 opacity-50'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className={`text-lg ${isCurrent ? 'text-primary' : isUnlocked ? 'text-green-500' : 'text-gray-500'}`}>
-                                {isUnlocked ? '✓' : '🔒'}
-                              </span>
-                              <span className={`font-medium ${isCurrent ? 'text-white' : 'text-gray-400'}`}>
-                                {level.name}
-                              </span>
-                            </div>
-                            <span className="text-sm text-gray-500">${level.capital.toLocaleString()}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
+            </div>
+
+            {/* Career Progress — mobile: 7th, desktop: col 3 row 4 */}
+            {careerLevels.length > 0 && portfolio?.career_level && (
+              <div className="order-7 lg:col-start-3 lg:row-start-4 bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6" data-testid="career-progress-section">
+                <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+                  <Award className="w-5 h-5 text-yellow-500" />
+                  {t('trading.careerProgress')}
+                </h3>
+
+                <div className="space-y-2">
+                  {careerLevels.slice(0, 5).map((level, index) => {
+                    const currentLevel = portfolio.career_level.current?.level || 1;
+                    const isUnlocked = currentLevel >= level.level;
+                    const isCurrent = currentLevel === level.level;
+
+                    return (
+                      <div
+                        key={level.level}
+                        className={`p-3 rounded-lg ${
+                          isCurrent ? 'bg-primary/20 border border-primary' :
+                          isUnlocked ? 'bg-gray-800/50' : 'bg-gray-800/30 opacity-50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-lg ${isCurrent ? 'text-primary' : isUnlocked ? 'text-green-500' : 'text-gray-500'}`}>
+                              {isUnlocked ? '✓' : '🔒'}
+                            </span>
+                            <span className={`font-medium ${isCurrent ? 'text-white' : 'text-gray-400'}`}>
+                              {level.name}
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-500">${level.capital.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
