@@ -4489,14 +4489,66 @@ async def create_lesson_admin(
     del lesson["_id"]
     return lesson
 
+async def _migrate_static_lesson(lesson_id: str) -> Optional[dict]:
+    """Migrate a single static/built-in lesson into db.lessons if not already there.
+    Returns the DB document (existing or newly inserted), or None if not found anywhere."""
+    existing = await db.lessons.find_one({"id": lesson_id})
+    if existing:
+        return existing
+
+    static = ALL_LESSONS.get(lesson_id)
+    if not static:
+        return None
+
+    lang_fields = ["title", "subtitle", "content", "summary",
+                   "learning_objectives", "examples", "recommended_readings"]
+    list_fields = {"learning_objectives", "examples", "recommended_readings"}
+    langs = ["en", "fr", "ar", "pt"]
+    translations = {}
+    for lang in langs:
+        entry = {}
+        for field in lang_fields:
+            val = static.get(field)
+            if isinstance(val, dict):
+                entry[field] = val.get(lang, val.get("en", [] if field in list_fields else ""))
+            elif val is not None:
+                entry[field] = val
+            else:
+                entry[field] = [] if field in list_fields else ""
+        translations[lang] = entry
+
+    doc = {
+        "id": lesson_id,
+        "course_id": static.get("course_id"),
+        "order": static.get("order", 0),
+        "duration_minutes": static.get("duration_minutes"),
+        "hero_image": static.get("hero_image"),
+        "audio_full": static.get("audio_full"),
+        "checkpoints": static.get("checkpoints", []),
+        "translations": translations,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.lessons.insert_one(doc)
+    return doc
+
+
+async def _ensure_course_lessons_in_db(course_id: str):
+    """Migrate all static lessons for a course to DB (needed before deleting one)."""
+    for lesson_id, lesson in ALL_LESSONS.items():
+        if lesson.get("course_id") == course_id:
+            await _migrate_static_lesson(lesson_id)
+
+
 @api_router.put("/admin/lessons/{lesson_id}")
 async def update_lesson_admin(
     lesson_id: str,
     request: LessonUpdateRequest,
     admin: dict = Depends(get_admin_user)
 ):
-    """Update a lesson — supports partial translation updates (merges into existing)"""
-    existing = await db.lessons.find_one({"id": lesson_id})
+    """Update a lesson — supports partial translation updates (merges into existing).
+    If the lesson only exists as static built-in content it is auto-migrated to the
+    DB on the first edit so subsequent updates work normally."""
+    existing = await _migrate_static_lesson(lesson_id)
     if not existing:
         raise HTTPException(status_code=404, detail="Lesson not found")
 
@@ -4531,8 +4583,15 @@ async def update_lesson_admin(
 
 @api_router.delete("/admin/lessons/{lesson_id}")
 async def delete_lesson_admin(lesson_id: str, admin: dict = Depends(require_moderator_or_above)):
-    """Delete a lesson"""
+    """Delete a lesson. For static/built-in lessons, migrates the whole course to DB first
+    so the remaining lessons continue to appear correctly."""
     lesson = await db.lessons.find_one({"id": lesson_id})
+    if not lesson:
+        # May be a static lesson — migrate entire course so remaining lessons stay visible
+        static = ALL_LESSONS.get(lesson_id)
+        if static:
+            await _ensure_course_lessons_in_db(static["course_id"])
+            lesson = await db.lessons.find_one({"id": lesson_id})
     if lesson:
         await db.lessons.delete_one({"id": lesson_id})
         await db.quizzes.delete_one({"lesson_id": lesson_id})
@@ -4572,8 +4631,8 @@ async def upsert_lesson_quiz(
     request: AdminQuizRequest,
     admin: dict = Depends(get_admin_user)
 ):
-    """Create or replace the quiz for a premium lesson"""
-    lesson = await db.lessons.find_one({"id": lesson_id}, {"_id": 0})
+    """Create or replace the quiz for a lesson (including trial/built-in lessons)."""
+    lesson = await _migrate_static_lesson(lesson_id)
     if not lesson:
         raise HTTPException(status_code=404, detail="Lesson not found")
 

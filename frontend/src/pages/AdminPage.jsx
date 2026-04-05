@@ -1150,7 +1150,7 @@ function CoursesTab({ token, currentUser }) {
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
-                          {canDelete && !courses.find(c => c.id === selectedCourse)?.is_trial && (
+                          {canDelete && (
                             <Button size="sm" variant="ghost" onClick={() => deleteLesson(lesson.id)}>
                               <Trash2 className="w-4 h-4 text-red-500" />
                             </Button>
