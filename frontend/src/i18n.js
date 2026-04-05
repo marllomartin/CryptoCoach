@@ -696,7 +696,7 @@ const resources = {
           free: {
             description: 'Start learning crypto for free',
             feature1: 'Crypto Glossary',
-            feature2: '3 foundational courses',
+            feature2: '3 foundational lessons',
             feature3: 'Blog & market insights',
             feature4: 'Watchlist (up to 3 assets)',
             feature5: '1 price alert',
@@ -706,7 +706,7 @@ const resources = {
           pro: {
             description: 'Full access for active learners',
             feature1: 'Everything in Standard',
-            feature2: 'All premium courses',
+            feature2: 'All courses and lessons',
             feature3: 'Trading Simulator',
             feature4: 'Unlimited watchlist & price alerts',
             feature5: 'Full news feed',
@@ -719,6 +719,7 @@ const resources = {
             feature2: 'CryptoCoach AI Mentor',
             feature3: 'Exclusive trading strategies',
             feature4: 'Priority support',
+            feature5: 'Monthly 1-on-1 call with a crypto specialist',
             cta: 'Join Elite'
           }
         }
@@ -1975,7 +1976,7 @@ const resources = {
           free: {
             description: 'Commencez à apprendre la crypto gratuitement',
             feature1: 'Glossaire Crypto',
-            feature2: '3 cours fondamentaux',
+            feature2: '3 leçons fondamentales',
             feature3: 'Blog & analyses de marché',
             feature4: 'Liste de suivi (jusqu\'à 3 actifs)',
             feature5: '1 alerte de prix',
@@ -1985,7 +1986,7 @@ const resources = {
           pro: {
             description: 'Accès complet pour les apprenants actifs',
             feature1: 'Tout du Standard',
-            feature2: 'Tous les cours premium',
+            feature2: 'Tous les cours et leçons',
             feature3: 'Simulateur de Trading',
             feature4: 'Liste de suivi & alertes illimitées',
             feature5: 'Fil d\'actualités complet',
@@ -1998,6 +1999,7 @@ const resources = {
             feature2: 'CryptoCoach AI Mentor',
             feature3: 'Stratégies de trading exclusives',
             feature4: 'Support prioritaire',
+            feature5: 'Appel mensuel en tête-à-tête avec un spécialiste crypto',
             cta: 'Rejoindre l\'Élite'
           }
         }
@@ -3068,7 +3070,7 @@ const resources = {
           free: {
             description: 'ابدأ تعلم الكريبتو مجاناً',
             feature1: 'مصطلحات الكريبتو',
-            feature2: '3 دورات أساسية',
+            feature2: '3 دروس أساسية',
             feature3: 'مدونة وتحليلات السوق',
             feature4: 'قائمة المتابعة (حتى 3 أصول)',
             feature5: 'تنبيه سعر واحد',
@@ -3078,7 +3080,7 @@ const resources = {
           pro: {
             description: 'وصول كامل للمتعلمين النشطين',
             feature1: 'كل شيء من Standard',
-            feature2: 'جميع الدورات المميزة',
+            feature2: 'جميع الدورات والدروس',
             feature3: 'محاكي التداول',
             feature4: 'قائمة متابعة وتنبيهات غير محدودة',
             feature5: 'تغطية إخبارية كاملة',
@@ -3091,6 +3093,7 @@ const resources = {
             feature2: 'مرشد CryptoCoach AI',
             feature3: 'استراتيجيات تداول حصرية',
             feature4: 'دعم ذو أولوية',
+            feature5: 'مكالمة شهرية فردية مع متخصص في الكريبتو',
             cta: 'انضم للنخبة'
           }
         }
@@ -4533,7 +4536,7 @@ const resources = {
           free: {
             description: 'Comece a aprender cripto de graça',
             feature1: 'Glossário Cripto',
-            feature2: '3 cursos fundamentais',
+            feature2: '3 aulas fundamentais',
             feature3: 'Blog & análises de mercado',
             feature4: 'Lista de acompanhamento (até 3 ativos)',
             feature5: '1 alerta de preço',
@@ -4543,7 +4546,7 @@ const resources = {
           pro: {
             description: 'Acesso completo para quem aprende ativamente',
             feature1: 'Tudo do Standard',
-            feature2: 'Todos os cursos premium',
+            feature2: 'Todos os cursos e aulas',
             feature3: 'Simulador de Trading',
             feature4: 'Lista de acompanhamento e alertas ilimitados',
             feature5: 'Feed completo de notícias',
@@ -4556,6 +4559,7 @@ const resources = {
             feature2: 'CryptoCoach AI Mentor',
             feature3: 'Estratégias de trading exclusivas',
             feature4: 'Suporte prioritário',
+            feature5: 'Call mensal 1-a-1 com um especialista em cripto',
             cta: 'Entrar no Elite'
           }
         }

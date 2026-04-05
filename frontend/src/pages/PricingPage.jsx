@@ -53,7 +53,7 @@ const PricingPage = () => {
   const [appliedCoupons, setAppliedCoupons] = useState({});  // tierId -> { code, discount_pct }
 
   const tiers = TIER_META.map(meta => {
-    const featuresCount = { free: 6, pro: 6, elite: 4 };
+    const featuresCount = { free: 6, pro: 6, elite: 5 };
     const count = featuresCount[meta.id];
     const features = Array.from({ length: count }, (_, i) =>
       t(`pricing.tiers.${meta.id}.feature${i + 1}`)
@@ -338,14 +338,22 @@ const PricingPage = () => {
                   </div>
 
                   <ul className="space-y-3 mb-8">
-                    {tier.features.map((feature, i) => (
-                      <li key={i} className="flex items-start gap-3">
-                        <Check className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
-                          tier.popular ? 'text-primary' : 'text-green-500'
-                        }`} />
-                        <span className="text-sm text-muted-foreground">{feature}</span>
-                      </li>
-                    ))}
+                    {tier.features.map((feature, i) => {
+                      const isEliteHighlight = tier.id === 'elite' && i === tier.features.length - 1;
+                      return isEliteHighlight ? (
+                        <li key={i} className="flex items-start gap-3 mt-4 p-3 rounded-lg bg-gradient-to-r from-purple-500/15 to-fuchsia-500/10 border border-purple-500/30">
+                          <Crown className="h-5 w-5 flex-shrink-0 mt-0.5 text-fuchsia-400" />
+                          <span className="text-sm font-semibold text-fuchsia-300">{feature}</span>
+                        </li>
+                      ) : (
+                        <li key={i} className="flex items-start gap-3">
+                          <Check className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
+                            tier.popular ? 'text-primary' : 'text-green-500'
+                          }`} />
+                          <span className="text-sm text-muted-foreground">{feature}</span>
+                        </li>
+                      );
+                    })}
                   </ul>
 
                   {tier.monthlyPrice > 0 && (
