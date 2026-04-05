@@ -132,12 +132,10 @@ export default function AcademyPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[...courses.filter(c => c.is_trial).sort((a, b) => a.level - b.level),
-                ...courses.filter(c => !c.is_trial)
-              ].map((course, index) => {
+              {[...courses].sort((a, b) => (a.level ?? 99) - (b.level ?? 99)).map((course, index) => {
                 const progress = getCourseProgress(course);
 
-                if (course.is_trial) {
+                if (!course.color_from) {
                   const styles = getLevelStyles(course.level);
                   return (
                     <motion.div

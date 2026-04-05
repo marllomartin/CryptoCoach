@@ -88,7 +88,7 @@ export default function CoursePage() {
   }
 
   const progress = getProgress();
-  const isPremiumLocked = !course.is_trial && !canAccessPremiumCourses;
+  const isPremiumLocked = course.id !== 'course-foundations' && !canAccessPremiumCourses;
 
   return (
     <Layout>

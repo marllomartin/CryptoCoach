@@ -257,21 +257,7 @@ const EMPTY_LESSON_TRANSLATIONS = () =>
 /** Badge showing language availability for a course or lesson.
  *  Trial courses/lessons show a locked "Trial" pill followed by all 4 green flags.
  *  Other items show a green flag per language with content, grey for missing. */
-function LangBadges({ translations, isTrial }) {
-  if (isTrial) {
-    return (
-      <div className="flex gap-1 flex-wrap mt-1 items-center">
-        <span className="text-xs px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 font-medium">
-          🔒 Trial
-        </span>
-        {LANG_OPTIONS.map(({ code, flag }) => (
-          <span key={code} className="text-xs px-1.5 py-0.5 rounded bg-green-500/20 text-green-400" title={`${code.toUpperCase()} available`}>
-            {flag} {code.toUpperCase()}
-          </span>
-        ))}
-      </div>
-    );
-  }
+function LangBadges({ translations }) {
   const trans = translations ?? {};
   return (
     <div className="flex gap-1 flex-wrap mt-1">
@@ -294,6 +280,7 @@ function LangBadges({ translations, isTrial }) {
 
 /** Multi-language tabs form for a course */
 function CourseForm({ initial, onSave, onCancel, saving }) {
+  const [level, setLevel] = useState(initial?.level ?? 1);
   const [thumbnail, setThumbnail] = useState(initial?.thumbnail ?? '');
   const [durationHours, setDurationHours] = useState(initial?.duration_hours ?? 0);
   const [isPublished, setIsPublished] = useState(initial?.is_published ?? false);
@@ -341,14 +328,27 @@ function CourseForm({ initial, onSave, onCancel, saving }) {
       toast.error('At least one language must have a title.');
       return;
     }
-    onSave({ level: initial?.level ?? 4, thumbnail, duration_hours: Number(durationHours), is_published: isPublished, color_from: colorFrom, color_to: colorTo, translations: payload });
+    onSave({ level: Number(level), thumbnail, duration_hours: Number(durationHours), is_published: isPublished, color_from: colorFrom, color_to: colorTo, translations: payload });
   };
 
   return (
     <Card className="bg-card border-border">
       <CardContent className="p-6 space-y-4">
         {/* Non-language fields */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="text-xs text-slate-400 mb-1 block">Level</label>
+            <select
+              value={level}
+              onChange={e => setLevel(e.target.value)}
+              className="w-full bg-muted border border-border rounded px-3 py-2 text-sm"
+            >
+              <option value={1}>1 – Foundations</option>
+              <option value={2}>2 – Investor</option>
+              <option value={3}>3 – Strategist</option>
+              <option value={4}>4 – Advanced</option>
+            </select>
+          </div>
           <div>
             <label className="text-xs text-slate-400 mb-1 block">Duration (hours)</label>
             <Input type="number" min={0} value={durationHours} onChange={e => setDurationHours(e.target.value)} />
@@ -1039,7 +1039,7 @@ function CoursesTab({ token, currentUser }) {
                     <p className="text-xs text-slate-400">
                       Level {course.level} · {course.lessons_count} lessons
                     </p>
-                    <LangBadges translations={course.translations} isTrial={course.is_trial} />
+                    <LangBadges translations={course.translations} />
                   </div>
                   <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
                     <Button
@@ -1049,7 +1049,7 @@ function CoursesTab({ token, currentUser }) {
                     >
                       <Edit className="w-3.5 h-3.5" />
                     </Button>
-                    {canDelete && !course.is_trial && (
+                    {canDelete && (
                       <Button
                         size="sm"
                         variant="ghost"
@@ -1100,7 +1100,7 @@ function CoursesTab({ token, currentUser }) {
                           {lesson.audio_full ? ` · 🔊 ${t('admin.media.audio')}` : ` · ⚪ ${t('admin.courses.noAudio')}`}
                           {lesson.hero_image ? ` · 🖼️ Image` : ` · ⚪ ${t('admin.courses.noImage')}`}
                         </p>
-                        <LangBadges translations={lesson.translations} isTrial={courses.find(c => c.id === selectedCourse)?.is_trial} />
+                        <LangBadges translations={lesson.translations} />
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         <Button size="sm" variant="ghost" onClick={() => generateAudio(lesson.id)} title="Generate audio">
