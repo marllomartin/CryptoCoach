@@ -348,6 +348,22 @@ def localize_lesson(lesson: dict, lang: str) -> Optional[dict]:
     result["examples"] = trans.get("examples", [])
     result["summary"] = trans.get("summary", "")
     result["recommended_readings"] = trans.get("recommended_readings", [])
+
+    # Localize checkpoints — their question/options/explanation may be multilingual dicts
+    raw_checkpoints = result.get("checkpoints") or []
+    localized_checkpoints = []
+    for cp in raw_checkpoints:
+        lcp = cp.copy()
+        for field in ("question", "explanation"):
+            val = lcp.get(field)
+            if isinstance(val, dict):
+                lcp[field] = val.get(lang, val.get("en", ""))
+        options = lcp.get("options")
+        if isinstance(options, dict):
+            lcp["options"] = options.get(lang, options.get("en", []))
+        localized_checkpoints.append(lcp)
+    result["checkpoints"] = localized_checkpoints
+
     return result
 
 def validate_translations(translations: dict, entity: str = "course"):
