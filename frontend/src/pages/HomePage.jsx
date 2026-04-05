@@ -42,13 +42,14 @@ export default function HomePage() {
   const [totalCourses, setTotalCourses] = useState(null);
 
   useEffect(() => {
-    axios.get(`${API}/courses`).then(res => {
+    const lang = i18n.language?.split('-')[0] || 'en';
+    axios.get(`${API}/courses?lang=${lang}`).then(res => {
       const data = res.data;
       setAllCourses(data);
       setTotalCourses(data.length);
       setTotalLessons(data.reduce((sum, c) => sum + (c.lessons_count || 0), 0));
     }).catch(() => {});
-  }, []);
+  }, [i18n.language]);
 
   const randomCourses = useMemo(() => {
     if (!allCourses.length) return [];
