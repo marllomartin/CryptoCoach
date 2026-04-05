@@ -653,7 +653,8 @@ async def login(request: Request, credentials: UserLogin):
         last_activity=user.get("last_activity"),
         subscription_tier=user.get("subscription_tier", "free"),
         subscription_expires=user.get("subscription_expires"),
-        role=role
+        role=role,
+        achievements=user.get("achievements", [])
     )
     return TokenResponse(access_token=token, user=user_response)
 
@@ -707,7 +708,8 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         last_activity=fresh_user.get("last_activity"),
         subscription_tier=fresh_user.get("subscription_tier", "free"),
         subscription_expires=fresh_user.get("subscription_expires"),
-        role=role
+        role=role,
+        achievements=fresh_user.get("achievements", [])
     )
 
 # ==================== COURSES ROUTES ====================

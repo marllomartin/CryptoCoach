@@ -20,11 +20,21 @@ export function GlobalProgressBar({ className = "", courseLessons }) {
   const completedLessons = completedInCourse ?? (user.completed_lessons?.length || 0);
   const progressPercent = Math.round((completedLessons / totalLessons) * 100);
   
-  // Calculate level from XP
+  // Calculate level from XP — must match backend calculate_level() thresholds
+  const XP_THRESHOLDS = [
+    0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5200,
+    6600, 8200, 10000, 12000, 14200, 16600, 19200, 22000, 25000, 28200,
+    31600, 35200, 39000, 43000, 47200, 51600, 56200, 61000, 66000, 71200,
+    76600, 82200, 88000, 94000, 100200
+  ];
   const xp = user.xp_points || 0;
-  const level = Math.floor(xp / 100) + 1;
-  const xpForNextLevel = level * 100;
-  const xpProgress = ((xp % 100) / 100) * 100;
+  let level = XP_THRESHOLDS.length;
+  for (let i = 1; i < XP_THRESHOLDS.length; i++) {
+    if (xp < XP_THRESHOLDS[i]) { level = i; break; }
+  }
+  const xpAtLevel = XP_THRESHOLDS[level - 1] || 0;
+  const xpAtNext = XP_THRESHOLDS[level] || XP_THRESHOLDS[XP_THRESHOLDS.length - 1];
+  const xpProgress = Math.round(((xp - xpAtLevel) / (xpAtNext - xpAtLevel)) * 100);
   
   return (
     <div className={`bg-card/50 backdrop-blur-sm border-b border-border ${className}`}>
