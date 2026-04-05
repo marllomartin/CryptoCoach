@@ -13,7 +13,6 @@ import {
   Award,
   ChevronRight,
   CheckCircle,
-  Crown
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -111,15 +110,12 @@ export default function AcademyPage() {
         </div>
       </section>
 
-      {/* Trial Courses Grid */}
+      {/* All Courses Grid */}
       <section className="py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-8">
             <GraduationCap className="w-6 h-6 text-primary" />
-            <h2 className="font-heading text-2xl font-bold">{t('academy.freeCourses')}</h2>
-            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
-              {t('academy.freeForEveryone')}
-            </span>
+            <h2 className="font-heading text-2xl font-bold">{t('academy.allCourses')}</h2>
           </div>
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -136,91 +132,73 @@ export default function AcademyPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {courses.filter(c => c.is_trial).map((course, index) => {
-                const styles = getLevelStyles(course.level);
+              {[...courses.filter(c => c.is_trial).sort((a, b) => a.level - b.level),
+                ...courses.filter(c => !c.is_trial)
+              ].map((course, index) => {
                 const progress = getCourseProgress(course);
 
-                return (
-                  <motion.div
-                    key={course.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Card className={`bg-gradient-to-br ${styles.gradient} border ${styles.border} h-full transition-all group relative overflow-hidden`}>
-                      <CardHeader>
-                        <div className="flex items-center justify-between mb-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium border ${styles.badge}`}>
-                            {t('academy.level')} {course.level}
-                          </span>
-                          <div className={`w-10 h-10 rounded-lg ${styles.icon} flex items-center justify-center`}>
-                            <GraduationCap className="w-5 h-5" />
-                          </div>
-                        </div>
-                        <CardTitle className="font-heading text-2xl">{course.title}</CardTitle>
-                        <CardDescription className="text-slate-400">
-                          {course.description}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-6 text-sm text-slate-400">
-                            <div className="flex items-center gap-2">
-                              <BookOpen className="w-4 h-4" />
-                              <span>{course.lessons_count} {t('academy.lessons')}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Clock className="w-4 h-4" />
-                              <span>{course.duration_hours}h</span>
+                if (course.is_trial) {
+                  const styles = getLevelStyles(course.level);
+                  return (
+                    <motion.div
+                      key={course.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className={`bg-gradient-to-br ${styles.gradient} border ${styles.border} h-full transition-all group relative overflow-hidden`}>
+                        <CardHeader>
+                          <div className="flex items-center justify-between mb-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${styles.badge}`}>
+                              {t('academy.level')} {course.level}
+                            </span>
+                            <div className={`w-10 h-10 rounded-lg ${styles.icon} flex items-center justify-center`}>
+                              <GraduationCap className="w-5 h-5" />
                             </div>
                           </div>
-                          {user && (
-                            <div className="space-y-2">
-                              <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">{t('academy.progress')}</span>
-                                <span className="text-primary font-medium">{progress}%</span>
+                          <CardTitle className="font-heading text-2xl">{course.title}</CardTitle>
+                          <CardDescription className="text-slate-400">{course.description}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-6 text-sm text-slate-400">
+                              <div className="flex items-center gap-2">
+                                <BookOpen className="w-4 h-4" />
+                                <span>{course.lessons_count} {t('academy.lessons')}</span>
                               </div>
-                              <Progress value={progress} className="h-2" />
+                              <div className="flex items-center gap-2">
+                                <Clock className="w-4 h-4" />
+                                <span>{course.duration_hours}h</span>
+                              </div>
                             </div>
-                          )}
-                          <div className="flex flex-wrap gap-2 pt-2">
-                            {course.topics?.slice(0, 4).map(topic => (
-                              <span key={topic} className={`px-2 py-1 text-xs rounded-md ${styles.tag}`}>
-                                {topic}
-                              </span>
-                            ))}
+                            {user && (
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-slate-400">{t('academy.progress')}</span>
+                                  <span className="text-primary font-medium">{progress}%</span>
+                                </div>
+                                <Progress value={progress} className="h-2" />
+                              </div>
+                            )}
+                            <div className="flex flex-wrap gap-2 pt-2">
+                              {course.topics?.slice(0, 4).map(topic => (
+                                <span key={topic} className={`px-2 py-1 text-xs rounded-md ${styles.tag}`}>{topic}</span>
+                              ))}
+                            </div>
+                            <Link to={`/course/${course.id}`} className="block pt-4">
+                              <Button className={`w-full transition-colors ${styles.button}`}>
+                                {progress > 0 ? t('academy.continueLearning') : t('academy.startCourse')}
+                                <ChevronRight className="w-4 h-4 ml-2" />
+                              </Button>
+                            </Link>
                           </div>
-                          <Link to={`/course/${course.id}`} className="block pt-4">
-                            <Button className={`w-full transition-colors ${styles.button}`}>
-                              {progress > 0 ? t('academy.continueLearning') : t('academy.startCourse')}
-                              <ChevronRight className="w-4 h-4 ml-2" />
-                            </Button>
-                          </Link>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </section>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                }
 
-      {/* Premium Courses Section */}
-      {!loading && courses.some(c => !c.is_trial) && (
-        <section className="py-10 bg-card/30">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-3 mb-8">
-              <Crown className="w-6 h-6 text-amber-400" />
-              <h2 className="font-heading text-2xl font-bold">{t('academy.premiumCourses')}</h2>
-              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                {t('academy.expertCurated')}
-              </span>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {courses.filter(c => !c.is_trial).map((course, index) => {
-                const progress = getCourseProgress(course);
+                // Premium course
                 const cf = course.color_from || '#f59e0b';
                 const ct = course.color_to || '#b45309';
                 return (
@@ -232,30 +210,16 @@ export default function AcademyPage() {
                   >
                     <Card
                       className="border h-full transition-all group relative overflow-hidden"
-                      style={{
-                        background: `linear-gradient(to bottom right, ${cf}33, ${ct}33)`,
-                        borderColor: `${cf}55`,
-                      }}
+                      style={{ background: `linear-gradient(to bottom right, ${cf}33, ${ct}33)`, borderColor: `${cf}55` }}
                     >
                       <CardHeader>
                         <div className="flex items-center justify-between mb-4">
-                          <span
-                            className="px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1"
-                            style={{ background: `${cf}22`, color: cf, borderColor: `${cf}55` }}
-                          >
-                            <Crown className="w-3 h-3" /> Premium
-                          </span>
-                          <div
-                            className="w-10 h-10 rounded-lg flex items-center justify-center"
-                            style={{ background: `${cf}22`, color: cf }}
-                          >
+                          <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: `${cf}22`, color: cf }}>
                             <GraduationCap className="w-5 h-5" />
                           </div>
                         </div>
                         <CardTitle className="font-heading text-2xl">{course.title}</CardTitle>
-                        <CardDescription className="text-slate-400">
-                          {course.description}
-                        </CardDescription>
+                        <CardDescription className="text-slate-400">{course.description}</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
@@ -282,32 +246,17 @@ export default function AcademyPage() {
                           )}
                           <div className="flex flex-wrap gap-2 pt-2">
                             {course.topics?.slice(0, 4).map(topic => (
-                              <span
-                                key={topic}
-                                className="px-2 py-1 text-xs rounded-md"
-                                style={{ background: `${cf}18`, color: `${cf}cc` }}
-                              >
-                                {topic}
-                              </span>
+                              <span key={topic} className="px-2 py-1 text-xs rounded-md" style={{ background: `${cf}18`, color: `${cf}cc` }}>{topic}</span>
                             ))}
                           </div>
                           <Link to={`/course/${course.id}`} className="block pt-4">
                             {canAccessPremiumCourses ? (
-                              <Button
-                                className="w-full transition-colors border"
-                                style={{
-                                  background: `${cf}28`,
-                                  color: cf,
-                                  borderColor: `${cf}55`,
-                                }}
-                              >
+                              <Button className="w-full transition-colors border" style={{ background: `${cf}28`, color: cf, borderColor: `${cf}55` }}>
                                 {progress > 0 ? t('academy.continueLearning') : t('academy.startCourse')}
                                 <ChevronRight className="w-4 h-4 ml-2" />
                               </Button>
                             ) : (
-                              <Button
-                                className="w-full transition-colors border bg-muted/40 text-slate-400 border-slate-600/40 hover:bg-muted/60"
-                              >
+                              <Button className="w-full transition-colors border bg-muted/40 text-slate-400 border-slate-600/40 hover:bg-muted/60">
                                 {t('academy.viewCourse')}
                                 <ChevronRight className="w-4 h-4 ml-2" />
                               </Button>
@@ -320,9 +269,9 @@ export default function AcademyPage() {
                 );
               })}
             </div>
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+      </section>
 
       {/* Certification Section */}
       <section className="py-24 bg-card/50">
