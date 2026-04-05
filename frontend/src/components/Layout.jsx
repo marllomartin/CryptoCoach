@@ -161,73 +161,109 @@ export const Layout = ({ children }) => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-card border-b border-border"
+              className="md:hidden bg-card border-b border-border overflow-hidden"
             >
-              <div className="px-4 py-4 space-y-4">
-                {navLinks.map(link => (
-                  <Link 
-                    key={link.to} 
-                    to={link.to}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block py-2 text-slate-300 hover:text-primary"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-                
-                {user && (
+              <div className="px-4 py-4 space-y-1">
+
+                {user ? (
                   <>
-                    <div className="border-t border-border pt-4 mt-4">
-                      {userLinks.map(link => (
+                    {/* User identity */}
+                    <div className="flex items-center gap-3 py-3 mb-2">
+                      <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                        <span className="text-sm font-bold text-primary">{user.full_name?.charAt(0) || 'U'}</span>
+                      </div>
+                      <span className="font-semibold text-white truncate">{user.full_name}</span>
+                    </div>
+
+                    {/* Simulator — prominent like desktop */}
+                    <Link to="/simulator" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full justify-start mb-2 text-primary border-primary/50 hover:bg-primary/10">
+                        <TrendingUp className="w-4 h-4 mr-2 shrink-0" />
+                        {t('nav.simulator')}
+                      </Button>
+                    </Link>
+
+                    {/* Admin Panel — if applicable */}
+                    {['admin', 'moderator', 'editor'].includes(user.role) && (() => {
+                      const roleStyle = {
+                        admin:     'text-red-400 border-red-500/50 hover:bg-red-500/10',
+                        moderator: 'text-purple-400 border-purple-500/50 hover:bg-purple-500/10',
+                        editor:    'text-blue-400 border-blue-500/50 hover:bg-blue-500/10',
+                      }[user.role] || '';
+                      return (
+                        <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
+                          <Button variant="outline" className={`w-full justify-start mb-2 ${roleStyle}`}>
+                            <Shield className="w-4 h-4 mr-2 shrink-0" />
+                            {t('admin.title')}
+                          </Button>
+                        </Link>
+                      );
+                    })()}
+
+                    {/* App links */}
+                    <div className="border-t border-border pt-3 mt-1 space-y-0.5">
+                      {userLinks.filter(l => l.to !== '/simulator').map(link => (
                         <Link
                           key={link.to}
                           to={link.to}
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-2 py-2 text-slate-300 hover:text-primary"
+                          className="flex items-center gap-3 px-2 py-2.5 rounded-md text-slate-300 hover:text-primary hover:bg-primary/5 transition-colors"
                         >
-                          <link.icon className="w-4 h-4" />
+                          <link.icon className="w-4 h-4 shrink-0" />
+                          <span className="text-sm">{link.label}</span>
+                        </Link>
+                      ))}
+                    </div>
+
+                    {/* Public nav links */}
+                    <div className="border-t border-border pt-3 mt-1 space-y-0.5">
+                      {navLinks.map(link => (
+                        <Link
+                          key={link.to}
+                          to={link.to}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block px-2 py-2.5 rounded-md text-sm text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
+                        >
                           {link.label}
                         </Link>
                       ))}
-                      {['admin', 'moderator', 'editor'].includes(user.role) && (
-                        <Link
-                          to="/admin"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={`flex items-center gap-2 py-2 ${{
-                            admin:     'text-red-400 hover:text-red-300',
-                            moderator: 'text-purple-400 hover:text-purple-300',
-                            editor:    'text-blue-400 hover:text-blue-300',
-                          }[user.role] || 'text-fuchsia-400 hover:text-fuchsia-300'}`}
-                        >
-                          <Shield className="w-4 h-4" />
-                          {t('admin.title')}
-                        </Link>
-                      )}
+                    </div>
+
+                    {/* Sign out */}
+                    <div className="border-t border-border pt-3 mt-1">
+                      <button
+                        onClick={() => { logout(); setMobileMenuOpen(false); }}
+                        className="flex items-center gap-3 w-full px-2 py-2.5 rounded-md text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/5 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4 shrink-0" />
+                        {t('nav.signOut', 'Sign Out')}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Public nav links */}
+                    {navLinks.map(link => (
+                      <Link
+                        key={link.to}
+                        to={link.to}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block px-2 py-2.5 rounded-md text-sm text-slate-300 hover:text-primary hover:bg-primary/5 transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                    <div className="border-t border-border pt-3 mt-1 space-y-2">
+                      <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="ghost" className="w-full">{t('nav.signIn')}</Button>
+                      </Link>
+                      <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                        <Button className="w-full bg-primary">{t('nav.getStarted')}</Button>
+                      </Link>
                     </div>
                   </>
                 )}
 
-                <div className="border-t border-border pt-4">
-                  {user ? (
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start text-slate-400"
-                      onClick={() => { logout(); setMobileMenuOpen(false); }}
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
-                    </Button>
-                  ) : (
-                    <div className="space-y-2">
-                      <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                        <Button variant="ghost" className="w-full">Sign In</Button>
-                      </Link>
-                      <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                        <Button className="w-full bg-primary">Get Started</Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
               </div>
             </motion.div>
           )}
