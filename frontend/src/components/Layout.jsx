@@ -19,7 +19,6 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import LanguageSwitcher from './LanguageSwitcher';
-import NotificationBell from './NotificationBell';
 
 const NavLink = ({ to, children, onClick }) => {
   const location = useLocation();
@@ -109,7 +108,6 @@ export const Layout = ({ children }) => {
                       </Link>
                     );
                   })()}
-                  <NotificationBell />
                   <Link to="/profile">
                     <Button variant="ghost" size="sm" className="whitespace-nowrap text-slate-300">
                       <User className="w-4 h-4 mr-2 shrink-0" />

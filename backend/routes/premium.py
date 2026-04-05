@@ -225,45 +225,12 @@ async def apply_referral_bonus(request: ReferralBonusRequest):
     # This would be called when a referral is confirmed
     # In a real implementation, this would update the database
     
-    # Create notification for the referrer
-    try:
-        await db.notifications.insert_one({
-            "user_id": request.referrer_user_id,
-            "type": "referral_bonus",
-            "title": "Bonus de Parrainage!",
-            "message": f"Félicitations! Vous avez gagné {TRIAL_CONFIG['referral_bonus_days']} jours d'essai gratuit grâce à votre parrainage!",
-            "icon": "gift",
-            "read": False,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        })
-    except Exception as e:
-        print(f"Error creating notification: {e}")
-    
     return {
         "success": True,
         "bonus_days": TRIAL_CONFIG["referral_bonus_days"],
         "message": f"Félicitations! Vous avez gagné {TRIAL_CONFIG['referral_bonus_days']} jours d'essai gratuit!"
     }
 
-
-@premium_router.post("/trial/expiry-reminder/{user_id}")
-async def send_trial_expiry_reminder(user_id: str, days_remaining: int = 1):
-    """Send trial expiry reminder notification"""
-    try:
-        await db.notifications.insert_one({
-            "user_id": user_id,
-            "type": "trial_expiry",
-            "title": "Votre essai expire bientôt!",
-            "message": f"Il vous reste {days_remaining} jour{'s' if days_remaining > 1 else ''} pour profiter de l'accès vidéo gratuit. Passez à un abonnement pour continuer.",
-            "icon": "clock",
-            "action_url": "/pricing",
-            "action_label": "Voir les offres",
-            "read": False,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        })
-        return {"success": True, "message": "Reminder sent"}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
 
 
 @premium_router.get("/user/access-summary")
