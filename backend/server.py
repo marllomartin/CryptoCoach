@@ -730,27 +730,30 @@ from services.content_aggregator import get_localized_lesson, get_all_lessons_fo
 
 @api_router.get("/courses/{course_id}/lessons", response_model=List[Lesson])
 async def get_course_lessons(course_id: str, lang: str = "en"):
-    # First try built-in content (trial + all other static lessons)
-    static_lessons = get_all_lessons_for_course(course_id, lang)
-    if static_lessons:
-        for lesson in static_lessons:
-            lesson.setdefault("xp_reward", 50)
-            lesson.setdefault("quiz_questions", [])
-            lesson.setdefault("recommended_readings", [])
-            lesson.setdefault("examples", [])
-            lesson.setdefault("learning_objectives", [])
-            lesson.setdefault("audio_intro", None)
-            lesson.setdefault("audio_full", None)
-            lesson.setdefault("subtitle", "")
-            lesson.setdefault("summary", "")
-            lesson.setdefault("checkpoints", [])
-            lesson.setdefault("infographics", [])
-            lesson.setdefault("hero_image", None)
-        return static_lessons
-    
-    # Fallback to database
+    # If an admin has ever edited this course's lessons, trust the DB exclusively
+    course_doc = await db.courses.find_one({"id": course_id}, {"_id": 0, "content_managed": 1})
+    if not (course_doc and course_doc.get("content_managed")):
+        # No admin edits yet — serve static built-in content
+        static_lessons = get_all_lessons_for_course(course_id, lang)
+        if static_lessons:
+            for lesson in static_lessons:
+                lesson.setdefault("xp_reward", 50)
+                lesson.setdefault("quiz_questions", [])
+                lesson.setdefault("recommended_readings", [])
+                lesson.setdefault("examples", [])
+                lesson.setdefault("learning_objectives", [])
+                lesson.setdefault("audio_intro", None)
+                lesson.setdefault("audio_full", None)
+                lesson.setdefault("subtitle", "")
+                lesson.setdefault("summary", "")
+                lesson.setdefault("checkpoints", [])
+                lesson.setdefault("infographics", [])
+                lesson.setdefault("hero_image", None)
+            return static_lessons
+
+    # DB is authoritative — use it (and seed if somehow empty for non-trial courses)
     lessons = await db.lessons.find({"course_id": course_id}, {"_id": 0}).sort("order", 1).to_list(100)
-    if not lessons:
+    if not lessons and not (course_doc and course_doc.get("content_managed")):
         await seed_lessons(course_id)
         lessons = await db.lessons.find({"course_id": course_id}, {"_id": 0}).sort("order", 1).to_list(100)
 
@@ -768,9 +771,18 @@ async def get_course_lessons(course_id: str, lang: str = "en"):
 
 @api_router.get("/lessons/{lesson_id}", response_model=Lesson)
 async def get_lesson(lesson_id: str, lang: str = "en"):
-    # First try built-in content (trial + all other static lessons)
-    static_lesson = get_localized_lesson(lesson_id, lang)
-    if static_lesson:
+    # Check if the parent course is DB-managed (admin has edited its content)
+    static_raw = ALL_LESSONS.get(lesson_id)
+    course_managed = False
+    if static_raw:
+        course_doc = await db.courses.find_one(
+            {"id": static_raw["course_id"]}, {"_id": 0, "content_managed": 1}
+        )
+        course_managed = bool(course_doc and course_doc.get("content_managed"))
+
+    if not course_managed and static_raw:
+        # Serve static content — no admin edits yet
+        static_lesson = get_localized_lesson(lesson_id, lang)
         static_lesson.setdefault("xp_reward", 50)
         static_lesson.setdefault("quiz_questions", [])
         static_lesson.setdefault("recommended_readings", [])
@@ -784,8 +796,8 @@ async def get_lesson(lesson_id: str, lang: str = "en"):
         static_lesson.setdefault("infographics", [])
         static_lesson.setdefault("hero_image", None)
         return static_lesson
-    
-    # Fallback to database
+
+    # DB is authoritative
     lesson = await db.lessons.find_one({"id": lesson_id}, {"_id": 0})
     if not lesson:
         raise HTTPException(status_code=404, detail="Lesson not found")
@@ -794,7 +806,6 @@ async def get_lesson(lesson_id: str, lang: str = "en"):
     if not localized:
         raise HTTPException(status_code=404, detail=f"Lesson not available in language '{lang}'")
 
-    # Add images
     images = get_lesson_images(lesson_id)
     localized["hero_image"] = images.get("hero_image")
     localized["infographics"] = images.get("infographics", [])
@@ -4529,6 +4540,11 @@ async def _migrate_static_lesson(lesson_id: str) -> Optional[dict]:
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.lessons.insert_one(doc)
+    # Mark the course as DB-managed so public endpoints stop using static content
+    await db.courses.update_one(
+        {"id": static["course_id"]},
+        {"$set": {"content_managed": True}}
+    )
     return doc
 
 
