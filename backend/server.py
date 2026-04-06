@@ -46,7 +46,7 @@ from routes.gamification import router as gamification_router
 from routes.trading_arena import router as trading_router
 from routes.media import media_router
 from routes.premium import premium_router
-from routes.market_intelligence import market_router, newsletter_router, set_database as set_newsletter_db
+from routes.market_intelligence import market_router, newsletter_router, set_database as set_newsletter_db, set_async_database as set_market_async_db
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -60,6 +60,7 @@ from pymongo import MongoClient
 sync_client = MongoClient(mongo_url)
 sync_db = sync_client[os.environ['DB_NAME']]
 set_newsletter_db(sync_db)
+set_market_async_db(db)  # async Motor db for news_views collection
 
 JWT_SECRET = os.environ.get('JWT_SECRET', 'default_secret_key')
 JWT_ALGORITHM = "HS256"
