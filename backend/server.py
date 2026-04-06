@@ -717,10 +717,10 @@ async def get_me(current_user: dict = Depends(get_current_user)):
 
 @api_router.get("/courses")
 async def get_courses(lang: str = "en"):
-    courses = await db.courses.find({}, {"_id": 0}).to_list(100)
+    courses = await db.courses.find({"is_published": True}, {"_id": 0}).to_list(100)
     if not courses:
         await seed_courses()
-        courses = await db.courses.find({}, {"_id": 0}).to_list(100)
+        courses = await db.courses.find({"is_published": True}, {"_id": 0}).to_list(100)
     result = []
     for course in courses:
         localized = localize_course(course, lang)
