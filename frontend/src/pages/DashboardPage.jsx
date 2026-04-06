@@ -23,16 +23,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Progress } from '../components/ui/progress';
 
 export default function DashboardPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, token } = useAuth();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [streakModalOpen, setStreakModalOpen] = useState(false);
 
   useEffect(() => {
+    const lang = i18n.language?.split('-')[0] || 'en';
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${API}/courses`);
+        const response = await axios.get(`${API}/courses?lang=${lang}`);
         setCourses(response.data);
       } catch (e) {
         console.error('Failed to fetch data', e);
@@ -41,7 +42,7 @@ export default function DashboardPage() {
       }
     };
     fetchData();
-  }, []);
+  }, [i18n.language]);
 
   const hasCertificate = (course) => {
     const exams = user?.completed_exams || [];
