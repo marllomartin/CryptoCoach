@@ -724,52 +724,50 @@ export default function LessonPage() {
               />
             </div>
 
-            {/* Complete Button */}
-            <div className="flex items-center justify-between pt-6 border-t border-border">
+            {/* Lesson Navigation */}
+            <div className="flex flex-wrap items-stretch gap-3 pt-6 border-t border-border">
               {prevLesson && (
-                <Link to={`/lesson/${prevLesson.id}`}>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <ChevronLeft className="w-4 h-4" />
+                <Link to={`/lesson/${prevLesson.id}`} className="flex-1 min-w-[120px]">
+                  <Button variant="outline" className="w-full h-10 flex items-center justify-center gap-2 whitespace-nowrap">
+                    <ChevronLeft className="w-4 h-4 flex-shrink-0" />
                     {t('lesson.previous')}
                   </Button>
                 </Link>
               )}
-              
-              <div className="flex items-center gap-4">
-                {!isCompleted && user && (
-                  <Button
-                    onClick={completeLesson}
-                    disabled={completing}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    {completing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        {t('lesson.validating')}
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        {t('lesson.markComplete')}
-                      </>
-                    )}
-                  </Button>
-                )}
-                
-                <Link to={`/quiz/${lessonId}`}>
-                  <Button className="flex items-center gap-2">
-                    <GraduationCap className="w-4 h-4" />
-                    {t('lesson.takeQuiz')}
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </Link>
-              </div>
-              
+
+              {!isCompleted && user && (
+                <Button
+                  onClick={completeLesson}
+                  disabled={completing}
+                  className="flex-1 min-w-[140px] h-10 bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2 whitespace-nowrap"
+                >
+                  {completing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 flex-shrink-0 animate-spin" />
+                      {t('lesson.validating')}
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                      {t('lesson.markComplete')}
+                    </>
+                  )}
+                </Button>
+              )}
+
+              <Link to={`/quiz/${lessonId}`} className="flex-1 min-w-[120px]">
+                <Button className="w-full h-10 flex items-center justify-center gap-2 whitespace-nowrap">
+                  <GraduationCap className="w-4 h-4 flex-shrink-0" />
+                  {t('lesson.takeQuiz')}
+                  <ChevronRight className="w-4 h-4 flex-shrink-0" />
+                </Button>
+              </Link>
+
               {nextLesson && (
-                <Link to={`/lesson/${nextLesson.id}`}>
-                  <Button variant="outline" className="flex items-center gap-2">
+                <Link to={`/lesson/${nextLesson.id}`} className="flex-1 min-w-[120px]">
+                  <Button variant="outline" className="w-full h-10 flex items-center justify-center gap-2 whitespace-nowrap">
                     {t('lesson.next')}
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-4 h-4 flex-shrink-0" />
                   </Button>
                 </Link>
               )}
