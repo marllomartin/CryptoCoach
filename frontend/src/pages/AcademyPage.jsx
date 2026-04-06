@@ -124,12 +124,17 @@ export default function AcademyPage() {
                           <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: `${cf}22`, color: cf }}>
                             <GraduationCap className="w-5 h-5" />
                           </div>
-                          {certified && (
+                          {certified ? (
                             <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium">
                               <Award className="w-3 h-3" />
                               {t('dashboard.certified')}
                             </span>
-                          )}
+                          ) : progress === 100 && user ? (
+                            <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-medium">
+                              <Award className="w-3 h-3" />
+                              {t('dashboard.examPending')}
+                            </span>
+                          ) : null}
                         </div>
                         <CardTitle className="font-heading text-2xl">{course.title}</CardTitle>
                         <CardDescription className="text-slate-400">{course.description}</CardDescription>
