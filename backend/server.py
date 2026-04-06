@@ -969,11 +969,14 @@ async def submit_quiz(submission: QuizSubmission, current_user: dict = Depends(g
 
 # ==================== EXAM ROUTES ====================
 
-@api_router.get("/exams/{level}")
-async def get_exam(level: int):
-    exam = await db.exams.find_one({"level": level}, {"_id": 0})
+@api_router.get("/exams/{course_id}")
+async def get_exam(course_id: str):
+    # Look up by course_id first, then fall back to legacy level-based id
+    exam = await db.exams.find_one({"course_id": course_id}, {"_id": 0})
     if not exam:
-        exam = await create_exam_for_level(level)
+        exam = await db.exams.find_one({"id": f"exam-{course_id}"}, {"_id": 0})
+    if not exam:
+        exam = await create_exam_for_course(course_id)
     return exam
 
 @api_router.post("/exams/submit")
@@ -1004,8 +1007,14 @@ async def submit_exam(submission: ExamSubmission, current_user: dict = Depends(g
     
     if passed and submission.exam_id not in current_user.get("completed_exams", []):
         cert_id = str(uuid.uuid4())
-        cert_name = ["Certified Crypto Foundations", "Certified Crypto Investor", "Advanced Crypto Strategist"][exam["level"] - 1]
-        
+        # Resolve cert name from course, falling back to level-based names
+        course_id = exam.get("course_id")
+        cert_name = exam.get("title", "Crypto Certificate")
+        if course_id:
+            course_doc = await db.courses.find_one({"id": course_id}, {"_id": 0, "title": 1, "translations": 1})
+            if course_doc:
+                cert_name = course_doc.get("title") or cert_name
+
         await db.users.update_one(
             {"id": current_user["id"]},
             {
@@ -1013,13 +1022,14 @@ async def submit_exam(submission: ExamSubmission, current_user: dict = Depends(g
                 "$inc": {"xp_points": 500}
             }
         )
-        
+
         await db.certificates.insert_one({
             "id": cert_id,
             "user_id": current_user["id"],
             "user_name": current_user["full_name"],
             "cert_name": cert_name,
-            "level": exam["level"],
+            "course_id": course_id,
+            "level": exam.get("level"),
             "score": score,
             "issued_at": datetime.now(timezone.utc).isoformat()
         })
@@ -3039,7 +3049,25 @@ async def create_quiz_for_lesson(lesson_id: str) -> dict:
     await db.quizzes.insert_one(quiz)
     return quiz
 
+async def create_exam_for_course(course_id: str) -> dict:
+    # Resolve which question bank to use based on the course's level field
+    course_doc = await db.courses.find_one({"id": course_id}, {"_id": 0, "level": 1, "title": 1})
+    level = course_doc.get("level", 1) if course_doc else 1
+    course_title = course_doc.get("title", "Crypto Course") if course_doc else "Crypto Course"
+    return await _build_exam(course_id=course_id, level=level, title=f"{course_title} Exam")
+
+
 async def create_exam_for_level(level: int) -> dict:
+    """Legacy helper kept for backward-compat with old /exam/:level URLs."""
+    course = await db.courses.find_one({"level": level}, {"_id": 0, "id": 1, "title": 1})
+    course_id = course["id"] if course else f"level-{level}"
+    course_title = course.get("title", "") if course else ""
+    titles = ["Crypto Foundations Exam", "Crypto Investor Exam", "Advanced Strategist Exam"]
+    title = course_title + " Exam" if course_title else titles[level - 1] if level <= 3 else "Crypto Exam"
+    return await _build_exam(course_id=course_id, level=level, title=title)
+
+
+async def _build_exam(course_id: str, level: int, title: str) -> dict:
     exam_questions = {
         1: [
             {"q": "What consensus mechanism does Bitcoin use?", "options": ["Proof of Stake", "Proof of Work", "Delegated Proof of Stake", "Proof of Authority"], "answer": "Proof of Work"},
@@ -3080,20 +3108,21 @@ async def create_exam_for_level(level: int) -> dict:
     }
     
     questions = []
-    for i, q in enumerate(exam_questions.get(level, [])):
+    for i, q in enumerate(exam_questions.get(level, exam_questions[1])):
         questions.append({
-            "id": f"exam-{level}-q{i+1}",
+            "id": f"exam-{course_id}-q{i+1}",
             "question": q["q"],
             "question_type": "multiple_choice",
             "options": q["options"],
             "correct_answer": q["answer"],
             "explanation": ""
         })
-    
+
     exam = {
-        "id": f"exam-level-{level}",
+        "id": f"exam-{course_id}",
+        "course_id": course_id,
         "level": level,
-        "title": ["Crypto Foundations Exam", "Crypto Investor Exam", "Advanced Strategist Exam"][level-1],
+        "title": title,
         "questions": questions,
         "time_limit_minutes": 30,
         "passing_score": 80

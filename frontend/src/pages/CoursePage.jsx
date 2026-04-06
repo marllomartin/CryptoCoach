@@ -63,7 +63,9 @@ export default function CoursePage() {
   };
 
   const hasCertificate = () => {
-    return user?.certificates?.some(c => c.course_id === course?.id || c.level === course?.level);
+    const exams = user?.completed_exams || [];
+    // New course_id-based format + legacy level-based format for backward compat
+    return exams.includes(`exam-${course?.id}`) || exams.includes(`exam-level-${course?.level}`);
   };
 
   if (loading) {
@@ -300,7 +302,7 @@ export default function CoursePage() {
                     }
                   </p>
                   {allLessonsCompleted() ? (
-                    <Link to={`/exam/${course.level}`}>
+                    <Link to={`/exam/${course.id}`}>
                       <Button size="lg" className="bg-primary hover:bg-primary/90">
                         {t('course.takeCertExam')}
                         <ChevronRight className="w-5 h-5 ml-2" />

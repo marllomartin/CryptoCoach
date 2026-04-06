@@ -196,7 +196,7 @@ function App() {
           <Route path="/trading-arena" element={<ProtectedRoute><TradingArenaPage /></ProtectedRoute>} />
           <Route path="/lesson/:lessonId" element={<ProtectedRoute><LessonPage /></ProtectedRoute>} />
           <Route path="/quiz/:lessonId" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
-          <Route path="/exam/:level" element={<ProtectedRoute><ExamPage /></ProtectedRoute>} />
+          <Route path="/exam/:courseId" element={<ProtectedRoute><ExamPage /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="/simulator" element={<Navigate to="/trading-arena" replace />} />
           <Route path="/mentor" element={<ProtectedRoute><MentorPage /></ProtectedRoute>} />

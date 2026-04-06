@@ -33,7 +33,7 @@ import {
 } from "../components/ui/alert-dialog";
 
 export default function ExamPage() {
-  const { level } = useParams();
+  const { courseId } = useParams();
   const navigate = useNavigate();
   const { token, refreshUser } = useAuth();
   const { t } = useTranslation();
@@ -50,7 +50,7 @@ export default function ExamPage() {
   useEffect(() => {
     const fetchExam = async () => {
       try {
-        const response = await axios.get(`${API}/exams/${level}`);
+        const response = await axios.get(`${API}/exams/${courseId}`);
         setExam(response.data);
         setTimeRemaining(response.data.time_limit_minutes * 60);
       } catch (e) {
@@ -60,7 +60,7 @@ export default function ExamPage() {
       }
     };
     fetchExam();
-  }, [level]);
+  }, [courseId]);
 
   // Timer
   useEffect(() => {
@@ -146,12 +146,7 @@ export default function ExamPage() {
     );
   }
 
-  const examNames = {
-    1: "Certified Crypto Foundations",
-    2: "Certified Crypto Investor", 
-    3: "Advanced Crypto Strategist"
-  };
-
+  const examTitle = exam.title || '';
   const answeredCount = Object.keys(answers).length;
   const progress = (answeredCount / exam.questions.length) * 100;
 
@@ -162,7 +157,7 @@ export default function ExamPage() {
         <AlertDialogContent className="bg-card border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-heading text-xl">
-              {examNames[level]} Exam
+              {examTitle}
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-4 text-slate-400">
               <p>{t('exam.aboutToStart')}</p>
@@ -206,7 +201,7 @@ export default function ExamPage() {
             className="mb-8"
           >
             <div className="flex items-center justify-between mb-4">
-              <h1 className="font-heading text-2xl font-bold">{examNames[level]}</h1>
+              <h1 className="font-heading text-2xl font-bold">{examTitle}</h1>
               <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
                 timeRemaining < 300 ? 'bg-red-500/10 text-red-500' : 'bg-primary/10 text-primary'
               }`}>
