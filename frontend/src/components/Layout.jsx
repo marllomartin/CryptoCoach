@@ -44,7 +44,6 @@ export const Layout = ({ children }) => {
 
   const navLinks = [
     { to: '/academy', label: t('nav.academy') },
-    { to: '/market-intelligence', label: t('nav.marketIntel', 'Market Intelligence'), highlight: true },
     { to: '/pricing', label: t('nav.pricing') },
     { to: '/blog', label: t('nav.insights') },
     { to: '/about', label: t('nav.about') },

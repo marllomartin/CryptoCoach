@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Layout from '../components/Layout';
 import { useAuth, API } from '../App';
@@ -358,6 +358,11 @@ function AlertModal({ crypto, onClose, onSave }) {
 export default function MarketIntelligencePage() {
   const { t, i18n } = useTranslation();
   const { user, token } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user === null) navigate('/login', { replace: true });
+  }, [user, navigate]);
   const [cryptos, setCryptos] = useState([]);
   const [globalData, setGlobalData] = useState(null);
   const [fearGreed, setFearGreed] = useState(null);
@@ -813,7 +818,7 @@ export default function MarketIntelligencePage() {
                     </CardTitle>
                     {!isUnlimitedNews && !newsBlocked && (
                       <span className="text-xs text-slate-400">
-                        {t('market.newsViewsLeft', { left: Math.max(0, FREE_NEWS_DAILY_LIMIT - newsViewed) })}
+                        {t('market.newsViewsLeft', { left: Math.max(0, FREE_NEWS_DAILY_LIMIT - newsViewed), count: Math.max(0, FREE_NEWS_DAILY_LIMIT - newsViewed) })}
                       </span>
                     )}
                   </CardHeader>
