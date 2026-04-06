@@ -4,7 +4,6 @@ import { Layout } from '../components/Layout';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API, useAuth } from '../App';
-import { useSubscriptionAccess } from '../components/SubscriptionGate';
 import { useTranslation } from 'react-i18next';
 import {
   GraduationCap,
@@ -21,7 +20,6 @@ import { Progress } from '../components/ui/progress';
 export default function AcademyPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const { canAccessPremiumCourses } = useSubscriptionAccess();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,37 +38,15 @@ export default function AcademyPage() {
     fetchCourses();
   }, [i18n.language]);
 
-  const getLevelStyles = (level) => {
-    const styles = {
-      1: {
-        // Bronze
-        gradient: "from-amber-800/25 to-orange-900/25",
-        border: "border-amber-700/40 hover:border-amber-600/60",
-        icon: "bg-amber-700/15 text-amber-600",
-        badge: "bg-amber-800/20 text-amber-500 border-amber-700/30",
-        tag: "bg-amber-800/15 text-amber-600/80",
-        button: "bg-amber-800/20 hover:bg-amber-700/30 text-amber-500 border border-amber-700/40"
-      },
-      2: {
-        // Silver
-        gradient: "from-slate-400/20 to-zinc-500/20",
-        border: "border-slate-400/40 hover:border-slate-300/60",
-        icon: "bg-slate-400/15 text-slate-300",
-        badge: "bg-slate-400/15 text-slate-300 border-slate-400/30",
-        tag: "bg-slate-400/10 text-slate-400",
-        button: "bg-slate-400/15 hover:bg-slate-400/25 text-slate-300 border border-slate-400/30"
-      },
-      3: {
-        // Gold
-        gradient: "from-yellow-400/20 to-amber-300/20",
-        border: "border-yellow-400/40 hover:border-yellow-300/60",
-        icon: "bg-yellow-400/15 text-yellow-300",
-        badge: "bg-yellow-400/15 text-yellow-300 border-yellow-400/30",
-        tag: "bg-yellow-400/10 text-yellow-400/80",
-        button: "bg-yellow-400/15 hover:bg-yellow-400/25 text-yellow-300 border border-yellow-400/30"
-      }
-    };
-    return styles[level] || styles[1];
+  const LEVEL_COLORS = {
+    1: { from: '#b45309', to: '#7c2d12' },
+    2: { from: '#94a3b8', to: '#71717a' },
+    3: { from: '#eab308', to: '#d97706' },
+  };
+
+  const hasCertificate = (course) => {
+    const exams = user?.completed_exams || [];
+    return exams.includes(`exam-${course.id}`) || exams.includes(`exam-level-${course.level}`);
   };
 
   const getCourseProgress = (course) => {
@@ -128,71 +104,10 @@ export default function AcademyPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[...courses].sort((a, b) => (a.level ?? 99) - (b.level ?? 99)).map((course, index) => {
                 const progress = getCourseProgress(course);
-
-                if (!course.color_from) {
-                  const styles = getLevelStyles(course.level);
-                  return (
-                    <motion.div
-                      key={course.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Card className={`bg-gradient-to-br ${styles.gradient} border ${styles.border} h-full transition-all group relative overflow-hidden`}>
-                        <CardHeader>
-                          <div className="flex items-center justify-between mb-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${styles.badge}`}>
-                              {t('academy.level')} {course.level}
-                            </span>
-                            <div className={`w-10 h-10 rounded-lg ${styles.icon} flex items-center justify-center`}>
-                              <GraduationCap className="w-5 h-5" />
-                            </div>
-                          </div>
-                          <CardTitle className="font-heading text-2xl">{course.title}</CardTitle>
-                          <CardDescription className="text-slate-400">{course.description}</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="flex items-center gap-6 text-sm text-slate-400">
-                              <div className="flex items-center gap-2">
-                                <BookOpen className="w-4 h-4" />
-                                <span>{course.lessons_count} {t('academy.lessons')}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4" />
-                                <span>{course.duration_hours}h</span>
-                              </div>
-                            </div>
-                            {user && (
-                              <div className="space-y-2">
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-slate-400">{t('academy.progress')}</span>
-                                  <span className="text-primary font-medium">{progress}%</span>
-                                </div>
-                                <Progress value={progress} className="h-2" />
-                              </div>
-                            )}
-                            <div className="flex flex-wrap gap-2 pt-2">
-                              {course.topics?.slice(0, 4).map(topic => (
-                                <span key={topic} className={`px-2 py-1 text-xs rounded-md ${styles.tag}`}>{topic}</span>
-                              ))}
-                            </div>
-                            <Link to={`/course/${course.id}`} className="block pt-4">
-                              <Button className={`w-full transition-colors ${styles.button}`}>
-                                {progress > 0 ? t('academy.continueLearning') : t('academy.startCourse')}
-                                <ChevronRight className="w-4 h-4 ml-2" />
-                              </Button>
-                            </Link>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  );
-                }
-
-                // Premium course
-                const cf = course.color_from || '#f59e0b';
-                const ct = course.color_to || '#b45309';
+                const certified = hasCertificate(course);
+                const fallback = LEVEL_COLORS[course.level] || LEVEL_COLORS[1];
+                const cf = course.color_from || fallback.from;
+                const ct = course.color_to || fallback.to;
                 return (
                   <motion.div
                     key={course.id}
@@ -209,6 +124,12 @@ export default function AcademyPage() {
                           <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: `${cf}22`, color: cf }}>
                             <GraduationCap className="w-5 h-5" />
                           </div>
+                          {certified && (
+                            <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium">
+                              <Award className="w-3 h-3" />
+                              {t('dashboard.certified')}
+                            </span>
+                          )}
                         </div>
                         <CardTitle className="font-heading text-2xl">{course.title}</CardTitle>
                         <CardDescription className="text-slate-400">{course.description}</CardDescription>
@@ -227,7 +148,7 @@ export default function AcademyPage() {
                               </div>
                             )}
                           </div>
-                          {user && canAccessPremiumCourses && (
+                          {user && (
                             <div className="space-y-2">
                               <div className="flex justify-between text-sm">
                                 <span className="text-slate-400">{t('academy.progress')}</span>
@@ -242,17 +163,10 @@ export default function AcademyPage() {
                             ))}
                           </div>
                           <Link to={`/course/${course.id}`} className="block pt-4">
-                            {canAccessPremiumCourses ? (
-                              <Button className="w-full transition-colors border" style={{ background: `${cf}28`, color: cf, borderColor: `${cf}55` }}>
-                                {progress > 0 ? t('academy.continueLearning') : t('academy.startCourse')}
-                                <ChevronRight className="w-4 h-4 ml-2" />
-                              </Button>
-                            ) : (
-                              <Button className="w-full transition-colors border bg-muted/40 text-slate-400 border-slate-600/40 hover:bg-muted/60">
-                                {t('academy.viewCourse')}
-                                <ChevronRight className="w-4 h-4 ml-2" />
-                              </Button>
-                            )}
+                            <Button className="w-full transition-colors border" style={{ background: `${cf}28`, color: cf, borderColor: `${cf}55` }}>
+                              {progress > 0 ? t('academy.continueLearning') : t('academy.startCourse')}
+                              <ChevronRight className="w-4 h-4 ml-2" />
+                            </Button>
                           </Link>
                         </div>
                       </CardContent>

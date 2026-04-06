@@ -860,6 +860,8 @@ const resources = {
         yourCourses: 'Your Courses',
         viewAll: 'View All',
         completed: 'Completed',
+        certified: 'Certified',
+        examPending: 'Exam Pending',
         certificatesCta: 'You have {{count}} certificate(s)!',
         downloadAchievements: 'Download and share your achievements',
         viewCertificates: 'View Certificates'
@@ -2153,6 +2155,8 @@ const resources = {
         yourCourses: 'Vos Cours',
         viewAll: 'Voir tout',
         completed: 'Terminé',
+        certified: 'Certifié',
+        examPending: 'Examen en attente',
         certificatesCta: 'Vous avez {{count}} certificat(s) !',
         downloadAchievements: 'Téléchargez et partagez vos réalisations',
         viewCertificates: 'Voir les certificats'
@@ -3247,6 +3251,8 @@ const resources = {
         yourCourses: 'دوراتك',
         viewAll: 'عرض الكل',
         completed: 'مكتمل',
+        certified: 'معتمد',
+        examPending: 'اختبار معلق',
         certificatesCta: 'لديك {{count}} شهادة مكتملة!',
         downloadAchievements: 'تنزيل الإنجازات',
         viewCertificates: 'عرض الشهادات'
@@ -4739,6 +4745,8 @@ const resources = {
         yourCourses: 'Seus Cursos',
         viewAll: 'Ver Todos',
         completed: 'Concluído',
+        certified: 'Certificado',
+        examPending: 'Exame pendente',
         certificatesCta: 'Você tem {{count}} certificado(s)!',
         downloadAchievements: 'Baixe e compartilhe suas conquistas',
         viewCertificates: 'Ver Certificados'
