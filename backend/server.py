@@ -969,15 +969,41 @@ async def submit_quiz(submission: QuizSubmission, current_user: dict = Depends(g
 
 # ==================== EXAM ROUTES ====================
 
+def _localize_exam(exam: dict, lang: str) -> dict:
+    """Convert a stored exam to a flat (localized) format for the frontend.
+    Supports both the new translations-based format and the legacy flat format."""
+    if not exam:
+        return exam
+    localized_questions = []
+    for q in exam.get("questions", []):
+        if "translations" in q:
+            # New format: pick the requested language, fall back to EN
+            trans = q["translations"].get(lang) or q["translations"].get("en") or next(iter(q["translations"].values()), {})
+            options = trans.get("options", [])
+            idx = q.get("correct_answer_index", 0)
+            correct_answer = options[idx] if options and 0 <= idx < len(options) else (options[0] if options else "")
+            localized_questions.append({
+                "id": q["id"],
+                "question": trans.get("question", ""),
+                "question_type": q.get("question_type", "multiple_choice"),
+                "options": options,
+                "correct_answer": correct_answer,
+                "explanation": trans.get("explanation", ""),
+            })
+        else:
+            # Legacy flat format — return as-is
+            localized_questions.append(q)
+    return {**exam, "questions": localized_questions}
+
 @api_router.get("/exams/{course_id}")
-async def get_exam(course_id: str):
+async def get_exam(course_id: str, lang: str = "en"):
     # Look up by course_id first, then fall back to legacy level-based id
     exam = await db.exams.find_one({"course_id": course_id}, {"_id": 0})
     if not exam:
         exam = await db.exams.find_one({"id": f"exam-{course_id}"}, {"_id": 0})
     if not exam:
         exam = await create_exam_for_course(course_id)
-    return exam
+    return _localize_exam(exam, lang)
 
 @api_router.post("/exams/submit")
 async def submit_exam(submission: ExamSubmission, current_user: dict = Depends(get_current_user)):
@@ -4722,6 +4748,67 @@ async def upsert_lesson_quiz(
 async def delete_lesson_quiz_admin(lesson_id: str, admin: dict = Depends(require_moderator_or_above)):
     """Delete the quiz for a lesson"""
     await db.quizzes.delete_one({"lesson_id": lesson_id})
+    return {"status": "deleted"}
+
+# ==================== ADMIN EXAM ROUTES ====================
+
+class AdminExamRequest(BaseModel):
+    title: Optional[str] = None
+    time_limit_minutes: int = 30
+    passing_score: int = 80
+    questions: List[AdminQuizQuestion]  # reuse same question model as quizzes
+
+@api_router.get("/admin/courses/{course_id}/exam")
+async def get_admin_course_exam(course_id: str, admin: dict = Depends(get_admin_user)):
+    """Return the raw exam document (with translations) for a course."""
+    exam = await db.exams.find_one({"course_id": course_id}, {"_id": 0})
+    if not exam:
+        raise HTTPException(status_code=404, detail="No exam found for this course")
+    return exam
+
+@api_router.put("/admin/courses/{course_id}/exam")
+async def upsert_course_exam(
+    course_id: str,
+    request: AdminExamRequest,
+    admin: dict = Depends(get_admin_user)
+):
+    """Create or replace the certification exam for a course."""
+    course = await db.courses.find_one({"id": course_id}, {"_id": 0, "level": 1, "translations": 1, "title": 1})
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    level = course.get("level", 1)
+    course_title = (
+        course.get("translations", {}).get("en", {}).get("title")
+        or course.get("title", course_id)
+    )
+    title = request.title or f"{course_title} Exam"
+
+    questions = []
+    for i, q in enumerate(request.questions):
+        questions.append({
+            "id": f"exam-{course_id}-q{i+1}",
+            "question_type": q.question_type,
+            "correct_answer_index": q.correct_answer_index,
+            "translations": {lang: t.model_dump() for lang, t in q.translations.items()}
+        })
+
+    exam_doc = {
+        "id": f"exam-{course_id}",
+        "course_id": course_id,
+        "level": level,
+        "title": title,
+        "questions": questions,
+        "time_limit_minutes": request.time_limit_minutes,
+        "passing_score": request.passing_score,
+    }
+    await db.exams.replace_one({"course_id": course_id}, exam_doc, upsert=True)
+    return {"status": "success", "questions": len(questions)}
+
+@api_router.delete("/admin/courses/{course_id}/exam")
+async def delete_course_exam(course_id: str, admin: dict = Depends(require_moderator_or_above)):
+    """Delete the certification exam for a course."""
+    await db.exams.delete_one({"course_id": course_id})
     return {"status": "deleted"}
 
 # ==================== MIGRATION ROUTES ====================

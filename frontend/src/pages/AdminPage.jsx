@@ -34,7 +34,8 @@ import {
   Tag,
   Calendar,
   Percent,
-  XCircle
+  XCircle,
+  Award
 } from 'lucide-react';
 import { AnalyticsDashboard } from '../components/AnalyticsDashboard';
 import NewsletterAdminTab from '../components/NewsletterAdminTab';
@@ -805,6 +806,246 @@ function QuizForm({ lessonId, lessonTitle, token, onClose }) {
   );
 }
 
+function ExamForm({ courseId, courseTitle, token, onClose }) {
+  const [activeLang, setActiveLang] = useState('en');
+  const [timeLimitMinutes, setTimeLimitMinutes] = useState(30);
+  const [passingScore, setPassingScore] = useState(80);
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await axios.get(`${API}/admin/courses/${courseId}/exam`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setTimeLimitMinutes(res.data.time_limit_minutes ?? 30);
+        setPassingScore(res.data.passing_score ?? 80);
+        setQuestions((res.data.questions || []).map((q, i) => {
+          // Support both new (translations) and legacy flat format
+          if (q.translations) {
+            return {
+              _key: i,
+              question_type: q.question_type || 'multiple_choice',
+              correct_answer_index: q.correct_answer_index ?? 0,
+              translations: Object.fromEntries(
+                LANG_OPTIONS.map(({ code }) => [code, {
+                  question: q.translations?.[code]?.question || '',
+                  options: (q.translations?.[code]?.options || []).join('\n'),
+                  explanation: q.translations?.[code]?.explanation || '',
+                }])
+              )
+            };
+          }
+          // Legacy flat: map EN options to index
+          const options = q.options || [];
+          const correctIdx = Math.max(0, options.indexOf(q.correct_answer));
+          return {
+            _key: i,
+            question_type: q.question_type || 'multiple_choice',
+            correct_answer_index: correctIdx,
+            translations: Object.fromEntries(
+              LANG_OPTIONS.map(({ code }) => [code, {
+                question: code === 'en' ? (q.question || '') : '',
+                options: code === 'en' ? options.join('\n') : '',
+                explanation: code === 'en' ? (q.explanation || '') : '',
+              }])
+            )
+          };
+        }));
+      } catch {
+        // No exam yet — start empty
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [courseId]);
+
+  const emptyQuestion = () => ({
+    _key: Date.now(),
+    question_type: 'multiple_choice',
+    correct_answer_index: 0,
+    translations: Object.fromEntries(LANG_OPTIONS.map(({ code }) => [code, { question: '', options: '', explanation: '' }]))
+  });
+
+  const addQuestion = () => setQuestions(prev => [...prev, emptyQuestion()]);
+  const removeQuestion = (key) => setQuestions(prev => prev.filter(q => q._key !== key));
+  const updateQ = (key, field, value) =>
+    setQuestions(prev => prev.map(q => q._key === key ? { ...q, [field]: value } : q));
+  const updateTrans = (key, lang, field, value) =>
+    setQuestions(prev => prev.map(q =>
+      q._key === key
+        ? { ...q, translations: { ...q.translations, [lang]: { ...q.translations[lang], [field]: value } } }
+        : q
+    ));
+
+  const handleSave = async () => {
+    if (questions.length === 0) { toast.error('Add at least one question'); return; }
+    setSaving(true);
+    try {
+      const payload = {
+        time_limit_minutes: Number(timeLimitMinutes),
+        passing_score: Number(passingScore),
+        questions: questions.map(q => ({
+          question_type: q.question_type,
+          correct_answer_index: Number(q.correct_answer_index),
+          translations: Object.fromEntries(
+            LANG_OPTIONS
+              .filter(({ code }) => q.translations[code]?.question?.trim())
+              .map(({ code }) => [code, {
+                question: q.translations[code].question.trim(),
+                options: q.translations[code].options.split('\n').map(s => s.trim()).filter(Boolean),
+                explanation: q.translations[code].explanation.trim(),
+              }])
+          )
+        })).filter(q => Object.keys(q.translations).length > 0)
+      };
+      if (payload.questions.length === 0) { toast.error('Each question needs at least one language filled'); return; }
+      await axios.put(`${API}/admin/courses/${courseId}/exam`, payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Exam saved');
+      onClose();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Failed to save exam');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin" /></div>;
+
+  return (
+    <Card className="bg-card border-border">
+      <CardHeader>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Award className="w-5 h-5 text-amber-400" />
+          Certification Exam — {courseTitle}
+        </CardTitle>
+        {/* Settings row */}
+        <div className="flex flex-wrap gap-4 mt-2">
+          <label className="flex items-center gap-2 text-sm text-slate-400">
+            Time limit (min)
+            <input
+              type="number"
+              min={5}
+              max={180}
+              value={timeLimitMinutes}
+              onChange={e => setTimeLimitMinutes(e.target.value)}
+              className="w-20 bg-muted border border-border rounded px-2 py-1 text-sm text-foreground"
+            />
+          </label>
+          <label className="flex items-center gap-2 text-sm text-slate-400">
+            Passing score (%)
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={passingScore}
+              onChange={e => setPassingScore(e.target.value)}
+              className="w-20 bg-muted border border-border rounded px-2 py-1 text-sm text-foreground"
+            />
+          </label>
+        </div>
+        {/* Language tabs */}
+        <div className="flex gap-2 flex-wrap mt-2">
+          {LANG_OPTIONS.map(({ code, flag, label }) => (
+            <button
+              key={code}
+              onClick={() => setActiveLang(code)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                activeLang === code
+                  ? 'bg-primary/20 text-primary border border-primary/40'
+                  : 'bg-muted text-slate-400 hover:text-foreground'
+              }`}
+            >
+              {flag} {label}
+            </button>
+          ))}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {questions.length === 0 && (
+          <p className="text-slate-400 text-center py-4 text-sm">No questions yet. Add your first one below.</p>
+        )}
+        {questions.map((q, idx) => {
+          const enOptions = (q.translations['en']?.options || '').split('\n').filter(Boolean);
+          return (
+            <div key={q._key} className="border border-border rounded-lg p-4 space-y-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-sm font-semibold text-slate-400 w-6">Q{idx + 1}</span>
+                <select
+                  value={q.question_type}
+                  onChange={e => updateQ(q._key, 'question_type', e.target.value)}
+                  className="bg-muted border border-border rounded px-2 py-1 text-sm"
+                >
+                  <option value="multiple_choice">Multiple Choice</option>
+                  <option value="true_false">True / False</option>
+                </select>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-slate-400">Correct:</span>
+                  <select
+                    value={q.correct_answer_index}
+                    onChange={e => updateQ(q._key, 'correct_answer_index', Number(e.target.value))}
+                    className="bg-muted border border-border rounded px-2 py-1 text-sm"
+                  >
+                    {q.question_type === 'true_false' ? (
+                      <>
+                        <option value={0}>True</option>
+                        <option value={1}>False</option>
+                      </>
+                    ) : enOptions.length > 0
+                      ? enOptions.map((opt, i) => (
+                          <option key={i} value={i}>{String.fromCharCode(65 + i)}: {opt.slice(0, 28)}</option>
+                        ))
+                      : [0, 1, 2, 3].map(i => (
+                          <option key={i} value={i}>{String.fromCharCode(65 + i)}</option>
+                        ))
+                    }
+                  </select>
+                </div>
+                <Button size="sm" variant="ghost" onClick={() => removeQuestion(q._key)} className="ml-auto">
+                  <Trash2 className="w-4 h-4 text-red-500" />
+                </Button>
+              </div>
+              <Input
+                placeholder={`Question text (${activeLang})`}
+                value={q.translations[activeLang]?.question ?? ''}
+                onChange={e => updateTrans(q._key, activeLang, 'question', e.target.value)}
+              />
+              <Textarea
+                placeholder={q.question_type === 'true_false'
+                  ? `Options (${activeLang}) — e.g. True\nFalse`
+                  : `Options (${activeLang}) — one per line`}
+                rows={4}
+                value={q.translations[activeLang]?.options ?? ''}
+                onChange={e => updateTrans(q._key, activeLang, 'options', e.target.value)}
+              />
+              <Input
+                placeholder={`Explanation (${activeLang})`}
+                value={q.translations[activeLang]?.explanation ?? ''}
+                onChange={e => updateTrans(q._key, activeLang, 'explanation', e.target.value)}
+              />
+            </div>
+          );
+        })}
+        <Button variant="outline" onClick={addQuestion} className="w-full">
+          <Plus className="w-4 h-4 mr-2" /> Add Question
+        </Button>
+        <div className="flex gap-2 justify-end pt-2 border-t border-border">
+          <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving} className="bg-amber-600 hover:bg-amber-700">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+            Save Exam
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // Courses Tab Component
 function CoursesTab({ token, currentUser }) {
   const canDelete = ['admin', 'moderator'].includes(currentUser?.role);
@@ -822,6 +1063,8 @@ function CoursesTab({ token, currentUser }) {
   const [editingLesson, setEditingLesson] = useState(null);
   const [showQuizForm, setShowQuizForm] = useState(false);
   const [selectedLessonForQuiz, setSelectedLessonForQuiz] = useState(null);
+  const [showExamForm, setShowExamForm] = useState(false);
+  const [selectedCourseForExam, setSelectedCourseForExam] = useState(null);
 
   const authHeaders = { Authorization: `Bearer ${token}` };
 
@@ -1004,6 +1247,18 @@ function CoursesTab({ token, currentUser }) {
         </div>
       )}
 
+      {/* Exam Form */}
+      {showExamForm && selectedCourseForExam && (
+        <div className="space-y-2">
+          <ExamForm
+            courseId={selectedCourseForExam.id}
+            courseTitle={getDisplayTitle(selectedCourseForExam)}
+            token={token}
+            onClose={() => { setShowExamForm(false); setSelectedCourseForExam(null); }}
+          />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Courses List */}
         <Card className="bg-card border-border">
@@ -1026,7 +1281,7 @@ function CoursesTab({ token, currentUser }) {
             {courses.map((course) => (
               <div
                 key={course.id}
-                onClick={() => { fetchLessons(course.id); setShowCourseForm(false); setShowLessonForm(false); setShowQuizForm(false); setSelectedLessonForQuiz(null); }}
+                onClick={() => { fetchLessons(course.id); setShowCourseForm(false); setShowLessonForm(false); setShowQuizForm(false); setSelectedLessonForQuiz(null); setShowExamForm(false); setSelectedCourseForExam(null); }}
                 className={`p-3 rounded-lg cursor-pointer transition-colors ${
                   selectedCourse === course.id
                     ? 'bg-primary/20 border border-primary'
@@ -1045,7 +1300,21 @@ function CoursesTab({ token, currentUser }) {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => { setEditingCourse(course); setShowCourseForm(true); setShowLessonForm(false); }}
+                      title="Manage certification exam"
+                      onClick={() => {
+                        setSelectedCourseForExam(course);
+                        setShowExamForm(true);
+                        setShowCourseForm(false);
+                        setShowLessonForm(false);
+                        setShowQuizForm(false);
+                      }}
+                    >
+                      <Award className="w-3.5 h-3.5 text-amber-400" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => { setEditingCourse(course); setShowCourseForm(true); setShowLessonForm(false); setShowExamForm(false); }}
                     >
                       <Edit className="w-3.5 h-3.5" />
                     </Button>

@@ -36,7 +36,8 @@ export default function ExamPage() {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const { token, refreshUser } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.split('-')[0] || 'en';
   const [exam, setExam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState({});
@@ -50,7 +51,7 @@ export default function ExamPage() {
   useEffect(() => {
     const fetchExam = async () => {
       try {
-        const response = await axios.get(`${API}/exams/${courseId}`);
+        const response = await axios.get(`${API}/exams/${courseId}?lang=${lang}`);
         setExam(response.data);
         setTimeRemaining(response.data.time_limit_minutes * 60);
       } catch (e) {
