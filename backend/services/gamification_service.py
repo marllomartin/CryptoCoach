@@ -74,11 +74,11 @@ ACHIEVEMENTS = {
     "crypto_scholar": {
         "id": "crypto_scholar",
         "name": "Crypto Scholar",
-        "description": "Complete all trial courses",
+        "description": "Complete three courses",
         "icon": "graduation-cap",
         "level": 2,
         "xp_reward": 300,
-        "condition": {"trial_courses_complete": True}
+        "condition": {"courses_completed": 3}
     },
     "quiz_master": {
         "id": "quiz_master",
@@ -296,13 +296,14 @@ class GamificationService:
         current_achievements = set(user.get("achievements", []))
         new_achievements = []
         
-        # Fetch trial course lesson IDs from DB to check completion
-        trial_courses = await self.db.courses.find({"is_trial": True}, {"_id": 0, "lesson_ids": 1}).to_list(20)
-        trial_lesson_ids = set()
-        for c in trial_courses:
-            trial_lesson_ids.update(c.get("lesson_ids", []))
         completed = set(user.get("completed_lessons", []))
-        trial_courses_complete = len(trial_lesson_ids) > 0 and trial_lesson_ids.issubset(completed)
+
+        # Count completed courses (all lessons in a course must be completed)
+        all_courses = await self.db.courses.find({}, {"_id": 0, "lesson_ids": 1}).to_list(100)
+        courses_completed = sum(
+            1 for c in all_courses
+            if c.get("lesson_ids") and set(c["lesson_ids"]).issubset(completed)
+        )
 
         stats = {
             "lessons_completed": len(completed),
@@ -312,7 +313,7 @@ class GamificationService:
             "streak_days": user.get("streak_days", 0),
             "certificates": len(user.get("certificates", [])),
             "level": self.calculate_level(user.get("xp_points", 0)),
-            "trial_courses_complete": trial_courses_complete,
+            "courses_completed": courses_completed,
         }
         
         for ach_id, achievement in ACHIEVEMENTS.items():
