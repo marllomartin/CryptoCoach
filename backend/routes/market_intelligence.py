@@ -1,7 +1,7 @@
 # Market Intelligence & Newsletter Routes
 # API endpoints for market data, news, and newsletter management
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends, Request
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends, Request, Header
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime, timezone
@@ -14,6 +14,7 @@ import re
 import resend
 import xml.etree.ElementTree as ET
 from email.utils import parsedate_to_datetime
+import jwt as pyjwt
 
 # Import security utilities
 import sys
@@ -242,6 +243,96 @@ async def get_crypto_news(limit: int = 10):
         market_cache["news"] = {"data": unique, "ts": datetime.now(timezone.utc)}
 
     return {"articles": unique[:limit]}
+
+
+# ── News view tracking ─────────────────────────────────────────────────────
+
+FREE_DAILY_NEWS_LIMIT = 3
+JWT_SECRET = os.environ.get('JWT_SECRET', 'default_secret_key')
+
+
+def _get_user_id_from_token(authorization: str) -> str:
+    try:
+        token = authorization.replace("Bearer ", "")
+        payload = pyjwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        user_id = payload.get("sub")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return user_id
+    except pyjwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except pyjwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
+def _today_str() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+
+class NewsViewRequest(BaseModel):
+    article_url: str
+
+
+@market_router.get("/news/daily-views")
+async def get_news_daily_views(authorization: str = Header(...)):
+    """Return how many unique articles the user has opened today."""
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not initialized")
+    user_id = _get_user_id_from_token(authorization)
+
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "subscription_tier": 1})
+    tier = user.get("subscription_tier", "free") if user else "free"
+
+    if tier in ("pro", "elite"):
+        return {"viewed": 0, "limit": None, "blocked": False}
+
+    record = await db.news_views.find_one({"user_id": user_id, "date": _today_str()})
+    viewed = len(record.get("urls", [])) if record else 0
+    return {
+        "viewed": viewed,
+        "limit": FREE_DAILY_NEWS_LIMIT,
+        "blocked": viewed >= FREE_DAILY_NEWS_LIMIT
+    }
+
+
+@market_router.post("/news/view")
+async def record_news_view(body: NewsViewRequest, authorization: str = Header(...)):
+    """Record that the user opened a specific article. Returns updated view status."""
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database not initialized")
+    user_id = _get_user_id_from_token(authorization)
+
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "subscription_tier": 1})
+    tier = user.get("subscription_tier", "free") if user else "free"
+
+    if tier in ("pro", "elite"):
+        return {"viewed": 0, "limit": None, "blocked": False, "allowed": True}
+
+    today = _today_str()
+    record = await db.news_views.find_one({"user_id": user_id, "date": today})
+
+    if record:
+        urls = record.get("urls", [])
+        if body.article_url not in urls:
+            if len(urls) >= FREE_DAILY_NEWS_LIMIT:
+                return {"viewed": len(urls), "limit": FREE_DAILY_NEWS_LIMIT, "blocked": True, "allowed": False}
+            urls.append(body.article_url)
+            await db.news_views.update_one(
+                {"user_id": user_id, "date": today},
+                {"$set": {"urls": urls}}
+            )
+        viewed = len(urls)
+    else:
+        urls = [body.article_url]
+        await db.news_views.insert_one({"user_id": user_id, "date": today, "urls": urls})
+        viewed = 1
+
+    return {
+        "viewed": viewed,
+        "limit": FREE_DAILY_NEWS_LIMIT,
+        "blocked": viewed >= FREE_DAILY_NEWS_LIMIT,
+        "allowed": True
+    }
 
 
 @market_router.get("/trending")

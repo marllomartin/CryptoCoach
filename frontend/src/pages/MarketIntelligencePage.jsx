@@ -22,6 +22,7 @@ import {
   RefreshCw,
   Search,
   ChevronRight,
+  ChevronLeft,
   Activity,
   Zap,
   Globe,
@@ -150,40 +151,19 @@ function CryptoRow({ crypto, rank, isWatchlisted, onToggleWatchlist, hasAlert, o
 }
 
 // News item component
-function NewsItem({ article, isLocked }) {
-  const { t } = useTranslation();
-  if (isLocked) {
-    return (
-      <div className="p-4 bg-muted/30 rounded-xl border border-dashed border-slate-600 relative overflow-hidden">
-        <div className="blur-sm">
-          <p className="font-medium text-white mb-2">Premium crypto news article...</p>
-          <p className="text-sm text-slate-400">Exclusive market analysis and insights...</p>
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center bg-background/50">
-          <Link to="/pricing">
-            <Button size="sm" variant="outline" className="gap-2">
-              <Lock className="w-4 h-4" />
-              {t('market.upgradeToUnlock')}
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-  
+function NewsItem({ article, onOpen }) {
   return (
-    <a 
-      href={article.url} 
-      target="_blank" 
-      rel="noopener noreferrer"
-      className="block p-4 bg-muted/30 hover:bg-muted/50 rounded-xl transition-all group"
+    <button
+      onClick={() => onOpen(article.url)}
+      className="w-full text-left block p-4 bg-muted/30 hover:bg-muted/50 rounded-xl transition-all group"
     >
       <div className="flex gap-4">
         {article.imageUrl && (
-          <img 
-            src={article.imageUrl} 
-            alt="" 
+          <img
+            src={article.imageUrl}
+            alt=""
             className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+            onError={e => { e.target.style.display = 'none'; }}
           />
         )}
         <div className="flex-1 min-w-0">
@@ -199,7 +179,7 @@ function NewsItem({ article, isLocked }) {
           </div>
         </div>
       </div>
-    </a>
+    </button>
   );
 }
 
@@ -377,7 +357,7 @@ function AlertModal({ crypto, onClose, onSave }) {
 // Main Component
 export default function MarketIntelligencePage() {
   const { t, i18n } = useTranslation();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [cryptos, setCryptos] = useState([]);
   const [globalData, setGlobalData] = useState(null);
   const [fearGreed, setFearGreed] = useState(null);
@@ -389,29 +369,36 @@ export default function MarketIntelligencePage() {
   const [selectedCrypto, setSelectedCrypto] = useState(null);
   const [activeTab, setActiveTab] = useState('market');
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  
+  const [newsPage, setNewsPage] = useState(0);
+  const [newsBlocked, setNewsBlocked] = useState(false);
+  const [newsViewed, setNewsViewed] = useState(0);
+
+  const NEWS_PER_PAGE = 5;
+  const FREE_NEWS_DAILY_LIMIT = 3;
+
   // Determine user tier limits
   const userTier = user?.subscription_tier || 'free';
+  const isUnlimitedNews = ['pro', 'elite'].includes(userTier);
   const limits = {
-    free: { cryptos: 10, news: 3, watchlist: 3, alerts: 1 },
-    starter: { cryptos: 50, news: 10, watchlist: 10, alerts: 5 },
-    pro: { cryptos: 100, news: 999, watchlist: 30, alerts: 20 },
-    elite: { cryptos: 999, news: 999, watchlist: 999, alerts: 999 }
-  }[userTier];
-  
-  // Fetch market data
+    free: { cryptos: 10, watchlist: 3, alerts: 1 },
+    starter: { cryptos: 50, watchlist: 10, alerts: 5 },
+    pro: { cryptos: 100, watchlist: 30, alerts: 20 },
+    elite: { cryptos: 999, watchlist: 999, alerts: 999 }
+  }[userTier] || { cryptos: 10, watchlist: 3, alerts: 1 };
+
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+
+  // Fetch market data (news fetched separately when tab opens)
   const fetchData = useCallback(async () => {
     try {
-      const [cryptoRes, globalRes, newsRes] = await Promise.all([
+      const [cryptoRes, globalRes] = await Promise.all([
         axios.get(`${API}/market/cryptos?limit=${limits.cryptos}`),
-        axios.get(`${API}/market/global`),
-        axios.get(`${API}/market/news?limit=${limits.news}`)
+        axios.get(`${API}/market/global`)
       ]);
 
       setCryptos(cryptoRes.data.cryptos || []);
       setGlobalData(globalRes.data);
       setFearGreed(globalRes.data.fear_greed);
-      setNews(newsRes.data.articles || []);
       setLastUpdate(new Date());
     } catch (error) {
       console.error('Error fetching market data:', error);
@@ -419,14 +406,62 @@ export default function MarketIntelligencePage() {
     } finally {
       setLoading(false);
     }
-  }, [limits]);
+  }, [limits.cryptos]);
+
+  // Check daily view status and fetch news
+  const fetchNews = useCallback(async () => {
+    try {
+      if (user && token) {
+        const statusRes = await axios.get(`${API}/market/news/daily-views`, { headers: authHeaders });
+        const { viewed, blocked } = statusRes.data;
+        setNewsViewed(viewed);
+        if (blocked) {
+          setNewsBlocked(true);
+          return;
+        }
+      }
+      const res = await axios.get(`${API}/market/news?limit=50`);
+      setNews(res.data.articles || []);
+    } catch (e) {
+      console.error('Error fetching news:', e);
+    }
+  }, [user, token]);
+
+  // Record article open and navigate to it
+  const handleArticleOpen = async (url) => {
+    if (user && token && !isUnlimitedNews) {
+      try {
+        const res = await axios.post(
+          `${API}/market/news/view`,
+          { article_url: url },
+          { headers: authHeaders }
+        );
+        const { viewed, blocked, allowed } = res.data;
+        setNewsViewed(viewed);
+        if (!allowed) {
+          setNewsBlocked(true);
+          return;
+        }
+        if (blocked) setNewsBlocked(true);
+      } catch (e) {
+        console.error('Error recording news view:', e);
+      }
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
   
   useEffect(() => {
     fetchData();
-    // Refresh every 30 seconds
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, [fetchData]);
+
+  // Fetch news when news tab is opened (only once per session)
+  useEffect(() => {
+    if (activeTab === 'news' && news.length === 0 && !newsBlocked) {
+      fetchNews();
+    }
+  }, [activeTab]);
   
   // Load user's watchlist and alerts
   useEffect(() => {
@@ -771,20 +806,74 @@ export default function MarketIntelligencePage() {
               
               {activeTab === 'news' && (
                 <Card className="bg-card border-border">
-                  <CardHeader>
+                  <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
                       <Newspaper className="w-5 h-5 text-blue-400" />
                       {t('market.cryptoNews')}
                     </CardTitle>
+                    {!isUnlimitedNews && !newsBlocked && (
+                      <span className="text-xs text-slate-400">
+                        {t('market.newsViewsLeft', { left: Math.max(0, FREE_NEWS_DAILY_LIMIT - newsViewed) })}
+                      </span>
+                    )}
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    {news.slice(0, limits.news).map((article, index) => (
-                      <NewsItem key={index} article={article} isLocked={false} />
-                    ))}
-                    {userTier === 'free' && (
+                  <CardContent>
+                    {newsBlocked ? (
+                      <div className="text-center py-12">
+                        <Lock className="w-12 h-12 mx-auto mb-4 text-slate-500 opacity-50" />
+                        <p className="font-semibold text-white mb-2">{t('market.newsDailyLimitTitle')}</p>
+                        <p className="text-sm text-slate-400 mb-6">{t('market.newsDailyLimitDesc')}</p>
+                        <Link to="/pricing">
+                          <Button className="gap-2 bg-primary hover:bg-primary/90">
+                            <Crown className="w-4 h-4" />
+                            {t('market.upgradeForMore')}
+                          </Button>
+                        </Link>
+                      </div>
+                    ) : news.length === 0 ? (
+                      <div className="space-y-3">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                          <div key={i} className="flex gap-4 p-4 rounded-xl animate-pulse">
+                            <div className="w-20 h-20 bg-muted rounded-lg flex-shrink-0" />
+                            <div className="flex-1 space-y-2">
+                              <div className="h-4 bg-muted rounded w-3/4" />
+                              <div className="h-3 bg-muted rounded w-full" />
+                              <div className="h-3 bg-muted rounded w-1/2" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
                       <>
-                        <NewsItem article={{}} isLocked={true} />
-                        <NewsItem article={{}} isLocked={true} />
+                        <div className="space-y-4">
+                          {news.slice(newsPage * NEWS_PER_PAGE, (newsPage + 1) * NEWS_PER_PAGE).map((article, index) => (
+                            <NewsItem key={index} article={article} onOpen={handleArticleOpen} />
+                          ))}
+                        </div>
+                        {/* Pagination */}
+                        {news.length > NEWS_PER_PAGE && (
+                          <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+                            <button
+                              onClick={() => setNewsPage(p => Math.max(0, p - 1))}
+                              disabled={newsPage === 0}
+                              className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                              {t('market.prev')}
+                            </button>
+                            <span className="text-sm text-slate-500">
+                              {newsPage + 1} / {Math.ceil(news.length / NEWS_PER_PAGE)}
+                            </span>
+                            <button
+                              onClick={() => setNewsPage(p => Math.min(Math.ceil(news.length / NEWS_PER_PAGE) - 1, p + 1))}
+                              disabled={(newsPage + 1) * NEWS_PER_PAGE >= news.length}
+                              className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                              {t('market.next')}
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
                       </>
                     )}
                   </CardContent>
@@ -845,7 +934,7 @@ export default function MarketIntelligencePage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">{t('market.newsAccess')}</span>
-                    <span className="font-medium text-white">{limits.news === 999 ? t('market.unlimited') : t('market.perDay', { n: limits.news })}</span>
+                    <span className="font-medium text-white">{isUnlimitedNews ? t('market.unlimited') : t('market.perDay', { n: FREE_NEWS_DAILY_LIMIT })}</span>
                   </div>
                   {userTier !== 'elite' && (
                     <Link to="/pricing">
