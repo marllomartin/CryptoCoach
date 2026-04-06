@@ -1030,7 +1030,9 @@ const resources = {
         verificationTitle: 'Certificate Verification',
         verificationMessage: 'Each certificate includes a unique QR code that can be scanned to verify its authenticity. Share your certificates with confidence!',
         toastDownloaded: 'Certificate downloaded!',
-        toastError: 'Failed to download certificate'
+        toastError: 'Failed to download certificate',
+        searchPlaceholder: 'Search certificates...',
+        noSearchResults: 'No certificates match your search.'
       },
       // Video Player
       videoPlayer: {
@@ -2315,7 +2317,9 @@ const resources = {
         verificationTitle: 'Vérification du certificat',
         verificationMessage: "Chaque certificat comprend un QR code unique qui peut être scanné pour vérifier son authenticité. Partagez vos certificats en toute confiance !",
         toastDownloaded: 'Certificat téléchargé !',
-        toastError: 'Échec du téléchargement du certificat'
+        toastError: 'Échec du téléchargement du certificat',
+        searchPlaceholder: 'Rechercher des certificats...',
+        noSearchResults: 'Aucun certificat ne correspond à votre recherche.'
       },
       // Video Player
       videoPlayer: {
@@ -3406,7 +3410,9 @@ const resources = {
         verificationTitle: 'التحقق من الشهادة',
         verificationMessage: 'تتضمن كل شهادة رمز QR فريد يمكن مسحه للتحقق من صحتها. شارك شهاداتك بثقة!',
         toastDownloaded: 'تم تحميل الشهادة!',
-        toastError: 'فشل تحميل الشهادة'
+        toastError: 'فشل تحميل الشهادة',
+        searchPlaceholder: 'ابحث عن الشهادات...',
+        noSearchResults: 'لا توجد شهادات تطابق بحثك.'
       },
       // Profile Page
       profile: {
@@ -4885,7 +4891,9 @@ const resources = {
         verificationTitle: 'Verificação do Certificado',
         verificationMessage: 'Cada certificado inclui um QR code exclusivo que pode ser escaneado para verificar sua autenticidade. Compartilhe seus certificados com confiança!',
         toastDownloaded: 'Certificado baixado!',
-        toastError: 'Falha ao baixar o certificado'
+        toastError: 'Falha ao baixar o certificado',
+        searchPlaceholder: 'Pesquisar certificados...',
+        noSearchResults: 'Nenhum certificado corresponde à sua pesquisa.'
       },
       // Video Player
       videoPlayer: {
