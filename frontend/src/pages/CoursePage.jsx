@@ -62,6 +62,10 @@ export default function CoursePage() {
     return lessons.length > 0 && lessons.every(l => isLessonCompleted(l.id));
   };
 
+  const hasCertificate = () => {
+    return user?.certificates?.some(c => c.course_id === course?.id || c.level === course?.level);
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -264,33 +268,53 @@ export default function CoursePage() {
       {user && !isPremiumLocked && (
         <section className="py-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Card className={`border ${allLessonsCompleted() ? 'border-primary bg-primary/5' : 'border-border bg-card'}`}>
-              <CardContent className="p-8 text-center">
-                <Award className={`w-12 h-12 mx-auto mb-4 ${allLessonsCompleted() ? 'text-primary' : 'text-slate-500'}`} />
-                <h3 className="font-heading text-2xl font-bold mb-2">
-                  {t('course.certificationExam')}
-                </h3>
-                <p className="text-slate-400 mb-6 max-w-md mx-auto">
-                  {allLessonsCompleted()
-                    ? t('course.allCompleted')
-                    : t('course.completeToUnlock', { count: lessons.length })
-                  }
-                </p>
-                {allLessonsCompleted() ? (
-                  <Link to={`/exam/${course.level}`}>
-                    <Button size="lg" className="bg-primary hover:bg-primary/90">
-                      {t('course.takeCertExam')}
+            {hasCertificate() ? (
+              <Card className="border border-green-500/50 bg-green-500/5">
+                <CardContent className="p-8 text-center">
+                  <Award className="w-12 h-12 mx-auto mb-4 text-green-500" />
+                  <h3 className="font-heading text-2xl font-bold mb-2 text-green-400">
+                    {t('course.certificationExam')}
+                  </h3>
+                  <p className="text-slate-400 mb-6 max-w-md mx-auto">
+                    {t('course.alreadyCertified')}
+                  </p>
+                  <Link to="/certificates">
+                    <Button size="lg" className="bg-green-600 hover:bg-green-700">
+                      {t('course.viewMyCertificate')}
                       <ChevronRight className="w-5 h-5 ml-2" />
                     </Button>
                   </Link>
-                ) : (
-                  <div className="flex items-center justify-center gap-2 text-slate-500">
-                    <Lock className="w-4 h-4" />
-                    <span>{t('course.completeAllLessons')}</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className={`border ${allLessonsCompleted() ? 'border-primary bg-primary/5' : 'border-border bg-card'}`}>
+                <CardContent className="p-8 text-center">
+                  <Award className={`w-12 h-12 mx-auto mb-4 ${allLessonsCompleted() ? 'text-primary' : 'text-slate-500'}`} />
+                  <h3 className="font-heading text-2xl font-bold mb-2">
+                    {t('course.certificationExam')}
+                  </h3>
+                  <p className="text-slate-400 mb-6 max-w-md mx-auto">
+                    {allLessonsCompleted()
+                      ? t('course.allCompleted')
+                      : t('course.completeToUnlock', { count: lessons.length })
+                    }
+                  </p>
+                  {allLessonsCompleted() ? (
+                    <Link to={`/exam/${course.level}`}>
+                      <Button size="lg" className="bg-primary hover:bg-primary/90">
+                        {t('course.takeCertExam')}
+                        <ChevronRight className="w-5 h-5 ml-2" />
+                      </Button>
+                    </Link>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2 text-slate-500">
+                      <Lock className="w-4 h-4" />
+                      <span>{t('course.completeAllLessons')}</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
         </section>
       )}
