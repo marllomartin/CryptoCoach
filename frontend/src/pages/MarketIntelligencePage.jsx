@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Layout from '../components/Layout';
 import { useAuth, API } from '../App';
@@ -11,33 +11,28 @@ import { Input } from '../components/ui/input';
 import { toast } from 'sonner';
 import {
   TrendingUp,
-  TrendingDown,
   BarChart3,
   Bell,
   BellPlus,
   Star,
   StarOff,
   Lock,
-  Unlock,
   RefreshCw,
   Search,
   ChevronRight,
   ChevronLeft,
   Activity,
   Zap,
-  Globe,
-  AlertTriangle,
   Clock,
-  Eye,
   Newspaper,
   Bot,
   Crown,
   Loader2,
   ArrowUpRight,
   ArrowDownRight,
-  Plus,
   X,
-  ExternalLink
+  ExternalLink,
+  UserPlus
 } from 'lucide-react';
 
 // Fear & Greed colors
@@ -91,7 +86,7 @@ function Sparkline({ data, color = '#22c55e', width = 80, height = 30 }) {
 }
 
 // Crypto row component
-function CryptoRow({ crypto, rank, isWatchlisted, onToggleWatchlist, hasAlert, onSetAlert, userTier }) {
+function CryptoRow({ crypto, rank, isWatchlisted, onToggleWatchlist, hasAlert, onSetAlert, showActions }) {
   const { t } = useTranslation();
   const isPositive = crypto.price_change_percentage_24h >= 0;
   
@@ -130,22 +125,24 @@ function CryptoRow({ crypto, rank, isWatchlisted, onToggleWatchlist, hasAlert, o
         <p className="text-sm text-slate-400">${formatNumber(crypto.market_cap)}</p>
       </div>
       
-      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          onClick={() => onToggleWatchlist(crypto.id)}
-          className={`p-2 rounded-lg transition-colors ${isWatchlisted ? 'text-yellow-400 bg-yellow-400/10' : 'text-slate-400 hover:text-yellow-400 hover:bg-yellow-400/10'}`}
-          title={isWatchlisted ? t('market.removeFromWatchlist') : t('market.addToWatchlist')}
-        >
-          {isWatchlisted ? <Star className="w-4 h-4 fill-current" /> : <StarOff className="w-4 h-4" />}
-        </button>
-        <button
-          onClick={() => onSetAlert(crypto)}
-          className={`p-2 rounded-lg transition-colors ${hasAlert ? 'text-primary bg-primary/10' : 'text-slate-400 hover:text-primary hover:bg-primary/10'}`}
-          title={t('market.setAlertTitle')}
-        >
-          {hasAlert ? <Bell className="w-4 h-4 fill-current" /> : <BellPlus className="w-4 h-4" />}
-        </button>
-      </div>
+      {showActions && (
+        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={() => onToggleWatchlist(crypto.id)}
+            className={`p-2 rounded-lg transition-colors ${isWatchlisted ? 'text-yellow-400 bg-yellow-400/10' : 'text-slate-400 hover:text-yellow-400 hover:bg-yellow-400/10'}`}
+            title={isWatchlisted ? t('market.removeFromWatchlist') : t('market.addToWatchlist')}
+          >
+            {isWatchlisted ? <Star className="w-4 h-4 fill-current" /> : <StarOff className="w-4 h-4" />}
+          </button>
+          <button
+            onClick={() => onSetAlert(crypto)}
+            className={`p-2 rounded-lg transition-colors ${hasAlert ? 'text-primary bg-primary/10' : 'text-slate-400 hover:text-primary hover:bg-primary/10'}`}
+            title={t('market.setAlertTitle')}
+          >
+            {hasAlert ? <Bell className="w-4 h-4 fill-current" /> : <BellPlus className="w-4 h-4" />}
+          </button>
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -180,6 +177,23 @@ function NewsItem({ article, onOpen }) {
         </div>
       </div>
     </button>
+  );
+}
+
+// Guest prompt — shown instead of gated content for unsigned users
+function GuestPrompt({ titleKey, descKey, t }) {
+  return (
+    <div className="text-center py-12">
+      <UserPlus className="w-12 h-12 mx-auto mb-4 text-slate-500 opacity-50" />
+      <p className="font-semibold text-white mb-2">{t(titleKey)}</p>
+      <p className="text-sm text-slate-400 mb-6">{t(descKey)}</p>
+      <Link to="/register">
+        <Button className="gap-2 bg-primary hover:bg-primary/90">
+          <UserPlus className="w-4 h-4" />
+          {t('market.guestCTA')}
+        </Button>
+      </Link>
+    </div>
   );
 }
 
@@ -358,11 +372,6 @@ function AlertModal({ crypto, onClose, onSave }) {
 export default function MarketIntelligencePage() {
   const { t, i18n } = useTranslation();
   const { user, token } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (user === null) navigate('/login', { replace: true });
-  }, [user, navigate]);
   const [cryptos, setCryptos] = useState([]);
   const [globalData, setGlobalData] = useState(null);
   const [fearGreed, setFearGreed] = useState(null);
@@ -705,7 +714,7 @@ export default function MarketIntelligencePage() {
                             onToggleWatchlist={toggleWatchlist}
                             hasAlert={alerts.some(a => a.cryptoId === crypto.id)}
                             onSetAlert={setSelectedCrypto}
-                            userTier={userTier}
+                            showActions={!!user}
                           />
                         ))
                       )}
@@ -737,7 +746,7 @@ export default function MarketIntelligencePage() {
                             onToggleWatchlist={toggleWatchlist}
                             hasAlert={alerts.some(a => a.cryptoId === crypto.id)}
                             onSetAlert={setSelectedCrypto}
-                            userTier={userTier}
+                            showActions={!!user}
                           />
                         ))}
                       </div>
@@ -816,14 +825,16 @@ export default function MarketIntelligencePage() {
                       <Newspaper className="w-5 h-5 text-blue-400" />
                       {t('market.cryptoNews')}
                     </CardTitle>
-                    {!isUnlimitedNews && !newsBlocked && (
+                    {user && !isUnlimitedNews && !newsBlocked && (
                       <span className="text-xs text-slate-400">
                         {t('market.newsViewsLeft', { left: Math.max(0, FREE_NEWS_DAILY_LIMIT - newsViewed), count: Math.max(0, FREE_NEWS_DAILY_LIMIT - newsViewed) })}
                       </span>
                     )}
                   </CardHeader>
                   <CardContent>
-                    {newsBlocked ? (
+                    {!user ? (
+                      <GuestPrompt titleKey="market.guestNewsTitle" descKey="market.guestNewsDesc" t={t} />
+                    ) : newsBlocked ? (
                       <div className="text-center py-12">
                         <Lock className="w-12 h-12 mx-auto mb-4 text-slate-500 opacity-50" />
                         <p className="font-semibold text-white mb-2">{t('market.newsDailyLimitTitle')}</p>
@@ -884,7 +895,7 @@ export default function MarketIntelligencePage() {
                   </CardContent>
                 </Card>
               )}
-              
+
               {activeTab === 'ai' && (
                 <Card className="bg-gradient-to-br from-primary/10 to-purple-500/10 border-primary/30">
                   <CardHeader>
@@ -895,7 +906,10 @@ export default function MarketIntelligencePage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-slate-400 text-sm">{t('market.aiBriefingComingSoon')}</p>
+                    {!user
+                      ? <GuestPrompt titleKey="market.guestAITitle" descKey="market.guestAIDesc" t={t} />
+                      : <p className="text-slate-400 text-sm">{t('market.aiBriefingComingSoon')}</p>
+                    }
                   </CardContent>
                 </Card>
               )}
@@ -919,8 +933,8 @@ export default function MarketIntelligencePage() {
                 </Card>
               )}
               
-              {/* Quick Stats */}
-              <Card className="bg-card border-border">
+              {/* Quick Stats — only for signed-in users */}
+              {user && <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle className="text-lg">{t('market.yourStats')}</CardTitle>
                 </CardHeader>
@@ -950,8 +964,8 @@ export default function MarketIntelligencePage() {
                     </Link>
                   )}
                 </CardContent>
-              </Card>
-              
+              </Card>}
+
               {/* Trending */}
               <Card className="bg-card border-border">
                 <CardHeader>

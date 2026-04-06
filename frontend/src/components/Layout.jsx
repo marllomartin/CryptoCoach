@@ -42,12 +42,24 @@ export const Layout = ({ children }) => {
   const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navLinks = [
+  // Public nav — shown when logged out
+  const publicNavLinks = [
     { to: '/academy', label: t('nav.academy') },
+    { to: '/market-intelligence', label: t('nav.marketIntel', 'Market Intelligence') },
     { to: '/pricing', label: t('nav.pricing') },
     { to: '/blog', label: t('nav.insights') },
     { to: '/about', label: t('nav.about') },
   ];
+
+  // Authenticated nav — shown when logged in
+  const authNavLinks = [
+    { to: '/dashboard', label: t('nav.dashboard') },
+    { to: '/academy', label: t('nav.academy') },
+    { to: '/market-intelligence', label: t('nav.marketIntel', 'Market Intelligence') },
+    { to: '/blog', label: t('nav.insights') },
+  ];
+
+  const navLinks = user ? authNavLinks : publicNavLinks;
 
   const userLinks = [
     { to: '/market-intelligence', label: t('nav.marketIntel', 'Market Intel'), icon: BarChart3, highlight: true },
@@ -79,11 +91,6 @@ export const Layout = ({ children }) => {
                   <span className="whitespace-nowrap">{link.label}</span>
                 </NavLink>
               ))}
-              {user && (
-                <NavLink to="/market-intelligence">
-                  <span className="whitespace-nowrap">{t('nav.marketIntel', 'Market Intelligence')}</span>
-                </NavLink>
-              )}
             </div>
 
             {/* Desktop Auth */}
@@ -216,9 +223,9 @@ export const Layout = ({ children }) => {
                       ))}
                     </div>
 
-                    {/* Public nav links */}
+                    {/* App nav links */}
                     <div className="border-t border-border pt-3 mt-1 space-y-0.5">
-                      {navLinks.map(link => (
+                      {authNavLinks.map(link => (
                         <Link
                           key={link.to}
                           to={link.to}
@@ -244,7 +251,7 @@ export const Layout = ({ children }) => {
                 ) : (
                   <>
                     {/* Public nav links */}
-                    {navLinks.map(link => (
+                    {publicNavLinks.map(link => (
                       <Link
                         key={link.to}
                         to={link.to}
@@ -293,8 +300,14 @@ export const Layout = ({ children }) => {
               </p>
             </div>
 
-            {/* Spacer */}
-            <div className="hidden md:block" />
+            {/* Nav links — always in footer, replaces navbar slots for logged-in users */}
+            <div>
+              <h4 className="font-heading font-semibold mb-4">{t('footer.explore', 'Explore')}</h4>
+              <ul className="space-y-2">
+                <li><Link to="/pricing" className="text-slate-400 hover:text-primary text-sm">{t('nav.pricing')}</Link></li>
+                <li><Link to="/about" className="text-slate-400 hover:text-primary text-sm">{t('nav.about')}</Link></li>
+              </ul>
+            </div>
 
             {/* Legal */}
             <div>
