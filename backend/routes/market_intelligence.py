@@ -12,6 +12,8 @@ import asyncio
 import logging
 import re
 import resend
+import xml.etree.ElementTree as ET
+from email.utils import parsedate_to_datetime
 
 # Import security utilities
 import sys
@@ -144,55 +146,102 @@ async def get_global_data():
     return fallback
 
 
+# RSS sources for crypto news
+NEWS_FEEDS = [
+    {"url": "https://www.coindesk.com/arc/outboundfeeds/rss/", "source": "CoinDesk"},
+    {"url": "https://www.theblock.co/rss.xml", "source": "The Block"},
+    {"url": "https://decrypt.co/feed", "source": "Decrypt"},
+    {"url": "https://feeds.reuters.com/reuters/technologyNews", "source": "Reuters"},
+]
+
+CACHE_TTL_NEWS = 300  # 5 minutes
+
+
+def _parse_rss(xml_text: str, source: str) -> List[dict]:
+    """Parse an RSS feed and return normalized article dicts."""
+    articles = []
+    try:
+        root = ET.fromstring(xml_text)
+        # Handle both RSS 2.0 and Atom-style namespaces
+        ns = {"media": "http://search.yahoo.com/mrss/"}
+        channel = root.find("channel")
+        items = channel.findall("item") if channel is not None else root.findall(".//item")
+
+        for item in items:
+            title = (item.findtext("title") or "").strip()
+            url = (item.findtext("link") or "").strip()
+            description = (item.findtext("description") or "").strip()
+            # Strip HTML tags from description
+            description = re.sub(r"<[^>]+>", "", description)[:300]
+            pub_date_raw = item.findtext("pubDate") or item.findtext("dc:date", namespaces={"dc": "http://purl.org/dc/elements/1.1/"}) or ""
+
+            # Parse date safely
+            try:
+                published_at = parsedate_to_datetime(pub_date_raw).isoformat()
+            except Exception:
+                published_at = datetime.now(timezone.utc).isoformat()
+
+            # Try to extract image from media:content or enclosure
+            image_url = None
+            media_content = item.find("media:content", ns)
+            if media_content is not None:
+                image_url = media_content.get("url")
+            if not image_url:
+                enclosure = item.find("enclosure")
+                if enclosure is not None and (enclosure.get("type") or "").startswith("image"):
+                    image_url = enclosure.get("url")
+
+            if title and url:
+                articles.append({
+                    "title": title,
+                    "description": description,
+                    "url": url,
+                    "imageUrl": image_url,
+                    "source": source,
+                    "publishedAt": published_at,
+                })
+    except Exception as e:
+        logger.warning(f"RSS parse error for {source}: {e}")
+    return articles
+
+
+async def _fetch_feed(client: httpx.AsyncClient, feed: dict) -> List[dict]:
+    try:
+        resp = await client.get(feed["url"], timeout=8.0, follow_redirects=True)
+        if resp.status_code == 200:
+            return _parse_rss(resp.text, feed["source"])
+    except Exception as e:
+        logger.warning(f"Failed to fetch feed {feed['source']}: {e}")
+    return []
+
+
 @market_router.get("/news")
 async def get_crypto_news(limit: int = 10):
-    """Get latest crypto news"""
-    # For now, return curated mock news
-    # In production, integrate with CryptoCompare News API or similar
-    mock_news = [
-        {
-            "title": "Bitcoin Surges Past $67,000 as Institutional Interest Grows",
-            "description": "Major financial institutions continue to accumulate Bitcoin, driving prices to new highs.",
-            "url": "https://example.com/news/1",
-            "imageUrl": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=200",
-            "source": "CryptoNews",
-            "publishedAt": datetime.now(timezone.utc).isoformat()
-        },
-        {
-            "title": "Ethereum Layer 2 Solutions See Record Activity",
-            "description": "Arbitrum and Optimism report all-time high transaction volumes as users seek lower fees.",
-            "url": "https://example.com/news/2",
-            "imageUrl": "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=200",
-            "source": "DeFi Daily",
-            "publishedAt": datetime.now(timezone.utc).isoformat()
-        },
-        {
-            "title": "SEC Approves New Crypto ETF Applications",
-            "description": "Regulatory clarity continues to improve as more investment vehicles receive approval.",
-            "url": "https://example.com/news/3",
-            "imageUrl": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=200",
-            "source": "BlockchainTimes",
-            "publishedAt": datetime.now(timezone.utc).isoformat()
-        },
-        {
-            "title": "DeFi Protocol Launches Revolutionary Yield Strategy",
-            "description": "New automated strategies promise sustainable yields for liquidity providers.",
-            "url": "https://example.com/news/4",
-            "imageUrl": "https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=200",
-            "source": "YieldWatch",
-            "publishedAt": datetime.now(timezone.utc).isoformat()
-        },
-        {
-            "title": "Major Bank Announces Crypto Custody Services",
-            "description": "Traditional finance continues to embrace digital assets with new custody solutions.",
-            "url": "https://example.com/news/5",
-            "imageUrl": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=200",
-            "source": "FinanceToday",
-            "publishedAt": datetime.now(timezone.utc).isoformat()
-        }
-    ]
-    
-    return {"articles": mock_news[:limit]}
+    """Get latest crypto news from real RSS feeds."""
+    if _cache_fresh("news", CACHE_TTL_NEWS):
+        articles = market_cache["news"]["data"]
+        return {"articles": articles[:limit]}
+
+    async with httpx.AsyncClient(headers={"User-Agent": "TheCryptoCoach/1.0 (RSS reader)"}) as client:
+        results = await asyncio.gather(*[_fetch_feed(client, f) for f in NEWS_FEEDS])
+
+    all_articles = [a for feed_articles in results for a in feed_articles]
+
+    # Sort by most recent first
+    all_articles.sort(key=lambda a: a["publishedAt"], reverse=True)
+
+    # Deduplicate by URL
+    seen = set()
+    unique = []
+    for a in all_articles:
+        if a["url"] not in seen:
+            seen.add(a["url"])
+            unique.append(a)
+
+    if unique:
+        market_cache["news"] = {"data": unique, "ts": datetime.now(timezone.utc)}
+
+    return {"articles": unique[:limit]}
 
 
 @market_router.get("/trending")
