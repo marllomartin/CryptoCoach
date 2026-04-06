@@ -81,12 +81,6 @@ export default function AcademyPage() {
     return Math.round((completed / course.lessons_count) * 100);
   };
 
-  const certifications = [
-    { level: 1, name: "Certified Crypto Foundations", color: "blue" },
-    { level: 2, name: "Certified Crypto Investor", color: "purple" },
-    { level: 3, name: "Advanced Crypto Strategist", color: "amber" }
-  ];
-
   return (
     <Layout>
       {/* Hero Section */}
@@ -288,43 +282,40 @@ export default function AcademyPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {certifications.map((cert, index) => (
-              <motion.div
-                key={cert.level}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card className="bg-card border-border text-center h-full">
-                  <CardContent className="p-8">
-                    <div className={`w-20 h-20 rounded-full bg-${cert.color}-500/10 flex items-center justify-center mx-auto mb-6`}>
-                      <Award className={`w-10 h-10 text-${cert.color}-500`} />
-                    </div>
-                    <h3 className="font-heading font-bold text-xl mb-2">{cert.name}</h3>
-                    <p className="text-slate-400 text-sm mb-6">
-                      {t('academy.certExamRequired', { level: cert.level })}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Card className="bg-card border-border">
+              <CardContent className="p-8 md:p-12">
+                <div className="flex flex-col md:flex-row gap-8 items-start">
+                  <div className="flex-shrink-0 flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mx-auto md:mx-0">
+                    <Award className="w-10 h-10 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-slate-300 text-base leading-relaxed mb-8">
+                      {t('academy.certCardBody')}
                     </p>
-                    <div className="space-y-2">
+                    <div className="flex flex-wrap gap-6">
                       <div className="flex items-center gap-2 text-sm text-slate-400">
-                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
                         <span>{t('academy.pdfDownload')}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-slate-400">
-                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
                         <span>{t('academy.qrVerification')}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-slate-400">
-                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
                         <span>{t('academy.shareable')}</span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </section>
 
