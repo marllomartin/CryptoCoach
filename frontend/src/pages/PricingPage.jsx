@@ -53,7 +53,7 @@ const PricingPage = () => {
   const [appliedCoupons, setAppliedCoupons] = useState({});  // tierId -> { code, discount_pct }
 
   const tiers = TIER_META.map(meta => {
-    const featuresCount = { free: 6, pro: 6, elite: 5 };
+    const featuresCount = { free: 8, pro: 7, elite: 6 };
     const count = featuresCount[meta.id];
     const features = Array.from({ length: count }, (_, i) =>
       t(`pricing.tiers.${meta.id}.feature${i + 1}`)
@@ -340,10 +340,17 @@ const PricingPage = () => {
                   <ul className="space-y-3 mb-8">
                     {tier.features.map((feature, i) => {
                       const isEliteHighlight = tier.id === 'elite' && i === tier.features.length - 1;
+                      const isSubItem = feature.startsWith('→ ');
+                      const label = isSubItem ? feature.slice(2) : feature;
                       return isEliteHighlight ? (
                         <li key={i} className="flex items-start gap-3 mt-4 p-3 rounded-lg bg-gradient-to-r from-purple-500/15 to-fuchsia-500/10 border border-purple-500/30">
                           <Crown className="h-5 w-5 flex-shrink-0 mt-0.5 text-fuchsia-400" />
-                          <span className="text-sm font-semibold text-fuchsia-300">{feature}</span>
+                          <span className="text-sm font-semibold text-fuchsia-300">{label}</span>
+                        </li>
+                      ) : isSubItem ? (
+                        <li key={i} className="flex items-start gap-2 pl-6">
+                          <span className={`mt-1.5 h-1.5 w-1.5 rounded-full flex-shrink-0 ${tier.popular ? 'bg-primary/60' : 'bg-green-500/60'}`} />
+                          <span className="text-xs text-muted-foreground">{label}</span>
                         </li>
                       ) : (
                         <li key={i} className="flex items-start gap-3">

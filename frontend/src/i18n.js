@@ -696,9 +696,11 @@ const resources = {
             feature1: 'Crypto Glossary',
             feature2: '3 foundational lessons',
             feature3: 'Blog & market insights',
-            feature4: 'Watchlist (up to 3 assets)',
-            feature5: '1 price alert',
-            feature6: '3 news articles per day',
+            feature4: 'Basic access to Market Intelligence',
+            feature5: '→ Real-time market insights',
+            feature6: '→ Watchlist (up to 3 assets)',
+            feature7: '→ 1 price alert',
+            feature8: '→ 3 news articles per day',
             cta: 'Get Started Free'
           },
           pro: {
@@ -706,9 +708,10 @@ const resources = {
             feature1: 'Everything in Standard',
             feature2: 'All courses and lessons',
             feature3: 'Trading Simulator',
-            feature4: 'Unlimited watchlist & price alerts',
-            feature5: 'Full news feed',
-            feature6: 'Daily AI market briefing',
+            feature4: 'Full access to Market Intelligence',
+            feature5: '→ Unlimited watchlist & price alerts',
+            feature6: '→ Full news feed',
+            feature7: '→ Daily AI Briefing',
             cta: 'Go Pro'
           },
           elite: {
@@ -718,6 +721,7 @@ const resources = {
             feature3: 'Exclusive trading strategies',
             feature4: 'Priority support',
             feature5: 'Monthly 1-on-1 call with a crypto specialist',
+            feature6: 'Be the first to experience new features',
             cta: 'Join Elite'
           }
         }
@@ -1974,9 +1978,11 @@ const resources = {
             feature1: 'Glossaire Crypto',
             feature2: '3 leçons fondamentales',
             feature3: 'Blog & analyses de marché',
-            feature4: 'Liste de suivi (jusqu\'à 3 actifs)',
-            feature5: '1 alerte de prix',
-            feature6: '3 articles d\'actualité par jour',
+            feature4: 'Accès basique à Market Intelligence',
+            feature5: '→ Données de marché en temps réel',
+            feature6: '→ Liste de suivi (jusqu\'à 3 actifs)',
+            feature7: '→ 1 alerte de prix',
+            feature8: '→ 3 articles d\'actualité par jour',
             cta: 'Commencer gratuitement'
           },
           pro: {
@@ -1984,9 +1990,10 @@ const resources = {
             feature1: 'Tout du Standard',
             feature2: 'Tous les cours et leçons',
             feature3: 'Simulateur de Trading',
-            feature4: 'Liste de suivi & alertes illimitées',
-            feature5: 'Fil d\'actualités complet',
-            feature6: 'Briefing IA quotidien sur les marchés',
+            feature4: 'Accès complet à Market Intelligence',
+            feature5: '→ Liste de suivi & alertes illimitées',
+            feature6: '→ Fil d\'actualités complet',
+            feature7: '→ Briefing IA quotidien',
             cta: 'Devenir Pro'
           },
           elite: {
@@ -1996,6 +2003,7 @@ const resources = {
             feature3: 'Stratégies de trading exclusives',
             feature4: 'Support prioritaire',
             feature5: 'Appel mensuel en tête-à-tête avec un spécialiste crypto',
+            feature6: 'Soyez le premier à découvrir les nouvelles fonctionnalités',
             cta: 'Rejoindre l\'Élite'
           }
         }
@@ -3058,9 +3066,11 @@ const resources = {
             feature1: 'مصطلحات الكريبتو',
             feature2: '3 دروس أساسية',
             feature3: 'مدونة وتحليلات السوق',
-            feature4: 'قائمة المتابعة (حتى 3 أصول)',
-            feature5: 'تنبيه سعر واحد',
-            feature6: '3 مقالات إخبارية يومياً',
+            feature4: 'وصول أساسي إلى Market Intelligence',
+            feature5: '→ بيانات السوق الفورية',
+            feature6: '→ قائمة المتابعة (حتى 3 أصول)',
+            feature7: '→ تنبيه سعر واحد',
+            feature8: '→ 3 مقالات إخبارية يومياً',
             cta: 'ابدأ مجاناً'
           },
           pro: {
@@ -3068,9 +3078,10 @@ const resources = {
             feature1: 'كل شيء من Standard',
             feature2: 'جميع الدورات والدروس',
             feature3: 'محاكي التداول',
-            feature4: 'قائمة متابعة وتنبيهات غير محدودة',
-            feature5: 'تغطية إخبارية كاملة',
-            feature6: 'تقرير ذكاء اصطناعي يومي عن الأسواق',
+            feature4: 'وصول كامل إلى Market Intelligence',
+            feature5: '→ قائمة متابعة وتنبيهات غير محدودة',
+            feature6: '→ تغطية إخبارية كاملة',
+            feature7: '→ تقرير ذكاء اصطناعي يومي',
             cta: 'احترف الآن'
           },
           elite: {
@@ -3080,6 +3091,7 @@ const resources = {
             feature3: 'استراتيجيات تداول حصرية',
             feature4: 'دعم ذو أولوية',
             feature5: 'مكالمة شهرية فردية مع متخصص في الكريبتو',
+            feature6: 'كن أول من يجرب الميزات الجديدة',
             cta: 'انضم للنخبة'
           }
         }
@@ -4530,9 +4542,11 @@ const resources = {
             feature1: 'Glossário Cripto',
             feature2: '3 aulas fundamentais',
             feature3: 'Blog & análises de mercado',
-            feature4: 'Lista de acompanhamento (até 3 ativos)',
-            feature5: '1 alerta de preço',
-            feature6: '3 artigos de notícias por dia',
+            feature4: 'Acesso básico ao Market Intelligence',
+            feature5: '→ Dados de mercado em tempo real',
+            feature6: '→ Lista de acompanhamento (até 3 ativos)',
+            feature7: '→ 1 alerta de preço',
+            feature8: '→ 3 artigos de notícias por dia',
             cta: 'Começar Grátis'
           },
           pro: {
@@ -4540,9 +4554,10 @@ const resources = {
             feature1: 'Tudo do Standard',
             feature2: 'Todos os cursos e aulas',
             feature3: 'Simulador de Trading',
-            feature4: 'Lista de acompanhamento e alertas ilimitados',
-            feature5: 'Feed completo de notícias',
-            feature6: 'Briefing diário de IA sobre o mercado',
+            feature4: 'Acesso completo ao Market Intelligence',
+            feature5: '→ Lista e alertas ilimitados',
+            feature6: '→ Feed completo de notícias',
+            feature7: '→ Briefing diário de IA',
             cta: 'Ir Pro'
           },
           elite: {
@@ -4552,6 +4567,7 @@ const resources = {
             feature3: 'Estratégias de trading exclusivas',
             feature4: 'Suporte prioritário',
             feature5: 'Call mensal 1-a-1 com um especialista em cripto',
+            feature6: 'Seja o primeiro a experimentar os novos recursos',
             cta: 'Entrar no Elite'
           }
         }
