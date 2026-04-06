@@ -720,8 +720,8 @@ const resources = {
             feature2: 'CryptoCoach AI Mentor',
             feature3: 'Exclusive trading strategies',
             feature4: 'Priority support',
-            feature5: 'Monthly 1-on-1 call with a crypto specialist',
-            feature6: 'Be the first to experience new features',
+            feature5: 'Be the first to experience new features',
+            feature6: 'Monthly 1-on-1 call with a crypto specialist',
             cta: 'Join Elite'
           }
         }
@@ -2002,8 +2002,8 @@ const resources = {
             feature2: 'CryptoCoach AI Mentor',
             feature3: 'Stratégies de trading exclusives',
             feature4: 'Support prioritaire',
-            feature5: 'Appel mensuel en tête-à-tête avec un spécialiste crypto',
-            feature6: 'Soyez le premier à découvrir les nouvelles fonctionnalités',
+            feature5: 'Soyez le premier à découvrir les nouvelles fonctionnalités',
+            feature6: 'Appel mensuel en tête-à-tête avec un spécialiste crypto',
             cta: 'Rejoindre l\'Élite'
           }
         }
@@ -3090,8 +3090,8 @@ const resources = {
             feature2: 'مرشد CryptoCoach AI',
             feature3: 'استراتيجيات تداول حصرية',
             feature4: 'دعم ذو أولوية',
-            feature5: 'مكالمة شهرية فردية مع متخصص في الكريبتو',
-            feature6: 'كن أول من يجرب الميزات الجديدة',
+            feature5: 'كن أول من يجرب الميزات الجديدة',
+            feature6: 'مكالمة شهرية فردية مع متخصص في الكريبتو',
             cta: 'انضم للنخبة'
           }
         }
@@ -4566,8 +4566,8 @@ const resources = {
             feature2: 'CryptoCoach AI Mentor',
             feature3: 'Estratégias de trading exclusivas',
             feature4: 'Suporte prioritário',
-            feature5: 'Call mensal 1-a-1 com um especialista em cripto',
-            feature6: 'Seja o primeiro a experimentar os novos recursos',
+            feature5: 'Seja o primeiro a experimentar os novos recursos',
+            feature6: 'Call mensal 1-a-1 com um especialista em cripto',
             cta: 'Entrar no Elite'
           }
         }

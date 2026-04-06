@@ -242,9 +242,9 @@ const PricingPage = () => {
                 <motion.div
                   key={tier.id}
                   data-testid={`pricing-card-${tier.id}`}
-                  className={`relative rounded-2xl p-6 ${
-                    tier.popular 
-                      ? 'bg-gradient-to-b from-primary/20 to-card border-2 border-primary' 
+                  className={`relative rounded-2xl p-6 flex flex-col ${
+                    tier.popular
+                      ? 'bg-gradient-to-b from-primary/20 to-card border-2 border-primary'
                       : 'bg-card border border-border'
                   } ${isCurrentTier ? 'ring-2 ring-green-500' : ''}`}
                   initial={{ opacity: 0, y: 30 }}
@@ -337,7 +337,7 @@ const PricingPage = () => {
                     })()}
                   </div>
 
-                  <ul className="space-y-3 mb-8">
+                  <ul className="space-y-3 mb-8 flex-1">
                     {tier.features.map((feature, i) => {
                       const isEliteHighlight = tier.id === 'elite' && i === tier.features.length - 1;
                       const isSubItem = feature.startsWith('→ ');
@@ -363,41 +363,43 @@ const PricingPage = () => {
                     })}
                   </ul>
 
-                  {tier.monthlyPrice > 0 && (
-                    <div className="mb-4">
-                      <CouponInput
-                        onApply={(coupon) =>
-                          setAppliedCoupons(prev => ({ ...prev, [tier.id]: coupon || undefined }))
-                        }
-                        language={i18n.language}
-                        originalPrice={isAnnual ? tier.annualPrice : tier.monthlyPrice}
-                      />
-                    </div>
-                  )}
-
-                  <Button
-                    data-testid={`subscribe-${tier.id}-btn`}
-                    className={`w-full ${
-                      tier.popular
-                        ? 'bg-primary hover:bg-primary/90'
-                        : 'bg-muted hover:bg-muted/80 text-foreground'
-                    }`}
-                    onClick={() => handleSubscribe(tier.id)}
-                    disabled={loading === tier.id || isCurrentTier}
-                  >
-                    {loading === tier.id ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        {t('pricing.loading')}
-                      </>
-                    ) : isCurrentTier ? (
-                      t('pricing.currentPlan')
-                    ) : isUpgrade ? (
-                      t('pricing.upgradeTo', { tier: tier.name })
-                    ) : (
-                      tier.cta
+                  <div className="mt-auto">
+                    {tier.monthlyPrice > 0 && (
+                      <div className="mb-4">
+                        <CouponInput
+                          onApply={(coupon) =>
+                            setAppliedCoupons(prev => ({ ...prev, [tier.id]: coupon || undefined }))
+                          }
+                          language={i18n.language}
+                          originalPrice={isAnnual ? tier.annualPrice : tier.monthlyPrice}
+                        />
+                      </div>
                     )}
-                  </Button>
+
+                    <Button
+                      data-testid={`subscribe-${tier.id}-btn`}
+                      className={`w-full ${
+                        tier.popular
+                          ? 'bg-primary hover:bg-primary/90'
+                          : 'bg-muted hover:bg-muted/80 text-foreground'
+                      }`}
+                      onClick={() => handleSubscribe(tier.id)}
+                      disabled={loading === tier.id || isCurrentTier}
+                    >
+                      {loading === tier.id ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          {t('pricing.loading')}
+                        </>
+                      ) : isCurrentTier ? (
+                        t('pricing.currentPlan')
+                      ) : isUpgrade ? (
+                        t('pricing.upgradeTo', { tier: tier.name })
+                      ) : (
+                        tier.cta
+                      )}
+                    </Button>
+                  </div>
                 </motion.div>
               );
             })}
