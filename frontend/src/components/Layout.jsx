@@ -79,6 +79,11 @@ export const Layout = ({ children }) => {
                   <span className="whitespace-nowrap">{link.label}</span>
                 </NavLink>
               ))}
+              {user && (
+                <NavLink to="/market-intelligence">
+                  <span className="whitespace-nowrap">{t('nav.marketIntel', 'Market Intelligence')}</span>
+                </NavLink>
+              )}
             </div>
 
             {/* Desktop Auth */}
