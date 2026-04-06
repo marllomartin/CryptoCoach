@@ -31,11 +31,18 @@ market_router = APIRouter(prefix="/api/market", tags=["market"])
 newsletter_router = APIRouter(prefix="/api/newsletter", tags=["newsletter"])
 
 # MongoDB setup (will be set from server.py)
-db = None
+db = None        # sync PyMongo db (for newsletter routes)
+async_db = None  # async Motor db (for news view tracking)
+
 
 def set_database(database):
     global db
     db = database
+
+
+def set_async_database(database):
+    global async_db
+    async_db = database
 
 # CoinGecko API (free tier)
 COINGECKO_API = "https://api.coingecko.com/api/v3"
@@ -208,12 +215,32 @@ def _parse_rss(xml_text: str, source: str) -> List[dict]:
 
 async def _fetch_feed(client: httpx.AsyncClient, feed: dict) -> List[dict]:
     try:
-        resp = await client.get(feed["url"], timeout=8.0, follow_redirects=True)
+        resp = await client.get(feed["url"], timeout=5.0, follow_redirects=True)
         if resp.status_code == 200:
             return _parse_rss(resp.text, feed["source"])
     except Exception as e:
         logger.warning(f"Failed to fetch feed {feed['source']}: {e}")
     return []
+
+
+async def _fetch_all_feeds() -> List[dict]:
+    async with httpx.AsyncClient(headers={"User-Agent": "Mozilla/5.0 TheCryptoCoach/1.0 (RSS reader)"}) as client:
+        results = await asyncio.gather(*[_fetch_feed(client, f) for f in NEWS_FEEDS], return_exceptions=True)
+
+    all_articles = []
+    for r in results:
+        if isinstance(r, list):
+            all_articles.extend(r)
+
+    all_articles.sort(key=lambda a: a["publishedAt"], reverse=True)
+
+    seen = set()
+    unique = []
+    for a in all_articles:
+        if a["url"] not in seen:
+            seen.add(a["url"])
+            unique.append(a)
+    return unique
 
 
 @market_router.get("/news")
@@ -223,24 +250,18 @@ async def get_crypto_news(limit: int = 10):
         articles = market_cache["news"]["data"]
         return {"articles": articles[:limit]}
 
-    async with httpx.AsyncClient(headers={"User-Agent": "TheCryptoCoach/1.0 (RSS reader)"}) as client:
-        results = await asyncio.gather(*[_fetch_feed(client, f) for f in NEWS_FEEDS])
-
-    all_articles = [a for feed_articles in results for a in feed_articles]
-
-    # Sort by most recent first
-    all_articles.sort(key=lambda a: a["publishedAt"], reverse=True)
-
-    # Deduplicate by URL
-    seen = set()
-    unique = []
-    for a in all_articles:
-        if a["url"] not in seen:
-            seen.add(a["url"])
-            unique.append(a)
+    try:
+        unique = await asyncio.wait_for(_fetch_all_feeds(), timeout=12.0)
+    except asyncio.TimeoutError:
+        logger.warning("News feed fetch timed out — returning stale cache or empty")
+        if "news" in market_cache:
+            return {"articles": market_cache["news"]["data"][:limit]}
+        return {"articles": []}
 
     if unique:
         market_cache["news"] = {"data": unique, "ts": datetime.now(timezone.utc)}
+    elif "news" in market_cache:
+        return {"articles": market_cache["news"]["data"][:limit]}
 
     return {"articles": unique[:limit]}
 
@@ -276,17 +297,17 @@ class NewsViewRequest(BaseModel):
 @market_router.get("/news/daily-views")
 async def get_news_daily_views(authorization: str = Header(...)):
     """Return how many unique articles the user has opened today."""
-    if db is None:
+    if async_db is None:
         raise HTTPException(status_code=500, detail="Database not initialized")
     user_id = _get_user_id_from_token(authorization)
 
-    user = await db.users.find_one({"id": user_id}, {"_id": 0, "subscription_tier": 1})
+    user = await async_db.users.find_one({"id": user_id}, {"_id": 0, "subscription_tier": 1})
     tier = user.get("subscription_tier", "free") if user else "free"
 
     if tier in ("pro", "elite"):
         return {"viewed": 0, "limit": None, "blocked": False}
 
-    record = await db.news_views.find_one({"user_id": user_id, "date": _today_str()})
+    record = await async_db.news_views.find_one({"user_id": user_id, "date": _today_str()})
     viewed = len(record.get("urls", [])) if record else 0
     return {
         "viewed": viewed,
@@ -298,18 +319,18 @@ async def get_news_daily_views(authorization: str = Header(...)):
 @market_router.post("/news/view")
 async def record_news_view(body: NewsViewRequest, authorization: str = Header(...)):
     """Record that the user opened a specific article. Returns updated view status."""
-    if db is None:
+    if async_db is None:
         raise HTTPException(status_code=500, detail="Database not initialized")
     user_id = _get_user_id_from_token(authorization)
 
-    user = await db.users.find_one({"id": user_id}, {"_id": 0, "subscription_tier": 1})
+    user = await async_db.users.find_one({"id": user_id}, {"_id": 0, "subscription_tier": 1})
     tier = user.get("subscription_tier", "free") if user else "free"
 
     if tier in ("pro", "elite"):
         return {"viewed": 0, "limit": None, "blocked": False, "allowed": True}
 
     today = _today_str()
-    record = await db.news_views.find_one({"user_id": user_id, "date": today})
+    record = await async_db.news_views.find_one({"user_id": user_id, "date": today})
 
     if record:
         urls = record.get("urls", [])
@@ -317,14 +338,14 @@ async def record_news_view(body: NewsViewRequest, authorization: str = Header(..
             if len(urls) >= FREE_DAILY_NEWS_LIMIT:
                 return {"viewed": len(urls), "limit": FREE_DAILY_NEWS_LIMIT, "blocked": True, "allowed": False}
             urls.append(body.article_url)
-            await db.news_views.update_one(
+            await async_db.news_views.update_one(
                 {"user_id": user_id, "date": today},
                 {"$set": {"urls": urls}}
             )
         viewed = len(urls)
     else:
         urls = [body.article_url]
-        await db.news_views.insert_one({"user_id": user_id, "date": today, "urls": urls})
+        await async_db.news_views.insert_one({"user_id": user_id, "date": today, "urls": urls})
         viewed = 1
 
     return {
