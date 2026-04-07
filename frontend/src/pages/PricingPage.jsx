@@ -335,13 +335,13 @@ const PricingPage = () => {
                           {isAnnual && savings > 0 && !effectiveDiscount && (
                             <div className="mt-1">
                               <span className="text-sm text-green-400">
-                                {t('pricing.savePerYear', { savings })}
+                                {t('pricing.savePerYear', { currency: currencySymbol, savings })}
                               </span>
                             </div>
                           )}
                           {isAnnual && price > 0 && (
                             <p className="text-xs text-muted-foreground mt-1">
-                              {t('pricing.perMonthBilled', { price: fmtPrice(discountedPrice / 12) })}
+                              {t('pricing.perMonthBilled', { currency: currencySymbol, price: fmtPrice(discountedPrice / 12) })}
                             </p>
                           )}
                         </>
