@@ -15,7 +15,8 @@ import {
   Award,
   BarChart3,
   UserCircle,
-  Shield
+  Shield,
+  Settings
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -123,6 +124,11 @@ export const Layout = ({ children }) => {
                     <Button variant="ghost" size="sm" className="whitespace-nowrap text-slate-300">
                       <User className="w-4 h-4 mr-2 shrink-0" />
                       <span className="max-w-[120px] truncate">{user.full_name}</span>
+                    </Button>
+                  </Link>
+                  <Link to="/account">
+                    <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white shrink-0" aria-label="Account settings">
+                      <Settings className="w-4 h-4" />
                     </Button>
                   </Link>
                   <Button
@@ -237,8 +243,16 @@ export const Layout = ({ children }) => {
                       ))}
                     </div>
 
-                    {/* Sign out */}
-                    <div className="border-t border-border pt-3 mt-1">
+                    {/* Account & Sign out */}
+                    <div className="border-t border-border pt-3 mt-1 space-y-1">
+                      <Link
+                        to="/account"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 w-full px-2 py-2.5 rounded-md text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+                      >
+                        <Settings className="w-4 h-4 shrink-0" />
+                        {t('account.title', 'Account Settings')}
+                      </Link>
                       <button
                         onClick={() => { logout(); setMobileMenuOpen(false); }}
                         className="flex items-center gap-3 w-full px-2 py-2.5 rounded-md text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/5 transition-colors"
