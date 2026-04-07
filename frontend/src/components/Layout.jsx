@@ -131,14 +131,6 @@ export const Layout = ({ children }) => {
                       <Settings className="w-4 h-4" />
                     </Button>
                   </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={logout}
-                    className="text-slate-400 hover:text-white shrink-0"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </Button>
                 </div>
               ) : (
                 <>
@@ -176,8 +168,9 @@ export const Layout = ({ children }) => {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               className="md:hidden bg-card border-b border-border"
+              style={{ maxHeight: 'calc(100svh - 4rem)', overflowY: 'auto' }}
             >
-              <div className="px-4 py-4 space-y-1 max-h-[calc(100svh-4rem)] overflow-y-auto">
+              <div className="px-4 py-4 space-y-1 pb-6">
 
                 {user ? (
                   <>

@@ -10,7 +10,7 @@ import axios from 'axios';
 import {
   Lock, CreditCard, ArrowLeft, Shield, User,
   Crown, Rocket, Star, AlertTriangle, CheckCircle,
-  Calendar, RefreshCw, X, Save
+  Calendar, RefreshCw, X, Save, LogOut
 } from 'lucide-react';
 
 const TIER_ICONS = { free: Star, pro: Rocket, elite: Crown };
@@ -21,7 +21,7 @@ const TIER_COLORS = {
 };
 
 const AccountPage = () => {
-  const { user, token, refreshUser } = useAuth();
+  const { user, token, refreshUser, logout } = useAuth();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
@@ -355,6 +355,18 @@ const AccountPage = () => {
                 {savingPassword ? t('account.password.saving') : t('account.password.save')}
               </Button>
             </form>
+          </div>
+
+          {/* ── Logout ───────────────────────────────────────────────────── */}
+          <div className="mt-4 pt-4 border-t border-gray-800">
+            <Button
+              variant="ghost"
+              className="w-full text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-transparent hover:border-red-500/30"
+              onClick={() => { logout(); navigate('/'); }}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              {t('nav.signOut', 'Sign Out')}
+            </Button>
           </div>
         </div>
       </div>
