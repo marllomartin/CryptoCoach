@@ -180,6 +180,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     full_name: str
+    certificate_name: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -553,11 +554,14 @@ async def register(request: Request, user_data: UserCreate):
         raise HTTPException(status_code=400, detail="Email already registered")
     
     user_id = str(uuid.uuid4())
+    clean_cert_name = InputSanitizer.sanitize_string(user_data.certificate_name or "", max_length=150) or None
+
     user_doc = {
         "id": user_id,
         "email": clean_email,
         "password_hash": hash_password(user_data.password),
         "full_name": clean_name,
+        "certificate_name": clean_cert_name,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "xp_points": 0,
         "completed_lessons": [],

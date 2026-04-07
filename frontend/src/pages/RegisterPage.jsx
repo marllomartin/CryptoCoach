@@ -50,6 +50,7 @@ export default function RegisterPage() {
   const { register, user } = useAuth();
   const [formData, setFormData] = useState({
     full_name: '',
+    certificate_name: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -86,7 +87,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await register(formData.email, formData.password, formData.full_name);
+      await register(formData.email, formData.password, formData.full_name, formData.certificate_name);
       toast.success(t('register.toastSuccess'));
       navigate('/dashboard');
     } catch (e) {
@@ -144,14 +145,14 @@ export default function RegisterPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="full_name">{t('auth.fullName')}</Label>
+                <Label htmlFor="full_name">{t('auth.displayName')}</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <Input
                     id="full_name"
                     name="full_name"
                     type="text"
-                    placeholder={t('register.fullNamePlaceholder')}
+                    placeholder={t('register.displayNamePlaceholder')}
                     value={formData.full_name}
                     onChange={handleChange}
                     required
@@ -159,6 +160,23 @@ export default function RegisterPage() {
                     data-testid="register-name-input"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="certificate_name">{t('auth.certName')}</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <Input
+                    id="certificate_name"
+                    name="certificate_name"
+                    type="text"
+                    placeholder={t('auth.certNamePlaceholder')}
+                    value={formData.certificate_name}
+                    onChange={handleChange}
+                    className="pl-10 bg-muted border-border h-12"
+                  />
+                </div>
+                <p className="text-xs text-slate-500">{t('auth.certNameHint')}</p>
               </div>
 
               <div className="space-y-2">

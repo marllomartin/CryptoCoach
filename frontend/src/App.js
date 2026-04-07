@@ -89,8 +89,8 @@ const AuthProvider = ({ children }) => {
     return userData;
   };
 
-  const register = async (email, password, full_name) => {
-    const response = await axios.post(`${API}/auth/register`, { email, password, full_name });
+  const register = async (email, password, full_name, certificate_name) => {
+    const response = await axios.post(`${API}/auth/register`, { email, password, full_name, certificate_name });
     const { access_token, user: userData } = response.data;
     localStorage.setItem('token', access_token);
     setToken(access_token);
