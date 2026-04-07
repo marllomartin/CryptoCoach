@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth, API } from '../App';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import axios from 'axios';
 import {
   User, Edit2, Save, Camera, Trophy, Flame, Zap,
   Calendar, Target, TrendingUp, Award,
   BookOpen, Star, Crown, Clock, X, HelpCircle,
-  Footprints, GraduationCap, BarChart2, Gem, Lock
+  Footprints, GraduationCap, BarChart2, Gem, Lock, Settings
 } from 'lucide-react';
 import { StreakInfoModal } from '../components/StreakInfoModal';
 import { Button } from '../components/ui/button';
@@ -18,6 +19,7 @@ import { toast } from 'sonner';
 const ProfilePage = () => {
   const { user, token, refreshUser } = useAuth();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [streakInfo, setStreakInfo] = useState(null);
   const [achievements, setAchievements] = useState([]);
@@ -101,7 +103,14 @@ const ProfilePage = () => {
         <div className="container mx-auto px-4 max-w-4xl">
           
           {/* Profile Header */}
-          <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-8 mb-6">
+          <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-8 mb-6 relative">
+            <button
+              onClick={() => navigate('/account')}
+              className="absolute top-4 right-4 p-2 hover:bg-gray-800 rounded-lg transition-colors"
+              aria-label="Account settings"
+            >
+              <Settings className="w-5 h-5 text-gray-400 hover:text-white transition-colors" />
+            </button>
             <div className="flex flex-col md:flex-row items-center gap-6">
               {/* Avatar */}
               <div className="relative">

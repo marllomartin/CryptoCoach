@@ -40,6 +40,7 @@ import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
 import AdminPage from './pages/AdminPage';
 import TradingArenaPage from './pages/TradingArenaPage';
 import ProfilePage from './pages/ProfilePage';
+import AccountPage from './pages/AccountPage';
 import MarketIntelligencePage from './pages/MarketIntelligencePage';
 // Social features removed - Learning platform focus
 // import GuildPage from './pages/GuildPage';
@@ -207,6 +208,7 @@ function App() {
           
           {/* Profile & Social Routes */}
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
           <Route path="/market-intelligence" element={<MarketIntelligencePage />} />
           {/* Guild and Referral removed - Learning platform focus */}
           

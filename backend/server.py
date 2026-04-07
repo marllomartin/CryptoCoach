@@ -473,6 +473,14 @@ class SubscriptionResponse(BaseModel):
     features: List[str]
     access: Dict[str, Any]
     expires: Optional[str] = None
+    started: Optional[str] = None
+
+class UpdateProfileRequest(BaseModel):
+    full_name: str
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
 
 # ==================== AUTH HELPERS ====================
 
@@ -713,6 +721,47 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         role=role,
         achievements=fresh_user.get("achievements", [])
     )
+
+@api_router.put("/auth/profile")
+async def update_profile(data: UpdateProfileRequest, current_user: dict = Depends(get_current_user)):
+    """Update the authenticated user's display name."""
+    clean_name = InputSanitizer.sanitize_string(data.full_name, max_length=100)
+    if not clean_name:
+        raise HTTPException(status_code=400, detail="Name cannot be empty")
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {"full_name": clean_name}}
+    )
+    return {"message": "Profile updated"}
+
+@api_router.put("/auth/password")
+async def change_password(data: ChangePasswordRequest, current_user: dict = Depends(get_current_user)):
+    """Change the authenticated user's password."""
+    if not verify_password(data.current_password, current_user["password_hash"]):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    is_valid, msg = PasswordSecurity.validate_password(data.new_password)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=msg)
+    new_hash = hash_password(data.new_password)
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {"password_hash": new_hash}}
+    )
+    return {"message": "Password updated"}
+
+@api_router.post("/subscription/cancel")
+async def cancel_subscription(current_user: dict = Depends(get_current_user)):
+    """Cancel the current user's subscription (keeps access until expiry, then downgrades to free)."""
+    tier = current_user.get("subscription_tier", "free")
+    if tier == "free":
+        raise HTTPException(status_code=400, detail="No active paid subscription to cancel")
+    expires = current_user.get("subscription_expires")
+    # Mark as cancelled — access remains until expiry date; a cron/webhook handles the actual downgrade
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {"subscription_cancelled": True}}
+    )
+    return {"message": "Subscription cancelled", "access_until": expires}
 
 # ==================== COURSES ROUTES ====================
 
@@ -4049,6 +4098,8 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
         tier = "free"
         expires = None
     
+    started = current_user.get("subscription_started")
+    cancelled = current_user.get("subscription_cancelled", False)
     tier_info = SUBSCRIPTION_TIERS.get(tier, SUBSCRIPTION_TIERS["free"])
     return SubscriptionResponse(
         tier=tier,
@@ -4056,7 +4107,8 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
         price=tier_info["price"],
         features=tier_info["features"],
         access=tier_info["access"],
-        expires=expires
+        expires=expires,
+        started=started
     )
 
 @api_router.post("/subscription/create-checkout")
@@ -4195,16 +4247,19 @@ async def get_checkout_status(session_id: str, current_user: dict = Depends(get_
             
             # Update user subscription
             tier = transaction.get("tier", "starter")
-            expires_at = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
-            
+            now_utc = datetime.now(timezone.utc)
+            expires_at = (now_utc + timedelta(days=30)).isoformat()
+
             await db.users.update_one(
                 {"id": transaction["user_id"]},
                 {"$set": {
                     "subscription_tier": tier,
-                    "subscription_expires": expires_at
+                    "subscription_expires": expires_at,
+                    "subscription_started": now_utc.isoformat(),
+                    "subscription_cancelled": False,
                 }}
             )
-            
+
             return {
                 "status": status.status,
                 "payment_status": status.payment_status,
@@ -4265,14 +4320,17 @@ async def stripe_webhook(request: Request):
             # Update user subscription
             user_id = metadata.get("user_id")
             tier = metadata.get("tier", "starter")
-            expires_at = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
-            
+            now_utc = datetime.now(timezone.utc)
+            expires_at = (now_utc + timedelta(days=30)).isoformat()
+
             if user_id:
                 await db.users.update_one(
                     {"id": user_id},
                     {"$set": {
                         "subscription_tier": tier,
-                        "subscription_expires": expires_at
+                        "subscription_expires": expires_at,
+                        "subscription_started": now_utc.isoformat(),
+                        "subscription_cancelled": False,
                     }}
                 )
         
