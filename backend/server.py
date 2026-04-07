@@ -871,7 +871,7 @@ async def complete_lesson(lesson_id: str, current_user: dict = Depends(get_curre
         
         # Check for achievements
         gamification_service = GamificationService(db)
-        awarded = await gamification_service.check_and_award_achievements(current_user["id"])
+        awarded = await gamification_service.check_and_award_achievements(current_user["id"], trigger="lesson")
         for a in awarded:
             new_achievements.append({"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)})
             xp_earned += a["xp_reward"]
@@ -882,7 +882,7 @@ async def complete_lesson(lesson_id: str, current_user: dict = Depends(get_curre
 
     # Re-check achievements after streak update (catches streak_beginner, streak_warrior, etc.)
     gamification_service_streak = GamificationService(db)
-    streak_achievements = await gamification_service_streak.check_and_award_achievements(current_user["id"])
+    streak_achievements = await gamification_service_streak.check_and_award_achievements(current_user["id"], trigger="lesson")
     for a in streak_achievements:
         if not any(x["id"] == a["id"] for x in new_achievements):
             new_achievements.append({"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)})
@@ -961,7 +961,7 @@ async def submit_quiz(submission: QuizSubmission, current_user: dict = Depends(g
             }
         )
         gamification_service = GamificationService(db)
-        awarded = await gamification_service.check_and_award_achievements(current_user["id"])
+        awarded = await gamification_service.check_and_award_achievements(current_user["id"], trigger="quiz")
         for a in awarded:
             new_achievements.append({"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)})
 
@@ -1063,7 +1063,7 @@ async def submit_exam(submission: ExamSubmission, current_user: dict = Depends(g
         result["certificate_id"] = cert_id
         result["certificate_name"] = cert_name
         gamification_service = GamificationService(db)
-        awarded = await gamification_service.check_and_award_achievements(current_user["id"])
+        awarded = await gamification_service.check_and_award_achievements(current_user["id"], trigger="exam")
         result["new_achievements"] = [
             {"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)}
             for a in awarded
@@ -1276,9 +1276,12 @@ async def execute_trade(trade: Trade, current_user: dict = Depends(get_current_u
     })
 
     gamification_service = GamificationService(db)
-    await gamification_service.check_and_award_achievements(current_user["id"])
+    trade_achievements = await gamification_service.check_and_award_achievements(current_user["id"], trigger="trade")
 
-    return {"balance": new_balance, "portfolio": portfolio, "trade": trade.model_dump()}
+    return {"balance": new_balance, "portfolio": portfolio, "trade": trade.model_dump(), "new_achievements": [
+        {"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)}
+        for a in trade_achievements
+    ]}
 
 # ==================== CONTACT ROUTE ====================
 

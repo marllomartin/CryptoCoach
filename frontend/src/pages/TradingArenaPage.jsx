@@ -12,6 +12,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Progress } from '../components/ui/progress';
 import { toast } from 'sonner';
+import { showAchievementToasts } from '../utils/achievementToast';
 
 const TradingArenaPage = () => {
   const { t, i18n } = useTranslation();
@@ -79,6 +80,7 @@ const TradingArenaPage = () => {
 
       if (response.data.success) {
         toast.success(`${tradeAction === 'buy' ? t('trading.purchased') : t('trading.sold')} ${tradeAmount} ${selectedCrypto}`);
+        showAchievementToasts(response.data.new_achievements);
         setTradeAmount('');
         fetchData();
       }

@@ -41,6 +41,7 @@ ACHIEVEMENTS = {
         "icon": "footprints",
         "level": 1,
         "xp_reward": 50,
+        "trigger": "lesson",
         "condition": {"lessons_completed": 1}
     },
     "streak_beginner": {
@@ -50,15 +51,17 @@ ACHIEVEMENTS = {
         "icon": "flame",
         "level": 1,
         "xp_reward": 50,
+        "trigger": "lesson",
         "condition": {"streak_days": 1}
     },
     "first_trade": {
         "id": "first_trade",
         "name": "First Trade",
-        "description": "Execute your first trade in the simulator",
+        "description": "Execute your first trade in the Trading Arena",
         "icon": "trending-up",
         "level": 1,
         "xp_reward": 100,
+        "trigger": "trade",
         "condition": {"trades_count": 1}
     },
     # ── Level 2 (Silver) ─────────────────────────────────────────────────────
@@ -69,6 +72,7 @@ ACHIEVEMENTS = {
         "icon": "book-open",
         "level": 2,
         "xp_reward": 200,
+        "trigger": "lesson",
         "condition": {"lessons_completed": 10}
     },
     "crypto_scholar": {
@@ -78,6 +82,7 @@ ACHIEVEMENTS = {
         "icon": "graduation-cap",
         "level": 2,
         "xp_reward": 300,
+        "trigger": "lesson",
         "condition": {"courses_completed": 3}
     },
     "quiz_master": {
@@ -87,6 +92,7 @@ ACHIEVEMENTS = {
         "icon": "target",
         "level": 2,
         "xp_reward": 250,
+        "trigger": "quiz",
         "condition": {"perfect_quizzes": 5}
     },
     "trader_apprentice": {
@@ -96,6 +102,7 @@ ACHIEVEMENTS = {
         "icon": "trending-up",
         "level": 2,
         "xp_reward": 200,
+        "trigger": "trade",
         "condition": {"trades_count": 50}
     },
     "streak_warrior": {
@@ -105,6 +112,7 @@ ACHIEVEMENTS = {
         "icon": "flame",
         "level": 2,
         "xp_reward": 175,
+        "trigger": "lesson",
         "condition": {"streak_days": 7}
     },
     # ── Level 3 (Gold) ───────────────────────────────────────────────────────
@@ -115,6 +123,7 @@ ACHIEVEMENTS = {
         "icon": "star",
         "level": 3,
         "xp_reward": 350,
+        "trigger": "lesson",
         "condition": {"lessons_completed": 25}
     },
     "profit_hunter": {
@@ -124,6 +133,7 @@ ACHIEVEMENTS = {
         "icon": "bar-chart-2",
         "level": 3,
         "xp_reward": 300,
+        "trigger": "trade",
         "condition": {"total_profit": 1000}
     },
     "streak_legend": {
@@ -133,6 +143,7 @@ ACHIEVEMENTS = {
         "icon": "fire",
         "level": 3,
         "xp_reward": 500,
+        "trigger": "lesson",
         "condition": {"streak_days": 30}
     },
     "certified_pro": {
@@ -142,6 +153,7 @@ ACHIEVEMENTS = {
         "icon": "award",
         "level": 3,
         "xp_reward": 400,
+        "trigger": "exam",
         "condition": {"certificates": 1}
     },
     # ── Level 4 (Prismatic) ──────────────────────────────────────────────────
@@ -152,6 +164,7 @@ ACHIEVEMENTS = {
         "icon": "crown",
         "level": 4,
         "xp_reward": 1000,
+        "trigger": "any",
         "condition": {"level": 20}
     }
 }
@@ -287,7 +300,7 @@ class GamificationService:
         
         return result
 
-    async def check_and_award_achievements(self, user_id: str) -> List[Dict]:
+    async def check_and_award_achievements(self, user_id: str, trigger: str = "any") -> List[Dict]:
         """Check and award any newly earned achievements"""
         user = await self.db.users.find_one({"id": user_id}, {"_id": 0})
         if not user:
@@ -319,7 +332,12 @@ class GamificationService:
         for ach_id, achievement in ACHIEVEMENTS.items():
             if ach_id in current_achievements:
                 continue
-            
+
+            # Only evaluate achievements that match the current trigger context
+            ach_trigger = achievement.get("trigger", "any")
+            if trigger != "any" and ach_trigger != "any" and ach_trigger != trigger:
+                continue
+
             condition = achievement["condition"]
             earned = True
             

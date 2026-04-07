@@ -11,6 +11,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from services.trading_arena_service import TradingArenaService
+from services.gamification_service import GamificationService
 
 router = APIRouter(prefix="/api/v2/trading", tags=["Trading Arena"])
 
@@ -100,10 +101,18 @@ async def execute_trade(user_id: str, request: TradeRequest):
         amount=request.amount,
         price=request.price
     )
-    
+
     if not result["success"]:
         raise HTTPException(status_code=400, detail=result["error"])
-    
+
+    # Check trade-specific achievements
+    gamification_service = GamificationService(db)
+    awarded = await gamification_service.check_and_award_achievements(user_id, trigger="trade")
+    result["new_achievements"] = [
+        {"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)}
+        for a in awarded
+    ]
+
     return result
 
 
