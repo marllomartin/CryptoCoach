@@ -152,6 +152,11 @@ export default function AcademyPage() {
                                 <span>{course.duration_hours}h</span>
                               </div>
                             )}
+                            {course.level && (
+                              <span className="ml-auto px-2 py-0.5 rounded text-xs font-medium" style={{ background: `${cf}20`, color: cf }}>
+                                {t('academy.level')} {course.level}
+                              </span>
+                            )}
                           </div>
                           {user && (
                             <div className="space-y-2">
