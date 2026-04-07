@@ -98,7 +98,7 @@ export function AnalyticsDashboard({ token }) {
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${API}/admin/analytics?range=${timeRange}`, {
+      const { data } = await axios.get(`${API}/admin/analytics?period=${timeRange}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStats(data);

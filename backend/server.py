@@ -4476,10 +4476,10 @@ async def get_admin_stats(admin: dict = Depends(get_admin_user)):
     }
 
 @api_router.get("/admin/analytics")
-async def get_admin_analytics(range: str = "7d", admin: dict = Depends(get_admin_user)):
+async def get_admin_analytics(period: str = "7d", admin: dict = Depends(get_admin_user)):
     """Real analytics data for the admin dashboard."""
     now = datetime.now(timezone.utc)
-    days = 7 if range == "7d" else (30 if range == "30d" else 90)
+    days = 7 if period == "7d" else (30 if period == "30d" else 90)
     range_start = now - timedelta(days=days)
     range_start_iso = range_start.isoformat()
 
