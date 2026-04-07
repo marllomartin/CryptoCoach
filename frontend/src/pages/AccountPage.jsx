@@ -8,9 +8,9 @@ import { Input } from '../components/ui/input';
 import { toast } from 'sonner';
 import axios from 'axios';
 import {
-  Lock, CreditCard, ArrowLeft, Shield,
+  Lock, CreditCard, ArrowLeft, Shield, User,
   Crown, Rocket, Star, AlertTriangle, CheckCircle,
-  Calendar, RefreshCw, X
+  Calendar, RefreshCw, X, Save
 } from 'lucide-react';
 
 const TIER_ICONS = { free: Star, pro: Rocket, elite: Crown };
@@ -21,9 +21,13 @@ const TIER_COLORS = {
 };
 
 const AccountPage = () => {
-  const { token } = useAuth();
+  const { user, token, refreshUser } = useAuth();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+
+  // ── Name edit state ────────────────────────────────────────────────────────
+  const [editName, setEditName]       = useState(user?.full_name || '');
+  const [savingName, setSavingName]   = useState(false);
 
   // ── Password change state ──────────────────────────────────────────────────
   const [currentPassword, setCurrentPassword]   = useState('');
@@ -52,6 +56,29 @@ const AccountPage = () => {
       .catch(() => setSub(null))
       .finally(() => setLoadingSub(false));
   }, [token]);
+
+  // ── Name save ────────────────────────────────────────────────────────────
+  const handleNameSave = async (e) => {
+    e.preventDefault();
+    if (!editName.trim()) {
+      toast.error(t('profile.nameRequired'));
+      return;
+    }
+    setSavingName(true);
+    try {
+      await axios.put(
+        `${API}/auth/profile`,
+        { full_name: editName.trim() },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(t('profile.profileUpdated'));
+      refreshUser?.();
+    } catch {
+      toast.error(t('profile.updateFailed'));
+    } finally {
+      setSavingName(false);
+    }
+  };
 
   // ── Password submit ───────────────────────────────────────────────────────
   const handlePasswordChange = async (e) => {
@@ -129,6 +156,26 @@ const AccountPage = () => {
             <div>
               <h1 className="text-2xl font-bold text-white">{t('account.title')}</h1>
             </div>
+          </div>
+
+          {/* ── Display Name Card ────────────────────────────────────────── */}
+          <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6 mb-6">
+            <h2 className="font-bold text-white mb-5 flex items-center gap-2">
+              <User className="w-5 h-5 text-primary" />
+              {t('account.name.title')}
+            </h2>
+            <form onSubmit={handleNameSave} className="flex gap-3">
+              <Input
+                value={editName}
+                onChange={e => setEditName(e.target.value)}
+                className="bg-gray-800 border-gray-700 text-white flex-1"
+                required
+              />
+              <Button type="submit" disabled={savingName || editName.trim() === user?.full_name}>
+                <Save className="w-4 h-4 mr-2" />
+                {savingName ? t('account.name.saving') : t('account.name.save')}
+              </Button>
+            </form>
           </div>
 
           {/* ── Subscription Card ─────────────────────────────────────────── */}

@@ -187,6 +187,11 @@ const resources = {
       },
       account: {
         title: 'Account Settings',
+        name: {
+          title: 'Display Name',
+          save: 'Save',
+          saving: 'Saving…',
+        },
         password: {
           title: 'Change Password',
           current: 'Current Password',
@@ -1535,6 +1540,11 @@ const resources = {
       },
       account: {
         title: 'Paramètres du compte',
+        name: {
+          title: 'Nom affiché',
+          save: 'Enregistrer',
+          saving: 'Enregistrement…',
+        },
         password: {
           title: 'Changer le mot de passe',
           current: 'Mot de passe actuel',
@@ -3547,6 +3557,11 @@ const resources = {
       },
       account: {
         title: 'إعدادات الحساب',
+        name: {
+          title: 'الاسم المعروض',
+          save: 'حفظ',
+          saving: 'جارٍ الحفظ…',
+        },
         password: {
           title: 'تغيير كلمة المرور',
           current: 'كلمة المرور الحالية',
@@ -4197,6 +4212,11 @@ const resources = {
       },
       account: {
         title: 'Configurações da Conta',
+        name: {
+          title: 'Nome de Exibição',
+          save: 'Salvar',
+          saving: 'Salvando…',
+        },
         password: {
           title: 'Alterar Senha',
           current: 'Senha Atual',

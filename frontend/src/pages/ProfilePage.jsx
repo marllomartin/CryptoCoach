@@ -5,29 +5,23 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import axios from 'axios';
 import {
-  User, Edit2, Save, Camera, Trophy, Flame, Zap,
-  Calendar, Target, TrendingUp, Award,
-  BookOpen, Star, Crown, Clock, X, HelpCircle,
+  Trophy, Flame, Zap,
+  Target, TrendingUp, Award,
+  BookOpen, Star, Crown, HelpCircle,
   Footprints, GraduationCap, BarChart2, Gem, Lock, Settings
 } from 'lucide-react';
 import { StreakInfoModal } from '../components/StreakInfoModal';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
 import { Progress } from '../components/ui/progress';
-import { toast } from 'sonner';
 
 const ProfilePage = () => {
-  const { user, token, refreshUser } = useAuth();
+  const { user, token } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [streakInfo, setStreakInfo] = useState(null);
   const [achievements, setAchievements] = useState([]);
   const [streakModalOpen, setStreakModalOpen] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [editName, setEditName] = useState('');
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!user || !token) return;
@@ -48,7 +42,6 @@ const ProfilePage = () => {
       setProfile(profileRes.data);
       setStreakInfo(streakRes.data);
       setAchievements(achRes.data);
-      setEditName(user.full_name);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -59,29 +52,6 @@ const ProfilePage = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  const saveProfile = async () => {
-    if (!editName.trim()) {
-      toast.error(t('profile.nameRequired'));
-      return;
-    }
-
-    setSaving(true);
-    try {
-      await axios.put(
-        `${API}/auth/profile`,
-        { full_name: editName },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success(t('profile.profileUpdated'));
-      setEditing(false);
-      refreshUser?.();
-    } catch (error) {
-      toast.error(t('profile.updateFailed'));
-    } finally {
-      setSaving(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -103,14 +73,7 @@ const ProfilePage = () => {
         <div className="container mx-auto px-4 max-w-4xl">
           
           {/* Profile Header */}
-          <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-8 mb-6 relative">
-            <button
-              onClick={() => navigate('/account')}
-              className="absolute top-4 right-4 p-2 hover:bg-gray-800 rounded-lg transition-colors"
-              aria-label="Account settings"
-            >
-              <Settings className="w-5 h-5 text-gray-400 hover:text-white transition-colors" />
-            </button>
+          <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-8 mb-6">
             <div className="flex flex-col md:flex-row items-center gap-6">
               {/* Avatar */}
               <div className="relative">
@@ -128,32 +91,16 @@ const ProfilePage = () => {
 
               {/* Info */}
               <div className="flex-1 text-center md:text-left">
-                {editing ? (
-                  <div className="flex items-center gap-2 mb-2">
-                    <Input
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="bg-gray-800 border-gray-700 text-white text-xl font-bold"
-                    />
-                    <Button size="sm" onClick={saveProfile} disabled={saving}>
-                      <Save className="w-4 h-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 mb-2">
-                    <h1 className="text-3xl font-bold text-white">{user?.full_name}</h1>
-                    <button onClick={() => setEditing(true)} className="p-1 hover:bg-gray-800 rounded">
-                      <Edit2 className="w-4 h-4 text-gray-500" />
-                    </button>
-                  </div>
-                )}
-                
-                <p className="text-primary font-medium mb-3">
-                  {profile?.avatar?.title || t('profile.newUser')}
-                </p>
+                <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
+                  <h1 className="text-3xl font-bold text-white">{user?.full_name}</h1>
+                  <button
+                    onClick={() => navigate('/account')}
+                    className="p-1.5 hover:bg-gray-800 rounded-lg transition-colors"
+                    aria-label="Account settings"
+                  >
+                    <Settings className="w-4 h-4 text-gray-500 hover:text-white transition-colors" />
+                  </button>
+                </div>
 
                 <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
                   <Zap className="w-5 h-5 text-yellow-500" />
