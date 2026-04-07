@@ -26,8 +26,9 @@ const AccountPage = () => {
   const navigate = useNavigate();
 
   // ── Name edit state ────────────────────────────────────────────────────────
-  const [editName, setEditName]       = useState(user?.full_name || '');
-  const [savingName, setSavingName]   = useState(false);
+  const [editName, setEditName]           = useState(user?.full_name || '');
+  const [editCertName, setEditCertName]   = useState(user?.certificate_name || '');
+  const [savingName, setSavingName]       = useState(false);
 
   // ── Password change state ──────────────────────────────────────────────────
   const [currentPassword, setCurrentPassword]   = useState('');
@@ -68,7 +69,7 @@ const AccountPage = () => {
     try {
       await axios.put(
         `${API}/auth/profile`,
-        { full_name: editName.trim() },
+        { full_name: editName.trim(), certificate_name: editCertName.trim() },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success(t('profile.profileUpdated'));
@@ -164,14 +165,27 @@ const AccountPage = () => {
               <User className="w-5 h-5 text-primary" />
               {t('account.name.title')}
             </h2>
-            <form onSubmit={handleNameSave} className="flex gap-3">
-              <Input
-                value={editName}
-                onChange={e => setEditName(e.target.value)}
-                className="bg-gray-800 border-gray-700 text-white flex-1"
-                required
-              />
-              <Button type="submit" disabled={savingName || editName.trim() === user?.full_name}>
+            <form onSubmit={handleNameSave} className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1.5">{t('account.name.displayName')}</label>
+                <Input
+                  value={editName}
+                  onChange={e => setEditName(e.target.value)}
+                  className="bg-gray-800 border-gray-700 text-white"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1.5">{t('account.name.fullName')}</label>
+                <Input
+                  value={editCertName}
+                  onChange={e => setEditCertName(e.target.value)}
+                  className="bg-gray-800 border-gray-700 text-white"
+                  placeholder={t('account.name.fullNamePlaceholder')}
+                />
+                <p className="text-xs text-gray-500 mt-1">{t('account.name.fullNameHint')}</p>
+              </div>
+              <Button type="submit" disabled={savingName}>
                 <Save className="w-4 h-4 mr-2" />
                 {savingName ? t('account.name.saving') : t('account.name.save')}
               </Button>

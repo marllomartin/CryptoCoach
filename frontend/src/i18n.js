@@ -188,8 +188,12 @@ const resources = {
       account: {
         title: 'Account Settings',
         name: {
-          title: 'Display Name',
-          save: 'Save',
+          title: 'Profile',
+          displayName: 'Display Name',
+          fullName: 'Full Name',
+          fullNamePlaceholder: 'Your full legal name',
+          fullNameHint: 'Used on certificates. Leave blank to use your display name.',
+          save: 'Save Changes',
           saving: 'Saving…',
         },
         password: {
@@ -1541,7 +1545,11 @@ const resources = {
       account: {
         title: 'Paramètres du compte',
         name: {
-          title: 'Nom affiché',
+          title: 'Profil',
+          displayName: 'Nom affiché',
+          fullName: 'Nom complet',
+          fullNamePlaceholder: 'Votre nom légal complet',
+          fullNameHint: 'Utilisé sur les certificats. Laissez vide pour utiliser votre nom affiché.',
           save: 'Enregistrer',
           saving: 'Enregistrement…',
         },
@@ -3558,8 +3566,12 @@ const resources = {
       account: {
         title: 'إعدادات الحساب',
         name: {
-          title: 'الاسم المعروض',
-          save: 'حفظ',
+          title: 'الملف الشخصي',
+          displayName: 'الاسم المعروض',
+          fullName: 'الاسم الكامل',
+          fullNamePlaceholder: 'اسمك القانوني الكامل',
+          fullNameHint: 'يُستخدم في الشهادات. اتركه فارغاً لاستخدام اسمك المعروض.',
+          save: 'حفظ التغييرات',
           saving: 'جارٍ الحفظ…',
         },
         password: {
@@ -4213,8 +4225,12 @@ const resources = {
       account: {
         title: 'Configurações da Conta',
         name: {
-          title: 'Nome de Exibição',
-          save: 'Salvar',
+          title: 'Perfil',
+          displayName: 'Nome de Exibição',
+          fullName: 'Nome Completo',
+          fullNamePlaceholder: 'Seu nome legal completo',
+          fullNameHint: 'Usado nos certificados. Deixe em branco para usar o nome de exibição.',
+          save: 'Salvar Alterações',
           saving: 'Salvando…',
         },
         password: {

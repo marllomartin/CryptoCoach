@@ -202,6 +202,7 @@ class UserResponse(BaseModel):
     subscription_expires: Optional[str] = None
     role: str = "none"  # none, editor, moderator, admin
     achievements: List[str] = []
+    certificate_name: Optional[str] = None
 
 class TokenResponse(BaseModel):
     access_token: str
@@ -477,6 +478,7 @@ class SubscriptionResponse(BaseModel):
 
 class UpdateProfileRequest(BaseModel):
     full_name: str
+    certificate_name: Optional[str] = None
 
 class ChangePasswordRequest(BaseModel):
     current_password: str
@@ -719,18 +721,23 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         subscription_tier=fresh_user.get("subscription_tier", "free"),
         subscription_expires=fresh_user.get("subscription_expires"),
         role=role,
-        achievements=fresh_user.get("achievements", [])
+        achievements=fresh_user.get("achievements", []),
+        certificate_name=fresh_user.get("certificate_name")
     )
 
 @api_router.put("/auth/profile")
 async def update_profile(data: UpdateProfileRequest, current_user: dict = Depends(get_current_user)):
-    """Update the authenticated user's display name."""
+    """Update the authenticated user's display name and optional certificate name."""
     clean_name = InputSanitizer.sanitize_string(data.full_name, max_length=100)
     if not clean_name:
         raise HTTPException(status_code=400, detail="Name cannot be empty")
+    update_fields: dict = {"full_name": clean_name}
+    if data.certificate_name is not None:
+        clean_cert = InputSanitizer.sanitize_string(data.certificate_name, max_length=150)
+        update_fields["certificate_name"] = clean_cert
     await db.users.update_one(
         {"id": current_user["id"]},
-        {"$set": {"full_name": clean_name}}
+        {"$set": update_fields}
     )
     return {"message": "Profile updated"}
 

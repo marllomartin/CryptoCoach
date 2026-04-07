@@ -91,16 +91,7 @@ const ProfilePage = () => {
 
               {/* Info */}
               <div className="flex-1 text-center md:text-left">
-                <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
-                  <h1 className="text-3xl font-bold text-white">{user?.full_name}</h1>
-                  <button
-                    onClick={() => navigate('/account')}
-                    className="p-1.5 hover:bg-gray-800 rounded-lg transition-colors"
-                    aria-label="Account settings"
-                  >
-                    <Settings className="w-4 h-4 text-gray-500 hover:text-white transition-colors" />
-                  </button>
-                </div>
+                <h1 className="text-3xl font-bold text-white mb-3">{user?.full_name}</h1>
 
                 <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
                   <Zap className="w-5 h-5 text-yellow-500" />
@@ -114,7 +105,15 @@ const ProfilePage = () => {
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col items-end gap-2">
+                <button
+                  onClick={() => navigate('/account')}
+                  className="p-1.5 hover:bg-gray-800 rounded-lg transition-colors self-end"
+                  aria-label="Account settings"
+                >
+                  <Settings className="w-4 h-4 text-gray-500 hover:text-white transition-colors" />
+                </button>
+                <div className="grid grid-cols-2 gap-4">
                 <div className="relative text-center p-3 bg-gray-800/50 rounded-lg">
                   <button
                     onClick={() => setStreakModalOpen(true)}
@@ -131,6 +130,7 @@ const ProfilePage = () => {
                   <Trophy className="w-6 h-6 text-purple-500 mx-auto mb-1" />
                   <p className="text-xl font-bold text-white">{profile?.achievements_count || 0}</p>
                   <p className="text-xs text-gray-400">{t('profile.achievements')}</p>
+                </div>
                 </div>
               </div>
             </div>
