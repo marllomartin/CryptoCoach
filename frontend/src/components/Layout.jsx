@@ -131,6 +131,15 @@ export const Layout = ({ children }) => {
                       <Settings className="w-4 h-4" />
                     </Button>
                   </Link>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={logout}
+                    className="text-slate-400 hover:text-white shrink-0"
+                    aria-label="Sign out"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
                 </div>
               ) : (
                 <>
