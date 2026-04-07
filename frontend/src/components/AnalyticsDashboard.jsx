@@ -1,224 +1,116 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import {
-  Users,
-  TrendingUp,
-  TrendingDown,
-  BookOpen,
-  Award,
-  DollarSign,
-  Clock,
-  Calendar,
-  Activity,
-  Eye,
-  Target,
-  BarChart3,
-  PieChart,
-  Loader2,
-  ArrowUpRight,
-  ArrowDownRight,
-  RefreshCw
+  Users, TrendingUp, BookOpen, Award,
+  DollarSign, Activity, BarChart3, PieChart,
+  Loader2, ArrowUpRight, ArrowDownRight, RefreshCw,
+  UserPlus, CreditCard
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { API } from '../App';
 import { toast } from 'sonner';
 
-// Simple line chart component
-function SimpleLineChart({ data, color = '#6366f1', height = 60 }) {
-  if (!data || data.length === 0) return null;
-  
+// ── Mini SVG line chart ────────────────────────────────────────────────────
+function LineSparkline({ data, color = '#6366f1', height = 40 }) {
+  if (!data || data.length < 2) return null;
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
-  
-  const points = data.map((val, i) => {
+  const pts = data.map((v, i) => {
     const x = (i / (data.length - 1)) * 100;
-    const y = 100 - ((val - min) / range) * 100;
+    const y = 100 - ((v - min) / range) * 100;
     return `${x},${y}`;
   }).join(' ');
-  
   return (
     <svg viewBox="0 0 100 100" className="w-full" style={{ height }} preserveAspectRatio="none">
       <defs>
-        <linearGradient id={`gradient-${color}`} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+        <linearGradient id={`sg-${color.replace('#','')}`} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor={color} stopOpacity="0.25" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <polyline
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        points={points}
-        vectorEffect="non-scaling-stroke"
-      />
-      <polygon
-        fill={`url(#gradient-${color})`}
-        points={`0,100 ${points} 100,100`}
-      />
+      <polyline fill="none" stroke={color} strokeWidth="2.5" points={pts} vectorEffect="non-scaling-stroke" />
+      <polygon fill={`url(#sg-${color.replace('#','')})`} points={`0,100 ${pts} 100,100`} />
     </svg>
   );
 }
 
-// Simple bar chart
-function SimpleBarChart({ data, labels, color = '#6366f1', height = 120 }) {
+// ── Mini bar chart ─────────────────────────────────────────────────────────
+function BarSparkline({ data, labels, color = '#6366f1', height = 130 }) {
   if (!data || data.length === 0) return null;
-  
   const max = Math.max(...data) || 1;
-  
+  // Only show every Nth label to avoid crowding
+  const step = data.length > 14 ? Math.ceil(data.length / 7) : 1;
   return (
-    <div className="flex items-end justify-between gap-2" style={{ height }}>
+    <div className="flex items-end justify-between gap-0.5" style={{ height }}>
       {data.map((val, i) => (
-        <div key={i} className="flex-1 flex flex-col items-center gap-1">
-          <div 
+        <div key={i} className="flex-1 flex flex-col items-center gap-0.5 min-w-0">
+          <div
             className="w-full rounded-t-sm transition-all duration-500"
-            style={{ 
-              height: `${(val / max) * 100}%`,
-              backgroundColor: color,
-              minHeight: val > 0 ? '4px' : '0'
-            }}
+            style={{ height: `${(val / max) * 85}%`, backgroundColor: color, minHeight: val > 0 ? 3 : 0 }}
           />
-          <span className="text-[10px] text-slate-500">{labels?.[i] || ''}</span>
+          <span className="text-[9px] text-slate-600 truncate w-full text-center">
+            {i % step === 0 ? (labels?.[i] || '') : ''}
+          </span>
         </div>
       ))}
     </div>
   );
 }
 
-// Stat card component
-function StatCard({ title, value, change, changeType, icon: Icon, color, trend }) {
-  const isPositive = changeType === 'positive' || change > 0;
-  
+// ── Stat card ──────────────────────────────────────────────────────────────
+function StatCard({ title, value, growth, icon: Icon, color, sparkline, sparkColor }) {
+  const isPositive = growth >= 0;
   return (
     <Card className="bg-card border-border overflow-hidden">
       <CardContent className="p-5">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between mb-3">
           <div>
             <p className="text-sm text-slate-400 mb-1">{title}</p>
             <p className="text-3xl font-bold text-white">{value}</p>
-            {change !== undefined && (
-              <div className={`flex items-center gap-1 mt-2 text-sm ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                {isPositive ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                <span>{Math.abs(change)}%</span>
-                <span className="text-slate-500 text-xs">vs last week</span>
+            {growth !== undefined && (
+              <div className={`flex items-center gap-1 mt-1.5 text-xs ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                {isPositive ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
+                <span>{Math.abs(growth)}%</span>
               </div>
             )}
           </div>
           <div className={`p-3 rounded-xl ${color}`}>
-            <Icon className="w-6 h-6 text-white" />
+            <Icon className="w-5 h-5 text-white" />
           </div>
         </div>
-        {trend && (
-          <div className="mt-4">
-            <SimpleLineChart data={trend} color={isPositive ? '#22c55e' : '#ef4444'} height={40} />
-          </div>
-        )}
+        {sparkline && <LineSparkline data={sparkline} color={sparkColor || '#6366f1'} height={36} />}
       </CardContent>
     </Card>
   );
 }
 
+// ── Main dashboard ─────────────────────────────────────────────────────────
 export function AnalyticsDashboard({ token }) {
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState(null);
-  const [timeRange, setTimeRange] = useState('7d');
-  
-  useEffect(() => {
-    fetchAnalytics();
-  }, [timeRange]);
-  
-  const fetchAnalytics = async () => {
+  const { t } = useTranslation();
+  const [loading, setLoading]     = useState(true);
+  const [stats, setStats]         = useState(null);
+  const [timeRange, setTimeRange] = useState('30d');
+
+  const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API}/admin/analytics?range=${timeRange}`, {
+      const { data } = await axios.get(`${API}/admin/analytics?range=${timeRange}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setStats(response.data);
-    } catch (error) {
-      // Use mock data if API not available
-      setStats(generateMockData());
+      setStats(data);
+    } catch {
+      toast.error(t('admin.analytics.loadError'));
     } finally {
       setLoading(false);
     }
-  };
-  
-  const generateMockData = () => {
-    // Generate realistic mock data
-    const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-    return {
-      totalUsers: 1247,
-      activeUsers: 432,
-      newUsersThisWeek: 87,
-      userGrowth: 12.5,
-      
-      totalLessonsCompleted: 5832,
-      lessonsThisWeek: 234,
-      lessonGrowth: 8.3,
-      
-      totalRevenue: 12450,
-      revenueThisMonth: 2340,
-      revenueGrowth: 15.2,
-      
-      avgSessionDuration: 24, // minutes
-      sessionGrowth: 5.1,
-      
-      conversionRate: 4.2,
-      conversionGrowth: 0.8,
-      
-      certificatesIssued: 89,
-      certificateGrowth: 22.1,
-      
-      // Trends (7 days)
-      userTrend: [32, 45, 38, 52, 48, 61, 87],
-      lessonTrend: [28, 35, 42, 38, 45, 52, 48],
-      revenueTrend: [180, 220, 150, 280, 320, 190, 340],
-      
-      // By day distribution
-      dailyActiveUsers: [180, 220, 195, 240, 280, 150, 120],
-      dailyLabels: days,
-      
-      // Subscription distribution
-      subscriptionDistribution: {
-        free: 856,
-        basic: 234,
-        pro: 112,
-        elite: 45
-      },
-      
-      // Course popularity
-      coursePopularity: [
-        { name: 'Fondamentaux', completions: 423 },
-        { name: 'Investisseur', completions: 287 },
-        { name: 'Stratégiste', completions: 156 }
-      ],
-      
-      // Recent activity
-      recentActivity: [
-        { type: 'signup', user: 'jean.d***@gmail.com', time: '5 min' },
-        { type: 'lesson', user: 'marie.l***@yahoo.com', time: '12 min' },
-        { type: 'subscription', user: 'pierre.m***@outlook.com', time: '28 min' },
-        { type: 'certificate', user: 'sophie.r***@gmail.com', time: '1h' },
-        { type: 'quiz', user: 'lucas.b***@gmail.com', time: '2h' }
-      ],
-      
-      // Top performing lessons
-      topLessons: [
-        { id: 'lesson-1', title: 'Introduction au Bitcoin', completions: 892, avgScore: 87 },
-        { id: 'lesson-2', title: 'Comprendre la Blockchain', completions: 756, avgScore: 82 },
-        { id: 'lesson-3', title: 'Portefeuilles Crypto', completions: 634, avgScore: 85 },
-        { id: 'lesson-4', title: 'Sécurité des Cryptos', completions: 521, avgScore: 79 },
-        { id: 'lesson-5', title: 'Trading Basics', completions: 487, avgScore: 74 }
-      ],
-      
-      // Retention metrics
-      retentionRate: 68,
-      churnRate: 4.2,
-      avgLessonsPerUser: 3.8
-    };
-  };
-  
+  }, [timeRange, token, t]);
+
+  useEffect(() => { fetchAnalytics(); }, [fetchAnalytics]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -226,37 +118,41 @@ export function AnalyticsDashboard({ token }) {
       </div>
     );
   }
-  
+
   if (!stats) {
-    return (
-      <div className="text-center py-20 text-slate-400">
-        Impossible de charger les analytics
-      </div>
-    );
+    return <div className="text-center py-20 text-slate-400">{t('admin.analytics.loadError')}</div>;
   }
-  
+
+  const ranges = [
+    { key: '7d',  label: t('admin.analytics.range7d')  },
+    { key: '30d', label: t('admin.analytics.range30d') },
+    { key: '90d', label: t('admin.analytics.range90d') },
+  ];
+
+  const subColors = { free: 'bg-slate-500', pro: 'bg-blue-500', elite: 'bg-purple-500' };
+  const subTotal  = Object.values(stats.subscription_distribution).reduce((a, b) => a + b, 0) || 1;
+
+  const fmtCurrency = (n) => `$${Number(n).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+
   return (
     <div className="space-y-6">
-      {/* Header with Time Range */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white">Analytics Dashboard</h2>
-          <p className="text-slate-400">Vue d'ensemble des performances</p>
+          <h2 className="text-2xl font-bold text-white">{t('admin.analytics.title')}</h2>
+          <p className="text-slate-400 text-sm">{t('admin.analytics.subtitle')}</p>
         </div>
-        
         <div className="flex items-center gap-2">
           <div className="flex bg-muted rounded-lg p-1">
-            {['7d', '30d', '90d'].map((range) => (
+            {ranges.map(({ key, label }) => (
               <button
-                key={range}
-                onClick={() => setTimeRange(range)}
+                key={key}
+                onClick={() => setTimeRange(key)}
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                  timeRange === range 
-                    ? 'bg-primary text-white' 
-                    : 'text-slate-400 hover:text-white'
+                  timeRange === key ? 'bg-primary text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {range === '7d' ? '7 jours' : range === '30d' ? '30 jours' : '90 jours'}
+                {label}
               </button>
             ))}
           </div>
@@ -265,129 +161,103 @@ export function AnalyticsDashboard({ token }) {
           </Button>
         </div>
       </div>
-      
-      {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+      {/* Primary stat cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Utilisateurs totaux"
-          value={stats.totalUsers.toLocaleString()}
-          change={stats.userGrowth}
-          changeType="positive"
+          title={t('admin.analytics.totalUsers')}
+          value={stats.total_users.toLocaleString()}
           icon={Users}
           color="bg-blue-500"
-          trend={stats.userTrend}
+          sparkline={stats.daily_signups}
+          sparkColor="#3b82f6"
         />
         <StatCard
-          title="Leçons complétées"
-          value={stats.totalLessonsCompleted.toLocaleString()}
-          change={stats.lessonGrowth}
-          changeType="positive"
-          icon={BookOpen}
-          color="bg-green-500"
-          trend={stats.lessonTrend}
+          title={t('admin.analytics.newUsers')}
+          value={stats.new_users_in_range.toLocaleString()}
+          growth={stats.user_growth}
+          icon={UserPlus}
+          color="bg-emerald-500"
+          sparkline={stats.daily_signups}
+          sparkColor="#10b981"
         />
         <StatCard
-          title="Revenus (€)"
-          value={`€${stats.totalRevenue.toLocaleString()}`}
-          change={stats.revenueGrowth}
-          changeType="positive"
+          title={t('admin.analytics.totalRevenue')}
+          value={fmtCurrency(stats.total_revenue)}
+          growth={stats.revenue_growth}
           icon={DollarSign}
           color="bg-amber-500"
-          trend={stats.revenueTrend}
+          sparkline={stats.daily_revenue}
+          sparkColor="#f59e0b"
         />
         <StatCard
-          title="Taux de conversion"
-          value={`${stats.conversionRate}%`}
-          change={stats.conversionGrowth}
-          changeType="positive"
-          icon={Target}
+          title={t('admin.analytics.revenueInRange')}
+          value={fmtCurrency(stats.revenue_in_range)}
+          icon={CreditCard}
           color="bg-purple-500"
+          sparkline={stats.daily_revenue}
+          sparkColor="#a855f7"
         />
       </div>
-      
-      {/* Secondary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-card border-border">
-          <CardContent className="p-4 text-center">
-            <Clock className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-white">{stats.avgSessionDuration} min</p>
-            <p className="text-xs text-slate-400">Durée session moy.</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-card border-border">
-          <CardContent className="p-4 text-center">
-            <Activity className="w-8 h-8 text-pink-400 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-white">{stats.activeUsers}</p>
-            <p className="text-xs text-slate-400">Utilisateurs actifs</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-card border-border">
-          <CardContent className="p-4 text-center">
-            <Award className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-white">{stats.certificatesIssued}</p>
-            <p className="text-xs text-slate-400">Certificats émis</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-card border-border">
-          <CardContent className="p-4 text-center">
-            <TrendingUp className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-white">{stats.retentionRate}%</p>
-            <p className="text-xs text-slate-400">Taux de rétention</p>
-          </CardContent>
-        </Card>
+
+      {/* Secondary stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[
+          { icon: Activity,  color: 'text-pink-400',   val: stats.active_users.toLocaleString(),          label: t('admin.analytics.activeUsers') },
+          { icon: BookOpen,  color: 'text-green-400',  val: stats.total_lessons_completed.toLocaleString(), label: t('admin.analytics.lessonsCompleted') },
+          { icon: Award,     color: 'text-yellow-400', val: stats.total_certificates.toLocaleString(),    label: t('admin.analytics.certificates') },
+          { icon: TrendingUp,color: 'text-cyan-400',   val: stats.avg_lessons_per_user,                   label: t('admin.analytics.avgLessonsPerUser') },
+        ].map(({ icon: Icon, color, val, label }, i) => (
+          <Card key={i} className="bg-card border-border">
+            <CardContent className="p-4 text-center">
+              <Icon className={`w-7 h-7 ${color} mx-auto mb-2`} />
+              <p className="text-2xl font-bold text-white">{val}</p>
+              <p className="text-xs text-slate-400 mt-0.5">{label}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-      
-      {/* Charts Row */}
+
+      {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Daily Active Users */}
+        {/* Daily signups */}
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <BarChart3 className="w-5 h-5 text-blue-400" />
-              Utilisateurs actifs par jour
+            <CardTitle className="flex items-center gap-2 text-base">
+              <BarChart3 className="w-4 h-4 text-blue-400" />
+              {t('admin.analytics.dailySignups')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <SimpleBarChart 
-              data={stats.dailyActiveUsers} 
-              labels={stats.dailyLabels}
-              color="#3b82f6"
-              height={150}
-            />
+            <BarSparkline data={stats.daily_signups} labels={stats.daily_labels} color="#3b82f6" height={130} />
           </CardContent>
         </Card>
-        
-        {/* Subscription Distribution */}
+
+        {/* Subscription distribution */}
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <PieChart className="w-5 h-5 text-purple-400" />
-              Distribution des abonnements
+            <CardTitle className="flex items-center gap-2 text-base">
+              <PieChart className="w-4 h-4 text-purple-400" />
+              {t('admin.analytics.subscriptionDist')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {Object.entries(stats.subscriptionDistribution).map(([tier, count]) => {
-                const total = Object.values(stats.subscriptionDistribution).reduce((a, b) => a + b, 0);
-                const percent = ((count / total) * 100).toFixed(1);
-                const colors = {
-                  free: 'bg-slate-500',
-                  basic: 'bg-blue-500',
-                  pro: 'bg-purple-500',
-                  elite: 'bg-amber-500'
-                };
+            <div className="space-y-3">
+              {Object.entries(stats.subscription_distribution).map(([tier, count]) => {
+                const pct = ((count / subTotal) * 100).toFixed(1);
+                const label = t(`admin.analytics.${tier}`, tier);
                 return (
                   <div key={tier}>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="capitalize text-slate-300">{tier}</span>
-                      <span className="text-slate-400">{count} ({percent}%)</span>
+                      <span className="capitalize text-slate-300">{label}</span>
+                      <span className="text-slate-400">{count.toLocaleString()} ({pct}%)</span>
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
-                        animate={{ width: `${percent}%` }}
-                        transition={{ duration: 0.8 }}
-                        className={`h-full ${colors[tier]}`}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ duration: 0.7 }}
+                        className={`h-full rounded-full ${subColors[tier] || 'bg-slate-500'}`}
                       />
                     </div>
                   </div>
@@ -397,66 +267,68 @@ export function AnalyticsDashboard({ token }) {
           </CardContent>
         </Card>
       </div>
-      
-      {/* Bottom Row */}
+
+      {/* Bottom row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Top Lessons */}
+        {/* Top lessons */}
         <Card className="bg-card border-border lg:col-span-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <BookOpen className="w-5 h-5 text-green-400" />
-              Top 5 Leçons
+            <CardTitle className="flex items-center gap-2 text-base">
+              <BookOpen className="w-4 h-4 text-green-400" />
+              {t('admin.analytics.topLessons')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {stats.topLessons.map((lesson, i) => (
-                <div key={lesson.id} className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
-                  <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
-                    {i + 1}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-white truncate">{lesson.title}</p>
-                    <p className="text-xs text-slate-400">{lesson.completions} complétions</p>
+            {stats.top_lessons.length === 0 ? (
+              <p className="text-slate-500 text-sm py-4 text-center">—</p>
+            ) : (
+              <div className="space-y-2">
+                {stats.top_lessons.map((lesson, i) => (
+                  <div key={lesson.id} className="flex items-center gap-3 p-3 bg-muted/40 rounded-lg">
+                    <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary shrink-0">
+                      {i + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate">{lesson.title}</p>
+                    </div>
+                    <span className="text-sm font-semibold text-primary shrink-0">
+                      {lesson.completions.toLocaleString()} {t('admin.analytics.completions')}
+                    </span>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-green-400">{lesson.avgScore}%</p>
-                    <p className="text-xs text-slate-400">score moy.</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
-        
-        {/* Recent Activity */}
+
+        {/* Recent signups */}
         <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Activity className="w-5 h-5 text-pink-400" />
-              Activité récente
+            <CardTitle className="flex items-center gap-2 text-base">
+              <UserPlus className="w-4 h-4 text-emerald-400" />
+              {t('admin.analytics.recentSignups')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {stats.recentActivity.map((activity, i) => {
-                const icons = {
-                  signup: { icon: Users, color: 'text-blue-400', label: 'Inscription' },
-                  lesson: { icon: BookOpen, color: 'text-green-400', label: 'Leçon' },
-                  subscription: { icon: DollarSign, color: 'text-amber-400', label: 'Abonnement' },
-                  certificate: { icon: Award, color: 'text-purple-400', label: 'Certificat' },
-                  quiz: { icon: Target, color: 'text-cyan-400', label: 'Quiz' }
-                };
-                const { icon: Icon, color, label } = icons[activity.type] || icons.signup;
-                
+              {stats.recent_activity.map((item, i) => {
+                const tierColors = { free: 'text-slate-400', pro: 'text-blue-400', elite: 'text-purple-400' };
+                const ago = item.time
+                  ? (() => {
+                      const diff = Math.floor((Date.now() - new Date(item.time)) / 1000);
+                      if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+                      if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+                      return `${Math.floor(diff / 86400)}d`;
+                    })()
+                  : '';
                 return (
-                  <div key={i} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                    <Icon className={`w-4 h-4 ${color}`} />
+                  <div key={i} className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-slate-500 shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white truncate">{activity.user}</p>
-                      <p className="text-xs text-slate-400">{label}</p>
+                      <p className="text-sm text-white truncate">{item.user}</p>
+                      <p className={`text-xs ${tierColors[item.tier] || 'text-slate-400'} capitalize`}>{item.tier}</p>
                     </div>
-                    <span className="text-xs text-slate-500">{activity.time}</span>
+                    <span className="text-xs text-slate-500 shrink-0">{ago}</span>
                   </div>
                 );
               })}
@@ -464,34 +336,6 @@ export function AnalyticsDashboard({ token }) {
           </CardContent>
         </Card>
       </div>
-      
-      {/* Key Metrics Summary */}
-      <Card className="bg-gradient-to-r from-primary/10 to-purple-500/10 border-primary/30">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6 text-center">
-            <div>
-              <p className="text-3xl font-bold text-primary">{stats.newUsersThisWeek}</p>
-              <p className="text-sm text-slate-400">Nouveaux cette semaine</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-green-400">{stats.lessonsThisWeek}</p>
-              <p className="text-sm text-slate-400">Leçons cette semaine</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-amber-400">€{stats.revenueThisMonth}</p>
-              <p className="text-sm text-slate-400">Revenus ce mois</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-cyan-400">{stats.avgLessonsPerUser}</p>
-              <p className="text-sm text-slate-400">Leçons/utilisateur</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-red-400">{stats.churnRate}%</p>
-              <p className="text-sm text-slate-400">Taux de churn</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

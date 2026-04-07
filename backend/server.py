@@ -4475,6 +4475,148 @@ async def get_admin_stats(admin: dict = Depends(get_admin_user)):
         "courses": courses
     }
 
+@api_router.get("/admin/analytics")
+async def get_admin_analytics(range: str = "7d", admin: dict = Depends(get_admin_user)):
+    """Real analytics data for the admin dashboard."""
+    now = datetime.now(timezone.utc)
+    days = 7 if range == "7d" else (30 if range == "30d" else 90)
+    range_start = now - timedelta(days=days)
+    range_start_iso = range_start.isoformat()
+
+    prev_start = (range_start - timedelta(days=days)).isoformat()
+
+    # ── Users ──────────────────────────────────────────────────────────────
+    total_users = await db.users.count_documents({})
+    new_users_in_range = await db.users.count_documents({"created_at": {"$gte": range_start_iso}})
+    new_users_prev = await db.users.count_documents({"created_at": {"$gte": prev_start, "$lt": range_start_iso}})
+
+    # Active users = had last_activity within range
+    active_users = await db.users.count_documents({"last_activity": {"$gte": range_start_iso}})
+
+    # ── Subscription distribution ──────────────────────────────────────────
+    subscription_distribution = {}
+    for tier in ["free", "pro", "elite"]:
+        subscription_distribution[tier] = await db.users.count_documents({"subscription_tier": tier})
+
+    # ── Revenue ────────────────────────────────────────────────────────────
+    paid_txns = await db.payment_transactions.find(
+        {"payment_status": "paid"}, {"_id": 0, "amount": 1, "created_at": 1}
+    ).to_list(length=10000)
+
+    total_revenue = sum(t.get("amount", 0) for t in paid_txns)
+    revenue_in_range = sum(
+        t.get("amount", 0) for t in paid_txns
+        if t.get("created_at", "") >= range_start_iso
+    )
+    revenue_prev = sum(
+        t.get("amount", 0) for t in paid_txns
+        if prev_start <= t.get("created_at", "") < range_start_iso
+    )
+    paid_count_in_range = sum(1 for t in paid_txns if t.get("created_at", "") >= range_start_iso)
+
+    # ── Lessons & certificates ─────────────────────────────────────────────
+    # Count total completed lessons across all users by summing list lengths
+    pipeline_lessons = [{"$project": {"count": {"$size": {"$ifNull": ["$completed_lessons", []]}}}}]
+    lesson_agg = await db.users.aggregate(pipeline_lessons).to_list(length=None)
+    total_lessons_completed = sum(doc["count"] for doc in lesson_agg)
+
+    pipeline_certs = [{"$project": {"count": {"$size": {"$ifNull": ["$certificates", []]}}}}]
+    cert_agg = await db.users.aggregate(pipeline_certs).to_list(length=None)
+    total_certificates = sum(doc["count"] for doc in cert_agg)
+
+    # ── Daily signups trend (last N days) ──────────────────────────────────
+    daily_signups = []
+    daily_labels = []
+    for i in range(days - 1, -1, -1):
+        day_start = (now - timedelta(days=i)).replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end   = (now - timedelta(days=i)).replace(hour=23, minute=59, second=59, microsecond=999999)
+        count = await db.users.count_documents({
+            "created_at": {"$gte": day_start.isoformat(), "$lte": day_end.isoformat()}
+        })
+        daily_signups.append(count)
+        daily_labels.append(day_start.strftime("%-d/%m" if days <= 30 else "%-d/%m"))
+
+    # ── Daily revenue trend ────────────────────────────────────────────────
+    daily_revenue = []
+    for i in range(days - 1, -1, -1):
+        day_start = (now - timedelta(days=i)).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+        day_end   = (now - timedelta(days=i)).replace(hour=23, minute=59, second=59, microsecond=999999).isoformat()
+        rev = sum(t.get("amount", 0) for t in paid_txns if day_start <= t.get("created_at", "") <= day_end)
+        daily_revenue.append(round(rev, 2))
+
+    # ── Top lessons by completion ──────────────────────────────────────────
+    lesson_completion_pipeline = [
+        {"$unwind": "$completed_lessons"},
+        {"$group": {"_id": "$completed_lessons", "completions": {"$sum": 1}}},
+        {"$sort": {"completions": -1}},
+        {"$limit": 5}
+    ]
+    top_lesson_ids = await db.users.aggregate(lesson_completion_pipeline).to_list(length=5)
+
+    top_lessons = []
+    for entry in top_lesson_ids:
+        lesson_id = entry["_id"]
+        lesson_doc = await db.lessons.find_one({"id": lesson_id}, {"_id": 0, "title": 1, "translations": 1})
+        title = lesson_id
+        if lesson_doc:
+            title = lesson_doc.get("title") or (
+                (lesson_doc.get("translations") or {}).get("en", {}).get("title") or lesson_id
+            )
+        top_lessons.append({"id": lesson_id, "title": title, "completions": entry["completions"]})
+
+    # ── Recent signups ─────────────────────────────────────────────────────
+    recent_users = await db.users.find(
+        {}, {"_id": 0, "email": 1, "created_at": 1, "subscription_tier": 1}
+    ).sort("created_at", -1).limit(5).to_list(length=5)
+
+    recent_activity = []
+    for u in recent_users:
+        email = u.get("email", "")
+        parts = email.split("@")
+        masked = parts[0][:3] + "***@" + parts[1] if len(parts) == 2 and len(parts[0]) >= 3 else email
+        recent_activity.append({
+            "type": "signup",
+            "user": masked,
+            "time": u.get("created_at", ""),
+            "tier": u.get("subscription_tier", "free")
+        })
+
+    # ── Growth percentages ─────────────────────────────────────────────────
+    def growth_pct(current, previous):
+        if previous == 0:
+            return 100.0 if current > 0 else 0.0
+        return round((current - previous) / previous * 100, 1)
+
+    user_growth    = growth_pct(new_users_in_range, new_users_prev)
+    revenue_growth = growth_pct(revenue_in_range, revenue_prev)
+
+    avg_lessons_per_user = round(total_lessons_completed / total_users, 1) if total_users > 0 else 0
+
+    return {
+        "total_users": total_users,
+        "new_users_in_range": new_users_in_range,
+        "active_users": active_users,
+        "user_growth": user_growth,
+
+        "total_lessons_completed": total_lessons_completed,
+        "total_certificates": total_certificates,
+        "avg_lessons_per_user": avg_lessons_per_user,
+
+        "total_revenue": round(total_revenue, 2),
+        "revenue_in_range": round(revenue_in_range, 2),
+        "revenue_growth": revenue_growth,
+        "paid_transactions_in_range": paid_count_in_range,
+
+        "subscription_distribution": subscription_distribution,
+
+        "daily_signups": daily_signups,
+        "daily_labels": daily_labels,
+        "daily_revenue": daily_revenue,
+
+        "top_lessons": top_lessons,
+        "recent_activity": recent_activity,
+    }
+
 @api_router.get("/admin/users")
 async def get_admin_users(
     skip: int = 0,
