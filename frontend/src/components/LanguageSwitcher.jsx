@@ -1,19 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe, Check, ChevronDown } from 'lucide-react';
+import ReactCountryFlag from 'react-country-flag';
 
 const languages = [
-  { code: 'en', name: 'English', flag: '🇬🇧', dir: 'ltr' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷', dir: 'ltr' },
-  { code: 'pt', name: 'Português', flag: '🇧🇷', dir: 'ltr' },
-  { code: 'ar', name: 'العربية', flag: '🇸🇦', dir: 'rtl' }
+  { code: 'en', name: 'English', countryCode: 'GB', dir: 'ltr' },
+  { code: 'fr', name: 'Français', countryCode: 'FR', dir: 'ltr' },
+  { code: 'pt', name: 'Português', countryCode: 'BR', dir: 'ltr' },
+  { code: 'ar', name: 'العربية', countryCode: 'SA', dir: 'rtl' }
 ];
+
+const Flag = ({ countryCode, size = '1.2em' }) => (
+  <ReactCountryFlag
+    countryCode={countryCode}
+    svg
+    style={{ width: size, height: size, borderRadius: '2px', objectFit: 'cover' }}
+  />
+);
 
 export const LanguageSwitcher = ({ variant = 'default' }) => {
   const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-  
+
   const currentLang = languages.find(l => l.code === i18n.language) || languages[0];
 
   useEffect(() => {
@@ -38,7 +47,7 @@ export const LanguageSwitcher = ({ variant = 'default' }) => {
   const handleLanguageChange = (langCode) => {
     i18n.changeLanguage(langCode);
     setIsOpen(false);
-    
+
     // Update document direction
     const lang = languages.find(l => l.code === langCode);
     if (lang) {
@@ -55,10 +64,10 @@ export const LanguageSwitcher = ({ variant = 'default' }) => {
           className="flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-colors text-sm"
           data-testid="language-switcher-btn"
         >
-          <span>{currentLang.flag}</span>
+          <Flag countryCode={currentLang.countryCode} />
           <ChevronDown className={`w-3 h-3 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </button>
-        
+
         {isOpen && (
           <div className="absolute top-full right-0 mt-1 bg-gray-900 border border-gray-800 rounded-lg shadow-xl py-1 min-w-[120px] z-50">
             {languages.map((lang) => (
@@ -70,7 +79,7 @@ export const LanguageSwitcher = ({ variant = 'default' }) => {
                 }`}
                 data-testid={`lang-option-${lang.code}`}
               >
-                <span>{lang.flag}</span>
+                <Flag countryCode={lang.countryCode} />
                 <span>{lang.name}</span>
                 {i18n.language === lang.code && <Check className="w-3 h-3 ml-auto" />}
               </button>
@@ -89,10 +98,11 @@ export const LanguageSwitcher = ({ variant = 'default' }) => {
         data-testid="language-switcher-btn"
       >
         <Globe className="w-4 h-4 text-gray-400" />
-        <span className="text-sm text-gray-300">{currentLang.flag} {currentLang.name}</span>
+        <Flag countryCode={currentLang.countryCode} />
+        <span className="text-sm text-gray-300">{currentLang.name}</span>
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-      
+
       {isOpen && (
         <div className="absolute top-full right-0 mt-2 bg-gray-900 border border-gray-800 rounded-xl shadow-xl py-2 min-w-[160px] z-50">
           {languages.map((lang) => (
@@ -104,7 +114,7 @@ export const LanguageSwitcher = ({ variant = 'default' }) => {
               }`}
               data-testid={`lang-option-${lang.code}`}
             >
-              <span className="text-lg">{lang.flag}</span>
+              <Flag countryCode={lang.countryCode} size="1.4em" />
               <span className="flex-1 text-left">{lang.name}</span>
               {i18n.language === lang.code && <Check className="w-4 h-4" />}
             </button>

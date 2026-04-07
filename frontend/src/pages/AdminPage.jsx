@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactCountryFlag from 'react-country-flag';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
@@ -242,11 +243,19 @@ function DashboardTab({ stats }) {
 }
 
 // Supported languages config
+const Flag = ({ countryCode }) => (
+  <ReactCountryFlag
+    countryCode={countryCode}
+    svg
+    style={{ width: '1.1em', height: '1.1em', borderRadius: '2px', objectFit: 'cover' }}
+  />
+);
+
 const LANG_OPTIONS = [
-  { code: 'en', label: 'English', flag: '🇬🇧' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'ar', label: 'العربية', flag: '🇸🇦' },
-  { code: 'pt', label: 'Português', flag: '🇧🇷' },
+  { code: 'en', label: 'English', countryCode: 'GB' },
+  { code: 'fr', label: 'Français', countryCode: 'FR' },
+  { code: 'ar', label: 'العربية', countryCode: 'SA' },
+  { code: 'pt', label: 'Português', countryCode: 'BR' },
 ];
 
 const EMPTY_COURSE_TRANSLATIONS = () =>
@@ -262,16 +271,16 @@ function LangBadges({ translations }) {
   const trans = translations ?? {};
   return (
     <div className="flex gap-1 flex-wrap mt-1">
-      {LANG_OPTIONS.map(({ code, flag }) => {
+      {LANG_OPTIONS.map(({ code, countryCode }) => {
         const entry = trans[code];
         const hasContent = entry && entry.title && entry.title.trim();
         return (
           <span
             key={code}
-            className={`text-xs px-1.5 py-0.5 rounded ${hasContent ? 'bg-green-500/20 text-green-400' : 'bg-muted text-slate-500'}`}
+            className={`inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded ${hasContent ? 'bg-green-500/20 text-green-400' : 'bg-muted text-slate-500'}`}
             title={hasContent ? `${code.toUpperCase()} available` : `${code.toUpperCase()} missing`}
           >
-            {flag} {code.toUpperCase()}
+            <Flag countryCode={countryCode} /> {code.toUpperCase()}
           </span>
         );
       })}
@@ -412,7 +421,7 @@ function CourseForm({ initial, onSave, onCancel, saving }) {
         {/* Language tabs */}
         <div className="border border-border rounded-lg overflow-hidden">
           <div className="flex border-b border-border bg-muted/50">
-            {LANG_OPTIONS.map(({ code, flag, label }) => {
+            {LANG_OPTIONS.map(({ code, countryCode, label }) => {
               const hasContent = translations[code]?.title?.trim();
               return (
                 <button
@@ -424,7 +433,7 @@ function CourseForm({ initial, onSave, onCancel, saving }) {
                       : 'text-slate-400 hover:text-foreground'
                   }`}
                 >
-                  <span>{flag}</span>
+                  <Flag countryCode={countryCode} />
                   <span>{label}</span>
                   {hasContent && <span className="w-1.5 h-1.5 rounded-full bg-green-400" />}
                 </button>
@@ -542,7 +551,7 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
         {/* Language tabs */}
         <div className="border border-border rounded-lg overflow-hidden">
           <div className="flex border-b border-border bg-muted/50">
-            {LANG_OPTIONS.map(({ code, flag, label }) => {
+            {LANG_OPTIONS.map(({ code, countryCode, label }) => {
               const hasContent = translations[code]?.title?.trim();
               return (
                 <button
@@ -554,7 +563,7 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
                       : 'text-slate-400 hover:text-foreground'
                   }`}
                 >
-                  <span>{flag}</span>
+                  <Flag countryCode={countryCode} />
                   <span>{label}</span>
                   {hasContent && <span className="w-1.5 h-1.5 rounded-full bg-green-400" />}
                 </button>
@@ -711,7 +720,7 @@ function QuizForm({ lessonId, lessonTitle, token, onClose }) {
           Quiz — {lessonTitle}
         </CardTitle>
         <div className="flex gap-2 flex-wrap mt-2">
-          {LANG_OPTIONS.map(({ code, flag, label }) => (
+          {LANG_OPTIONS.map(({ code, countryCode, label }) => (
             <button
               key={code}
               onClick={() => setActiveLang(code)}
@@ -721,7 +730,7 @@ function QuizForm({ lessonId, lessonTitle, token, onClose }) {
                   : 'bg-muted text-slate-400 hover:text-foreground'
               }`}
             >
-              {flag} {label}
+              <Flag countryCode={countryCode} /> {label}
             </button>
           ))}
         </div>
@@ -951,7 +960,7 @@ function ExamForm({ courseId, courseTitle, token, onClose }) {
         </div>
         {/* Language tabs */}
         <div className="flex gap-2 flex-wrap mt-2">
-          {LANG_OPTIONS.map(({ code, flag, label }) => (
+          {LANG_OPTIONS.map(({ code, countryCode, label }) => (
             <button
               key={code}
               onClick={() => setActiveLang(code)}
@@ -961,7 +970,7 @@ function ExamForm({ courseId, courseTitle, token, onClose }) {
                   : 'bg-muted text-slate-400 hover:text-foreground'
               }`}
             >
-              {flag} {label}
+              <Flag countryCode={countryCode} /> {label}
             </button>
           ))}
         </div>
