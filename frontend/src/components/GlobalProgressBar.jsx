@@ -19,7 +19,7 @@ export function GlobalProgressBar({ className = "", courseLessons }) {
   const totalLessons = courseLessons?.length || 23;
   const completedLessons = completedInCourse ?? (user.completed_lessons?.length || 0);
   const progressPercent = Math.round((completedLessons / totalLessons) * 100);
-  
+
   // Calculate level from XP — must match backend calculate_level() thresholds
   const XP_THRESHOLDS = [
     0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5200,
@@ -35,11 +35,13 @@ export function GlobalProgressBar({ className = "", courseLessons }) {
   const xpAtLevel = XP_THRESHOLDS[level - 1] || 0;
   const xpAtNext = XP_THRESHOLDS[level] || XP_THRESHOLDS[XP_THRESHOLDS.length - 1];
   const xpProgress = Math.round(((xp - xpAtLevel) / (xpAtNext - xpAtLevel)) * 100);
-  
+
   return (
     <div className={`sticky top-16 z-40 bg-card/80 backdrop-blur-sm border-b border-border ${className}`}>
       <div className="max-w-7xl mx-auto px-4 py-2">
-        <div className="flex items-center justify-between gap-4">
+
+        {/* Desktop layout */}
+        <div className="hidden md:flex items-center justify-between gap-4">
           {/* Level & XP */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
@@ -47,7 +49,7 @@ export function GlobalProgressBar({ className = "", courseLessons }) {
               <span className="text-sm font-medium">{t('progressBar.level', { level })}</span>
             </div>
             <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden">
-              <motion.div 
+              <motion.div
                 className="h-full bg-gradient-to-r from-yellow-500 to-orange-500"
                 initial={{ width: 0 }}
                 animate={{ width: `${xpProgress}%` }}
@@ -56,7 +58,7 @@ export function GlobalProgressBar({ className = "", courseLessons }) {
             </div>
             <span className="text-xs text-slate-400">{xp} XP</span>
           </div>
-          
+
           {/* Course Progress */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
@@ -64,7 +66,7 @@ export function GlobalProgressBar({ className = "", courseLessons }) {
               <span className="text-sm">{t('progressBar.lessons', { completed: completedLessons, total: totalLessons })}</span>
             </div>
             <div className="w-32 h-1.5 bg-muted rounded-full overflow-hidden">
-              <motion.div 
+              <motion.div
                 className="h-full bg-gradient-to-r from-primary to-blue-400"
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
@@ -73,7 +75,7 @@ export function GlobalProgressBar({ className = "", courseLessons }) {
             </div>
             <span className="text-xs text-slate-400">{progressPercent}%</span>
           </div>
-          
+
           {/* Streak */}
           {user.streak_days > 0 && (
             <div className="flex items-center gap-1.5">
@@ -81,13 +83,46 @@ export function GlobalProgressBar({ className = "", courseLessons }) {
               <span className="text-sm font-medium">{t('progressBar.streak', { days: user.streak_days })}</span>
             </div>
           )}
-          
-          {/* Achievements hint */}
+
+          {/* Achievements */}
           <div className="flex items-center gap-1.5 text-slate-400">
             <Trophy className="w-4 h-4" />
             <span className="text-xs">{t('progressBar.badges', { count: user.achievements?.length || 0 })}</span>
           </div>
         </div>
+
+        {/* Mobile layout */}
+        <div className="flex md:hidden items-center justify-between gap-3">
+          {/* Level */}
+          <div className="flex items-center gap-1">
+            <Star className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
+            <span className="text-xs font-medium">{t('progressBar.level', { level })}</span>
+          </div>
+
+          {/* XP */}
+          <span className="text-xs text-slate-400">{xp} XP</span>
+
+          {/* Lesson count */}
+          <div className="flex items-center gap-1">
+            <BookOpen className="w-3.5 h-3.5 text-primary shrink-0" />
+            <span className="text-xs">{completedLessons}/{totalLessons}</span>
+          </div>
+
+          {/* Streak */}
+          {user.streak_days > 0 && (
+            <div className="flex items-center gap-1">
+              <Flame className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+              <span className="text-xs font-medium">{user.streak_days}</span>
+            </div>
+          )}
+
+          {/* Achievements — icon only */}
+          <div className="flex items-center gap-1 text-slate-400">
+            <Trophy className="w-3.5 h-3.5 shrink-0" />
+            <span className="text-xs">{user.achievements?.length || 0}</span>
+          </div>
+        </div>
+
       </div>
     </div>
   );
