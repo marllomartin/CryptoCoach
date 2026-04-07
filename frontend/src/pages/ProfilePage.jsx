@@ -317,25 +317,25 @@ const LEVEL_STYLES = {
     card: 'from-amber-800/30 to-amber-700/20 border-amber-700/50',
     icon: 'text-amber-600',
     badge: 'bg-amber-700/30 text-amber-500',
-    label: 'Bronze',
+    labelKey: 'achievements.tiers.bronze',
   },
   2: {
     card: 'from-slate-500/30 to-slate-400/20 border-slate-400/50',
     icon: 'text-slate-300',
     badge: 'bg-slate-500/30 text-slate-300',
-    label: 'Silver',
+    labelKey: 'achievements.tiers.silver',
   },
   3: {
     card: 'from-yellow-500/30 to-yellow-400/20 border-yellow-500/50',
     icon: 'text-yellow-400',
     badge: 'bg-yellow-500/20 text-yellow-400',
-    label: 'Gold',
+    labelKey: 'achievements.tiers.gold',
   },
   4: {
     card: 'from-purple-500/20 via-pink-500/20 to-cyan-500/20 border-purple-400/50',
     icon: 'text-fuchsia-300',
     badge: 'bg-purple-500/20 text-purple-300',
-    label: 'Prismatic',
+    labelKey: 'achievements.tiers.prismatic',
   },
 };
 
@@ -354,7 +354,7 @@ const AchievementCard = ({ achievement }) => {
         : 'from-gray-800/40 to-gray-800/20 border-gray-700/50 opacity-50 grayscale'
     }`}>
       {!earned && (
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-2 ltr:right-2 rtl:left-2">
           <Lock className="w-3.5 h-3.5 text-gray-500" />
         </div>
       )}
@@ -362,7 +362,7 @@ const AchievementCard = ({ achievement }) => {
         <div className="flex items-center gap-2">
           <IconComponent className={`w-6 h-6 shrink-0 ${earned ? styles.icon : 'text-gray-600'}`} />
           <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${earned ? styles.badge : 'bg-gray-700 text-gray-500'}`}>
-            {styles.label}
+            {t(styles.labelKey)}
           </span>
         </div>
         <div>

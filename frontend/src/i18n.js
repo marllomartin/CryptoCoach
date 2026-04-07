@@ -187,6 +187,7 @@ const resources = {
       },
       achievements: {
         unlocked: 'Achievement Unlocked',
+        tiers: { bronze: 'Bronze', silver: 'Silver', gold: 'Gold', prismatic: 'Prismatic' },
         first_steps: { name: 'First Steps', description: 'Complete your first lesson' },
         streak_beginner: { name: 'Streak Beginner', description: 'Start a streak for the first time' },
         first_trade: { name: 'First Trade', description: 'Execute your first trade in the Trading Arena' },
@@ -1482,6 +1483,7 @@ const resources = {
       },
       achievements: {
         unlocked: 'Succès Débloqué',
+        tiers: { bronze: 'Bronze', silver: 'Argent', gold: 'Or', prismatic: 'Prismatique' },
         first_steps: { name: 'Premiers Pas', description: 'Complétez votre première leçon' },
         streak_beginner: { name: 'Débutant en Série', description: 'Démarrez une série pour la première fois' },
         first_trade: { name: 'Premier Trade', description: 'Effectuez votre premier trade dans le Trading Arena' },
@@ -3458,6 +3460,7 @@ const resources = {
       },
       achievements: {
         unlocked: 'إنجاز مفتوح',
+        tiers: { bronze: 'برونزي', silver: 'فضي', gold: 'ذهبي', prismatic: 'منشوري' },
         first_steps: { name: 'الخطوات الأولى', description: 'أكمل درسك الأول' },
         streak_beginner: { name: 'مبتدئ السلسلة', description: 'ابدأ سلسلة لأول مرة' },
         first_trade: { name: 'أول صفقة', description: 'نفّذ صفقتك الأولى في Trading Arena' },
@@ -4072,6 +4075,7 @@ const resources = {
       },
       achievements: {
         unlocked: 'Conquista Desbloqueada',
+        tiers: { bronze: 'Bronze', silver: 'Prata', gold: 'Ouro', prismatic: 'Prismático' },
         first_steps: { name: 'Primeiros Passos', description: 'Conclua sua primeira lição' },
         streak_beginner: { name: 'Iniciante em Sequência', description: 'Inicie uma sequência pela primeira vez' },
         first_trade: { name: 'Primeiro Trade', description: 'Execute seu primeiro trade no Trading Arena' },
