@@ -26,6 +26,7 @@ from reportlab.lib.colors import HexColor
 import qrcode
 from PIL import Image
 import stripe as stripe_lib
+import httpx
 
 # Import security module
 from security import (
@@ -1282,6 +1283,31 @@ async def execute_trade(trade: Trade, current_user: dict = Depends(get_current_u
         {"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)}
         for a in trade_achievements
     ]}
+
+# ==================== GEO / PRICING ROUTE ====================
+
+@api_router.get("/geo/pricing")
+async def get_pricing_region(request: Request):
+    """Detect the user's country from their IP and return the appropriate pricing region.
+    Uses the real client IP — not influenced by language/locale settings."""
+    # Resolve real IP behind Railway / Cloudflare / nginx proxies
+    forwarded_for = request.headers.get("x-forwarded-for", "")
+    real_ip = forwarded_for.split(",")[0].strip() if forwarded_for else request.client.host
+
+    # Skip geo for local/private IPs — default to global pricing
+    private_prefixes = ("127.", "::1", "10.", "192.168.", "172.")
+    if any(real_ip.startswith(p) for p in private_prefixes) or real_ip in ("", "testclient"):
+        return {"country_code": "XX", "region": "global"}
+
+    try:
+        async with httpx.AsyncClient(timeout=4.0) as client:
+            res = await client.get(f"https://ipapi.co/{real_ip}/country/")
+            country_code = res.text.strip().upper() if res.status_code == 200 else "XX"
+    except Exception:
+        country_code = "XX"
+
+    region = "brazil" if country_code == "BR" else "global"
+    return {"country_code": country_code, "region": region}
 
 # ==================== CONTACT ROUTE ====================
 

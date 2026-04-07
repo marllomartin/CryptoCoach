@@ -13,32 +13,29 @@ import { CouponInput } from '../components/CouponInput';
 import { UrgencyBadge } from '../components/UrgencyBadge';
 import { SocialProof, SocialProofMini } from '../components/SocialProof';
 
-const TIER_META = [
-  {
-    id: 'free',
-    name: 'Standard',
-    monthlyPrice: 0,
-    annualPrice: 0,
-    icon: Star,
-    popular: false
+const PRICING_REGIONS = {
+  global: {
+    symbol: '$',
+    tiers: {
+      free:  { monthly: 0,  annual: 0   },
+      pro:   { monthly: 29, annual: 232 }, // ~33% off annual
+      elite: { monthly: 79, annual: 632 },
+    }
   },
-  {
-    id: 'pro',
-    name: 'Pro',
-    monthlyPrice: 19.99,
-    annualPrice: 159.99,
-    icon: Rocket,
-    popular: true,
-  },
-  {
-    id: 'elite',
-    name: 'Elite',
-    monthlyPrice: 25.00,
-    annualPrice: 199.99,
-    icon: Crown,
-    popular: false,
-    bestValue: true
+  brazil: {
+    symbol: 'R$',
+    tiers: {
+      free:  { monthly: 0,   annual: 0    },
+      pro:   { monthly: 49,  annual: 392  },
+      elite: { monthly: 129, annual: 1032 },
+    }
   }
+};
+
+const TIER_META = [
+  { id: 'free',  name: 'Standard', icon: Star,   popular: false,                },
+  { id: 'pro',   name: 'Pro',      icon: Rocket, popular: true,                 },
+  { id: 'elite', name: 'Elite',    icon: Crown,  popular: false, bestValue: true },
 ];
 
 const PricingPage = () => {
@@ -51,6 +48,10 @@ const PricingPage = () => {
   const [isAnnual, setIsAnnual] = useState(true);
   const [activePromo, setActivePromo] = useState(null);
   const [appliedCoupons, setAppliedCoupons] = useState({});  // tierId -> { code, discount_pct }
+  const [pricingRegion, setPricingRegion] = useState('global');
+
+  const region = PRICING_REGIONS[pricingRegion] || PRICING_REGIONS.global;
+  const currencySymbol = region.symbol;
 
   const tiers = TIER_META.map(meta => {
     const featuresCount = { free: 8, pro: 7, elite: 6 };
@@ -58,13 +59,23 @@ const PricingPage = () => {
     const features = Array.from({ length: count }, (_, i) =>
       t(`pricing.tiers.${meta.id}.feature${i + 1}`)
     );
+    const prices = region.tiers[meta.id];
     return {
       ...meta,
+      monthlyPrice: prices.monthly,
+      annualPrice: prices.annual,
       description: t(`pricing.tiers.${meta.id}.description`),
       features,
       cta: t(`pricing.tiers.${meta.id}.cta`)
     };
   });
+
+  // Detect pricing region from server-side IP geolocation (not influenced by browser locale)
+  useEffect(() => {
+    axios.get(`${API}/geo/pricing`)
+      .then(res => setPricingRegion(res.data.region || 'global'))
+      .catch(() => {});
+  }, []);
 
   // Fetch active promotion
   useEffect(() => {
@@ -296,16 +307,17 @@ const PricingPage = () => {
                       const savings = isAnnual && tier.monthlyPrice > 0
                         ? Math.round((tier.monthlyPrice * 12) - tier.annualPrice)
                         : 0;
+                      const fmtPrice = (n) => Number.isInteger(n) ? n : n.toFixed(2);
                       return (
                         <>
                           <div className="flex items-baseline gap-2">
                             {promoDiscount > 0 && (
                               <span className="text-2xl font-semibold text-muted-foreground line-through">
-                                €{price.toFixed(2)}
+                                {currencySymbol}{fmtPrice(price)}
                               </span>
                             )}
                             <span className="text-4xl font-bold text-foreground">
-                              €{discountedPrice.toFixed(2)}
+                              {currencySymbol}{fmtPrice(discountedPrice)}
                             </span>
                             {price > 0 && (
                               <span className="text-muted-foreground">
@@ -329,7 +341,7 @@ const PricingPage = () => {
                           )}
                           {isAnnual && price > 0 && (
                             <p className="text-xs text-muted-foreground mt-1">
-                              {t('pricing.perMonthBilled', { price: (discountedPrice / 12).toFixed(2) })}
+                              {t('pricing.perMonthBilled', { price: fmtPrice(discountedPrice / 12) })}
                             </p>
                           )}
                         </>
