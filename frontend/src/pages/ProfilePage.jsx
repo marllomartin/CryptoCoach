@@ -84,7 +84,7 @@ const ProfilePage = () => {
                     </span>
                   </div>
                 </div>
-                <div className="absolute -bottom-2 -right-2 bg-primary text-white text-sm font-bold px-4 py-1 rounded-full">
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:-right-2 bg-primary text-white text-sm font-bold px-4 py-1 rounded-full whitespace-nowrap">
                   {t('profile.levelBadge', { level })}
                 </div>
               </div>
@@ -295,6 +295,13 @@ const LEVEL_STYLES = {
   },
 };
 
+const goldRayStyle = {
+  animation: 'achievementRay 4s linear infinite',
+};
+const prismaticRayStyle = {
+  animation: 'achievementRay 2.5s linear infinite',
+};
+
 const AchievementCard = ({ achievement }) => {
   const { t } = useTranslation();
   const { earned, id, name, description, icon, level, xp_reward } = achievement;
@@ -303,18 +310,45 @@ const AchievementCard = ({ achievement }) => {
   const displayName = t(`achievements.${id}.name`, { defaultValue: name });
   const displayDesc = t(`achievements.${id}.description`, { defaultValue: description });
 
+  const isGold      = earned && level === 3;
+  const isPrismatic = earned && level === 4;
+
   return (
-    <div className={`relative p-4 rounded-xl border bg-gradient-to-br transition-all ${
+    <div className={`relative p-4 rounded-xl border bg-gradient-to-br transition-all overflow-hidden ${
       earned
         ? `${styles.card} opacity-100`
         : 'from-gray-800/40 to-gray-800/20 border-gray-700/50 opacity-50 grayscale'
-    }`}>
+    } ${isGold ? 'shadow-[0_0_12px_2px_rgba(234,179,8,0.18)]' : ''
+      } ${isPrismatic ? 'shadow-[0_0_18px_4px_rgba(168,85,247,0.28)]' : ''}`}>
+
+      {/* Light ray sweep — gold */}
+      {isGold && (
+        <span
+          className="pointer-events-none absolute inset-0 z-0"
+          style={goldRayStyle}
+          aria-hidden="true"
+        >
+          <span className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_70%,rgba(234,179,8,0.10)_80%,transparent_90%)]" />
+        </span>
+      )}
+
+      {/* Light ray sweep — prismatic */}
+      {isPrismatic && (
+        <span
+          className="pointer-events-none absolute inset-0 z-0"
+          style={prismaticRayStyle}
+          aria-hidden="true"
+        >
+          <span className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_60%,rgba(192,132,252,0.18)_75%,rgba(236,72,153,0.12)_82%,transparent_92%)]" />
+        </span>
+      )}
+
       {!earned && (
         <div className="absolute top-2 ltr:right-2 rtl:left-2">
           <Lock className="w-3.5 h-3.5 text-gray-500" />
         </div>
       )}
-      <div className="flex flex-col gap-2">
+      <div className="relative z-10 flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <IconComponent className={`w-6 h-6 shrink-0 ${earned ? styles.icon : 'text-gray-600'}`} />
           <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${earned ? styles.badge : 'bg-gray-700 text-gray-500'}`}>
