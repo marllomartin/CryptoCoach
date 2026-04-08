@@ -4502,8 +4502,15 @@ async def get_admin_analytics(period: str = "7d", admin: dict = Depends(get_admi
         subscription_distribution[tier] = await db.users.count_documents({"subscription_tier": tier})
 
     # ── Revenue ────────────────────────────────────────────────────────────
+    # Exclude transactions from admin/moderator/editor accounts
+    admin_emails = [
+        u["email"] async for u in db.users.find(
+            {"role": {"$in": ["admin", "moderator", "editor"]}}, {"_id": 0, "email": 1}
+        )
+    ]
     paid_txns = await db.payment_transactions.find(
-        {"payment_status": "paid"}, {"_id": 0, "amount": 1, "created_at": 1}
+        {"payment_status": "paid", "user_email": {"$nin": admin_emails}},
+        {"_id": 0, "amount": 1, "created_at": 1}
     ).to_list(length=10000)
 
     total_revenue = sum(t.get("amount", 0) for t in paid_txns)
@@ -4574,12 +4581,9 @@ async def get_admin_analytics(period: str = "7d", admin: dict = Depends(get_admi
 
     recent_activity = []
     for u in recent_users:
-        email = u.get("email", "")
-        parts = email.split("@")
-        masked = parts[0][:3] + "***@" + parts[1] if len(parts) == 2 and len(parts[0]) >= 3 else email
         recent_activity.append({
             "type": "signup",
-            "user": masked,
+            "user": u.get("email", ""),
             "time": u.get("created_at", ""),
             "tier": u.get("subscription_tier", "free")
         })
