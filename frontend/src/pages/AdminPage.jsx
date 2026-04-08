@@ -262,7 +262,7 @@ const EMPTY_COURSE_TRANSLATIONS = () =>
   Object.fromEntries(LANG_OPTIONS.map(({ code }) => [code, { title: '', description: '', topics: '' }]));
 
 const EMPTY_LESSON_TRANSLATIONS = () =>
-  Object.fromEntries(LANG_OPTIONS.map(({ code }) => [code, { title: '', subtitle: '', content: '', learning_objectives: '', examples: '', summary: '', recommended_readings: '' }]));
+  Object.fromEntries(LANG_OPTIONS.map(({ code }) => [code, { title: '', subtitle: '', content: '', learning_objectives: '', examples: '', summary: '', recommended_readings: '', coach_tip: '' }]));
 
 /** Badge showing language availability for a course or lesson.
  *  Trial courses/lessons show a locked "Trial" pill followed by all 4 green flags.
@@ -497,6 +497,7 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
           recommended_readings: Array.isArray(val.recommended_readings)
             ? val.recommended_readings.join('\n')
             : (val.recommended_readings ?? ''),
+          coach_tip: val.coach_tip ?? '',
         };
       }
     } else if (initial) {
@@ -513,14 +514,58 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
         recommended_readings: Array.isArray(initial.recommended_readings)
           ? initial.recommended_readings.join('\n')
           : (initial.recommended_readings ?? ''),
+        coach_tip: initial.coach_tip ?? '',
       };
     }
     return base;
   });
+
+  // Checkpoints state — stored with per-language text dicts
+  const [checkpoints, setCheckpoints] = useState(() => {
+    return (initial?.checkpoints || []).map((cp, i) => ({
+      _key: `cp-${Date.now()}-${i}`,
+      type: cp.type || 'quiz',
+      position: cp.position ?? i,
+      question: typeof cp.question === 'object' && !Array.isArray(cp.question)
+        ? cp.question
+        : { en: typeof cp.question === 'string' ? cp.question : '' },
+      options: typeof cp.options === 'object' && !Array.isArray(cp.options)
+        ? Object.fromEntries(Object.entries(cp.options).map(([k, v]) => [k, Array.isArray(v) ? v.join('\n') : (v || '')]))
+        : { en: Array.isArray(cp.options) ? cp.options.join('\n') : '' },
+      answer: cp.answer ?? 0,
+      explanation: typeof cp.explanation === 'object' && !Array.isArray(cp.explanation)
+        ? cp.explanation
+        : { en: typeof cp.explanation === 'string' ? cp.explanation : '' },
+    }));
+  });
+
   const [activeLang, setActiveLang] = useState('en');
 
   const updateTrans = (lang, field, value) =>
     setTranslations(prev => ({ ...prev, [lang]: { ...prev[lang], [field]: value } }));
+
+  const addCheckpoint = () => {
+    setCheckpoints(prev => [...prev, {
+      _key: `cp-${Date.now()}`,
+      type: 'quiz',
+      position: prev.length,
+      question: Object.fromEntries(LANG_OPTIONS.map(({ code }) => [code, ''])),
+      options: Object.fromEntries(LANG_OPTIONS.map(({ code }) => [code, ''])),
+      answer: 0,
+      explanation: Object.fromEntries(LANG_OPTIONS.map(({ code }) => [code, ''])),
+    }]);
+  };
+
+  const removeCheckpoint = (key) =>
+    setCheckpoints(prev => prev.filter(cp => cp._key !== key));
+
+  const updateCheckpoint = (key, field, value) =>
+    setCheckpoints(prev => prev.map(cp => cp._key === key ? { ...cp, [field]: value } : cp));
+
+  const updateCheckpointLang = (key, field, lang, value) =>
+    setCheckpoints(prev => prev.map(cp =>
+      cp._key === key ? { ...cp, [field]: { ...cp[field], [lang]: value } } : cp
+    ));
 
   const handleSave = () => {
     const payload = {};
@@ -534,6 +579,7 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
           examples: val.examples.split('\n').map(s => s.trim()).filter(Boolean),
           summary: val.summary.trim(),
           recommended_readings: val.recommended_readings.split('\n').map(s => s.trim()).filter(Boolean),
+          coach_tip: val.coach_tip.trim() || null,
         };
       }
     }
@@ -541,7 +587,20 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
       toast.error('At least one language must have a title.');
       return;
     }
-    onSave({ course_id: courseId, order: Number(order), translations: payload });
+    const checkpointPayload = checkpoints
+      .filter(cp => Object.values(cp.question).some(v => v.trim()))
+      .map((cp, i) => ({
+        id: cp._key,
+        type: cp.type,
+        position: i,
+        question: Object.fromEntries(Object.entries(cp.question).filter(([, v]) => v.trim())),
+        options: Object.fromEntries(
+          Object.entries(cp.options).map(([k, v]) => [k, v.split('\n').map(s => s.trim()).filter(Boolean)])
+        ),
+        answer: Number(cp.answer),
+        explanation: Object.fromEntries(Object.entries(cp.explanation).filter(([, v]) => v.trim())),
+      }));
+    onSave({ course_id: courseId, order: Number(order), translations: payload, checkpoints: checkpointPayload });
   };
 
   return (
@@ -631,7 +690,88 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
                 onChange={e => updateTrans(activeLang, 'recommended_readings', e.target.value)}
               />
             </div>
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Coach's Tip <span className="text-slate-600">(optional)</span></label>
+              <Textarea
+                rows={3}
+                value={translations[activeLang]?.coach_tip ?? ''}
+                onChange={e => updateTrans(activeLang, 'coach_tip', e.target.value)}
+                placeholder="Leave blank to hide the Coach's Tip section for this language"
+              />
+            </div>
           </div>
+        </div>
+
+        {/* Checkpoints — "Check Your Understanding" */}
+        <div className="border border-border rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 bg-muted/50 border-b border-border">
+            <span className="text-sm font-semibold text-slate-200 flex items-center gap-2">
+              <span>Check Your Understanding</span>
+              <span className="text-xs font-normal text-slate-500">(optional checkpoints)</span>
+            </span>
+            <Button size="sm" variant="outline" onClick={addCheckpoint}>
+              <Plus className="w-3.5 h-3.5 mr-1" /> Add Question
+            </Button>
+          </div>
+          {checkpoints.length === 0 ? (
+            <p className="text-xs text-slate-500 text-center py-4">No checkpoint questions — section will be hidden in the lesson.</p>
+          ) : (
+            <div className="p-4 space-y-5">
+              {checkpoints.map((cp, idx) => (
+                <div key={cp._key} className="border border-border rounded-lg p-4 space-y-3 bg-muted/20">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Question {idx + 1}</span>
+                    <Button size="sm" variant="ghost" onClick={() => removeCheckpoint(cp._key)}>
+                      <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                    </Button>
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400 mb-1 block">Question text ({activeLang.toUpperCase()})</label>
+                    <Input
+                      value={cp.question[activeLang] ?? ''}
+                      onChange={e => updateCheckpointLang(cp._key, 'question', activeLang, e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400 mb-1 block">Options — one per line ({activeLang.toUpperCase()})</label>
+                    <Textarea
+                      rows={4}
+                      value={cp.options[activeLang] ?? ''}
+                      onChange={e => updateCheckpointLang(cp._key, 'options', activeLang, e.target.value)}
+                      placeholder={"Option A\nOption B\nOption C\nOption D"}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-slate-400 mb-1 block">Correct answer</label>
+                      <select
+                        value={cp.answer}
+                        onChange={e => updateCheckpoint(cp._key, 'answer', Number(e.target.value))}
+                        className="w-full bg-background border border-border rounded-md px-3 py-2 text-sm text-foreground"
+                      >
+                        {(cp.options[activeLang] || cp.options['en'] || '')
+                          .split('\n').map(s => s.trim()).filter(Boolean)
+                          .map((opt, i) => (
+                            <option key={i} value={i}>{String.fromCharCode(65 + i)}: {opt.slice(0, 30)}</option>
+                          ))
+                        }
+                        {!(cp.options[activeLang] || cp.options['en'] || '').trim() && (
+                          [0,1,2,3].map(i => <option key={i} value={i}>{String.fromCharCode(65 + i)}</option>)
+                        )}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400 mb-1 block">Explanation ({activeLang.toUpperCase()})</label>
+                    <Input
+                      value={cp.explanation[activeLang] ?? ''}
+                      onChange={e => updateCheckpointLang(cp._key, 'explanation', activeLang, e.target.value)}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex gap-2 justify-end">

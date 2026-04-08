@@ -134,10 +134,17 @@ const DEFAULT_TIP = {
   ar: "استمر في التعلم وابق فضوليًا! كل درس يقربك من إتقان العملات المشفرة. تذكر: المعرفة هي أفضل استثمار لك."
 };
 
-export function CoachTip({ lessonId, language = 'en' }) {
+export function CoachTip({ lessonId, tip: tipProp, language = 'en' }) {
   const { t } = useTranslation();
-  const tip = COACH_TIPS[lessonId]?.[language] || COACH_TIPS[lessonId]?.['en'] || DEFAULT_TIP[language] || DEFAULT_TIP['en'];
-  
+
+  // If a tip prop is explicitly passed, use it (empty string = hide)
+  // Otherwise fall back to the legacy static map for backwards compatibility
+  const tip = tipProp !== undefined
+    ? tipProp
+    : (COACH_TIPS[lessonId]?.[language] || COACH_TIPS[lessonId]?.['en'] || DEFAULT_TIP[language] || DEFAULT_TIP['en']);
+
+  if (!tip) return null;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

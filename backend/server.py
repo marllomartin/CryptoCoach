@@ -291,12 +291,14 @@ class LessonTranslation(BaseModel):
     examples: List[str] = []
     summary: str = ""
     recommended_readings: List[str] = []
+    coach_tip: Optional[str] = None
 
 class LessonCreateRequest(BaseModel):
     course_id: str
     order: int = 0
     duration_minutes: Optional[int] = None
     translations: Dict[str, LessonTranslation]
+    checkpoints: List[Dict] = []
 
 class LessonUpdateRequest(BaseModel):
     order: Optional[int] = None
@@ -353,6 +355,7 @@ def localize_lesson(lesson: dict, lang: str) -> Optional[dict]:
     result["examples"] = trans.get("examples", [])
     result["summary"] = trans.get("summary", "")
     result["recommended_readings"] = trans.get("recommended_readings", [])
+    result["coach_tip"] = trans.get("coach_tip") or ""
 
     # Localize checkpoints — their question/options/explanation may be multilingual dicts
     raw_checkpoints = result.get("checkpoints") or []
@@ -4798,7 +4801,7 @@ async def create_lesson_admin(
         "audio_full": None,
         "audio_summary": None,
         "infographics": [],
-        "checkpoints": [],
+        "checkpoints": request.checkpoints,
         "interactive_elements": [],
         "created_at": datetime.now(timezone.utc).isoformat(),
         "translations": {k: v.model_dump() for k, v in request.translations.items()}

@@ -712,7 +712,11 @@ export default function LessonPage() {
             )}
 
             {/* Coach's Tip */}
-            <CoachTip lessonId={lessonId} language={appLanguage?.split('-')[0] || 'en'} />
+            <CoachTip
+              lessonId={lessonId}
+              tip={lesson.coach_tip || undefined}
+              language={appLanguage?.split('-')[0] || 'en'}
+            />
 
             {/* Certificate Progress */}
             <div className="mb-8">
