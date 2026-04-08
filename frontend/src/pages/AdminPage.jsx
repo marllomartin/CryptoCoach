@@ -441,22 +441,28 @@ function CourseForm({ initial, onSave, onCancel, saving }) {
             })}
           </div>
           <div className="p-4 space-y-3">
-            <Input
-              placeholder={`Title (${activeLang})`}
-              value={translations[activeLang]?.title ?? ''}
-              onChange={e => updateTrans(activeLang, 'title', e.target.value)}
-            />
-            <Textarea
-              placeholder={`Description (${activeLang})`}
-              rows={3}
-              value={translations[activeLang]?.description ?? ''}
-              onChange={e => updateTrans(activeLang, 'description', e.target.value)}
-            />
-            <Input
-              placeholder={`Topics — comma separated (${activeLang})`}
-              value={translations[activeLang]?.topics ?? ''}
-              onChange={e => updateTrans(activeLang, 'topics', e.target.value)}
-            />
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Title</label>
+              <Input
+                value={translations[activeLang]?.title ?? ''}
+                onChange={e => updateTrans(activeLang, 'title', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Description</label>
+              <Textarea
+                rows={3}
+                value={translations[activeLang]?.description ?? ''}
+                onChange={e => updateTrans(activeLang, 'description', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Topics — comma separated</label>
+              <Input
+                value={translations[activeLang]?.topics ?? ''}
+                onChange={e => updateTrans(activeLang, 'topics', e.target.value)}
+              />
+            </div>
           </div>
         </div>
 
@@ -571,46 +577,60 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
             })}
           </div>
           <div className="p-4 space-y-3">
-            <Input
-              placeholder={`Title (${activeLang})`}
-              value={translations[activeLang]?.title ?? ''}
-              onChange={e => updateTrans(activeLang, 'title', e.target.value)}
-            />
-            <Input
-              placeholder={`Subtitle (${activeLang})`}
-              value={translations[activeLang]?.subtitle ?? ''}
-              onChange={e => updateTrans(activeLang, 'subtitle', e.target.value)}
-            />
-            <Textarea
-              placeholder={`Content — Markdown (${activeLang})`}
-              rows={8}
-              value={translations[activeLang]?.content ?? ''}
-              onChange={e => updateTrans(activeLang, 'content', e.target.value)}
-            />
-            <Textarea
-              placeholder={`Learning objectives — one per line (${activeLang})`}
-              rows={3}
-              value={translations[activeLang]?.learning_objectives ?? ''}
-              onChange={e => updateTrans(activeLang, 'learning_objectives', e.target.value)}
-            />
-            <Textarea
-              placeholder={`Examples — one per line (${activeLang})`}
-              rows={3}
-              value={translations[activeLang]?.examples ?? ''}
-              onChange={e => updateTrans(activeLang, 'examples', e.target.value)}
-            />
-            <Textarea
-              placeholder={`Summary (${activeLang})`}
-              rows={2}
-              value={translations[activeLang]?.summary ?? ''}
-              onChange={e => updateTrans(activeLang, 'summary', e.target.value)}
-            />
-            <Textarea
-              placeholder={`Recommended readings — one per line (${activeLang})`}
-              rows={2}
-              value={translations[activeLang]?.recommended_readings ?? ''}
-              onChange={e => updateTrans(activeLang, 'recommended_readings', e.target.value)}
-            />
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Title</label>
+              <Input
+                value={translations[activeLang]?.title ?? ''}
+                onChange={e => updateTrans(activeLang, 'title', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Subtitle</label>
+              <Input
+                value={translations[activeLang]?.subtitle ?? ''}
+                onChange={e => updateTrans(activeLang, 'subtitle', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Content — Markdown</label>
+              <Textarea
+                rows={8}
+                value={translations[activeLang]?.content ?? ''}
+                onChange={e => updateTrans(activeLang, 'content', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Learning objectives — one per line</label>
+              <Textarea
+                rows={3}
+                value={translations[activeLang]?.learning_objectives ?? ''}
+                onChange={e => updateTrans(activeLang, 'learning_objectives', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Examples — one per line</label>
+              <Textarea
+                rows={3}
+                value={translations[activeLang]?.examples ?? ''}
+                onChange={e => updateTrans(activeLang, 'examples', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Summary</label>
+              <Textarea
+                rows={2}
+                value={translations[activeLang]?.summary ?? ''}
+                onChange={e => updateTrans(activeLang, 'summary', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Recommended readings — one per line</label>
+              <Textarea
+                rows={2}
+                value={translations[activeLang]?.recommended_readings ?? ''}
+                onChange={e => updateTrans(activeLang, 'recommended_readings', e.target.value)}
+              />
+            </div>
           </div>
         </div>
 
@@ -779,24 +799,30 @@ function QuizForm({ lessonId, lessonTitle, token, onClose }) {
                   <Trash2 className="w-4 h-4 text-red-500" />
                 </Button>
               </div>
-              <Input
-                placeholder={`Question text (${activeLang})`}
-                value={q.translations[activeLang]?.question ?? ''}
-                onChange={e => updateTrans(q._key, activeLang, 'question', e.target.value)}
-              />
-              <Textarea
-                placeholder={q.question_type === 'true_false'
-                  ? `Options (${activeLang}) — e.g. True\nFalse`
-                  : `Options (${activeLang}) — one per line`}
-                rows={4}
-                value={q.translations[activeLang]?.options ?? ''}
-                onChange={e => updateTrans(q._key, activeLang, 'options', e.target.value)}
-              />
-              <Input
-                placeholder={`Explanation (${activeLang})`}
-                value={q.translations[activeLang]?.explanation ?? ''}
-                onChange={e => updateTrans(q._key, activeLang, 'explanation', e.target.value)}
-              />
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Question text</label>
+                <Input
+                  value={q.translations[activeLang]?.question ?? ''}
+                  onChange={e => updateTrans(q._key, activeLang, 'question', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">
+                  {q.question_type === 'true_false' ? 'Options — e.g. True / False' : 'Options — one per line'}
+                </label>
+                <Textarea
+                  rows={4}
+                  value={q.translations[activeLang]?.options ?? ''}
+                  onChange={e => updateTrans(q._key, activeLang, 'options', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Explanation</label>
+                <Input
+                  value={q.translations[activeLang]?.explanation ?? ''}
+                  onChange={e => updateTrans(q._key, activeLang, 'explanation', e.target.value)}
+                />
+              </div>
             </div>
           );
         })}
@@ -1019,24 +1045,30 @@ function ExamForm({ courseId, courseTitle, token, onClose }) {
                   <Trash2 className="w-4 h-4 text-red-500" />
                 </Button>
               </div>
-              <Input
-                placeholder={`Question text (${activeLang})`}
-                value={q.translations[activeLang]?.question ?? ''}
-                onChange={e => updateTrans(q._key, activeLang, 'question', e.target.value)}
-              />
-              <Textarea
-                placeholder={q.question_type === 'true_false'
-                  ? `Options (${activeLang}) — e.g. True\nFalse`
-                  : `Options (${activeLang}) — one per line`}
-                rows={4}
-                value={q.translations[activeLang]?.options ?? ''}
-                onChange={e => updateTrans(q._key, activeLang, 'options', e.target.value)}
-              />
-              <Input
-                placeholder={`Explanation (${activeLang})`}
-                value={q.translations[activeLang]?.explanation ?? ''}
-                onChange={e => updateTrans(q._key, activeLang, 'explanation', e.target.value)}
-              />
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Question text</label>
+                <Input
+                  value={q.translations[activeLang]?.question ?? ''}
+                  onChange={e => updateTrans(q._key, activeLang, 'question', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">
+                  {q.question_type === 'true_false' ? 'Options — e.g. True / False' : 'Options — one per line'}
+                </label>
+                <Textarea
+                  rows={4}
+                  value={q.translations[activeLang]?.options ?? ''}
+                  onChange={e => updateTrans(q._key, activeLang, 'options', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Explanation</label>
+                <Input
+                  value={q.translations[activeLang]?.explanation ?? ''}
+                  onChange={e => updateTrans(q._key, activeLang, 'explanation', e.target.value)}
+                />
+              </div>
             </div>
           );
         })}
@@ -1368,19 +1400,25 @@ function CoursesTab({ token, currentUser }) {
               <div className="space-y-3">
                 {[...lessons].sort((a, b) => a.order - b.order).map((lesson) => (
                   <div key={lesson.id} className="p-4 bg-muted rounded-lg">
-                    <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <p className="font-medium">
                           {lesson.order + 1}. {getDisplayTitle(lesson)}
                         </p>
-                        <p className="text-xs text-slate-400 mt-1">
-                          {lesson.duration_minutes} min
-                          {lesson.audio_full ? ` · 🔊 ${t('admin.media.audio')}` : ` · ⚪ ${t('admin.courses.noAudio')}`}
-                          {lesson.hero_image ? ` · 🖼️ Image` : ` · ⚪ ${t('admin.courses.noImage')}`}
-                        </p>
-                        <LangBadges translations={lesson.translations} />
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
+                          <span className="text-xs text-slate-400">
+                            {lesson.duration_minutes} min
+                          </span>
+                          <span className="text-xs text-slate-400">
+                            {lesson.audio_full ? `🔊 ${t('admin.media.audio')}` : `⚪ ${t('admin.courses.noAudio')}`}
+                          </span>
+                          <span className="text-xs text-slate-400">
+                            {lesson.hero_image ? `🖼️ Image` : `⚪ ${t('admin.courses.noImage')}`}
+                          </span>
+                          <LangBadges translations={lesson.translations} />
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 shrink-0">
+                      <div className="flex items-center gap-1 shrink-0 mt-1 sm:mt-0">
                         <Button size="sm" variant="ghost" onClick={() => generateAudio(lesson.id)} title="Generate audio">
                           <Volume2 className="w-4 h-4" />
                         </Button>
