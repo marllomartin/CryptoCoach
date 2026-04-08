@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Lightbulb } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 // Coach tips for each lesson - personalized advice
@@ -158,8 +157,7 @@ export function CoachTip({ lessonId, tip: tipProp, language = 'en' }) {
         {/* Closing quote */}
         <span className="absolute bottom-0 right-3 text-5xl font-serif leading-none text-amber-500/20 select-none">&rdquo;</span>
 
-        <div className="relative flex items-center gap-2 mb-3">
-          <Lightbulb className="w-4 h-4 text-amber-400 shrink-0" />
+        <div className="relative mb-3">
           <span className="text-sm font-semibold text-amber-400">
             {t('coachTip.title')}
           </span>
