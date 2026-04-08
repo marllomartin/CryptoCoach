@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { StreakInfoModal } from '../components/StreakInfoModal';
 import { Progress } from '../components/ui/progress';
+import PrismaticBurst from '../components/PrismaticBurst';
+
 
 const ProfilePage = () => {
   const { user, token } = useAuth();
@@ -295,13 +297,6 @@ const LEVEL_STYLES = {
   },
 };
 
-const goldRayStyle = {
-  animation: 'achievementRay 4s linear infinite',
-};
-const prismaticRayStyle = {
-  animation: 'achievementRay 2.5s linear infinite',
-};
-
 const AchievementCard = ({ achievement }) => {
   const { t } = useTranslation();
   const { earned, id, name, description, icon, level, xp_reward } = achievement;
@@ -321,26 +316,20 @@ const AchievementCard = ({ achievement }) => {
     } ${isGold ? 'shadow-[0_0_12px_2px_rgba(234,179,8,0.18)]' : ''
       } ${isPrismatic ? 'shadow-[0_0_18px_4px_rgba(168,85,247,0.28)]' : ''}`}>
 
-      {/* Light ray sweep — gold */}
-      {isGold && (
-        <span
-          className="pointer-events-none absolute inset-0 z-0"
-          style={goldRayStyle}
-          aria-hidden="true"
-        >
-          <span className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_70%,rgba(234,179,8,0.10)_80%,transparent_90%)]" />
-        </span>
-      )}
-
-      {/* Light ray sweep — prismatic */}
+      {/* Prismatic burst — WebGL */}
       {isPrismatic && (
-        <span
-          className="pointer-events-none absolute inset-0 z-0"
-          style={prismaticRayStyle}
-          aria-hidden="true"
-        >
-          <span className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_60%,rgba(192,132,252,0.18)_75%,rgba(236,72,153,0.12)_82%,transparent_92%)]" />
-        </span>
+        <div className="pointer-events-none absolute inset-0 z-0 opacity-20" aria-hidden="true">
+          <PrismaticBurst
+            animationType="rotate3d"
+            intensity={1.8}
+            speed={0.4}
+            distort={0}
+            rayCount={0}
+            fadeRadius={0.6}
+            mixBlendMode="lighten"
+            colors={['#a855f7', '#ec4899', '#06b6d4', '#e879f9', '#c084fc']}
+          />
+        </div>
       )}
 
       {!earned && (
