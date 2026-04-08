@@ -13,8 +13,10 @@ import {
   EyeOff,
   Loader2,
   CheckCircle,
-  XCircle
+  XCircle,
+  ArrowLeft
 } from 'lucide-react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Input } from '../components/ui/input';
@@ -108,6 +110,17 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
+      {/* Back button */}
+      <div className="fixed top-4 left-4 z-50">
+        <Link to="/" className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          {t('auth.backToHome')}
+        </Link>
+      </div>
+      {/* Language Switcher */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher variant="minimal" />
+      </div>
       {/* Background Effects */}
       <div className="absolute inset-0 hero-glow opacity-30" />
       
