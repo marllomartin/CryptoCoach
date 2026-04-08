@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Lightbulb, GraduationCap } from 'lucide-react';
+import { Lightbulb } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 // Coach tips for each lesson - personalized advice
@@ -150,38 +150,23 @@ export function CoachTip({ lessonId, tip: tipProp, language = 'en' }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="my-8 relative"
+      className="my-8"
     >
-      <div className="absolute -top-4 left-6 z-10">
-        <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full shadow-lg">
-          <GraduationCap className="w-5 h-5 text-white" />
-          <span className="text-sm font-bold text-white">
+      <div className="relative p-5 bg-amber-500/5 border border-amber-500/20 rounded-xl overflow-hidden">
+        {/* Opening quote */}
+        <span className="absolute top-2 left-3 text-5xl font-serif leading-none text-amber-500/20 select-none">&ldquo;</span>
+        {/* Closing quote */}
+        <span className="absolute bottom-0 right-3 text-5xl font-serif leading-none text-amber-500/20 select-none">&rdquo;</span>
+
+        <div className="relative flex items-center gap-2 mb-3">
+          <Lightbulb className="w-4 h-4 text-amber-400 shrink-0" />
+          <span className="text-sm font-semibold text-amber-400">
             {t('coachTip.title')}
           </span>
         </div>
-      </div>
-      
-      <div className="pt-6 p-6 bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-yellow-500/10 border-2 border-amber-500/30 rounded-2xl">
-        <div className="flex gap-4">
-          <div className="flex-shrink-0">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
-              <Lightbulb className="w-6 h-6 text-white" />
-            </div>
-          </div>
-          <div className="flex-1">
-            <p className={`text-slate-200 leading-relaxed text-lg ${language === 'ar' ? 'text-right' : ''}`}>
-              "{tip}"
-            </p>
-            <div className="mt-4 flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <span className="text-xs font-bold text-primary">CC</span>
-              </div>
-              <span className="text-sm text-slate-400 font-medium">
-                — CryptoCoach
-              </span>
-            </div>
-          </div>
-        </div>
+        <p className={`relative text-slate-300 leading-relaxed ${language === 'ar' ? 'text-right' : ''}`}>
+          {tip}
+        </p>
       </div>
     </motion.div>
   );
