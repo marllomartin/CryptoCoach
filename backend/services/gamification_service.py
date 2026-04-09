@@ -130,12 +130,12 @@ ACHIEVEMENTS = {
     "profit_hunter": {
         "id": "profit_hunter",
         "name": "Profit Hunter",
-        "description": "Reach $1,000 total profit in simulation",
+        "description": "Reach $1,000 total profit in the Trading Arena",
         "icon": "bar-chart-2",
         "level": 3,
         "xp_reward": 300,
-        "trigger": "trade",
-        "condition": {"total_profit": 1000}
+        "trigger": "grant_only",
+        "condition": {}
     },
     "streak_legend": {
         "id": "streak_legend",
@@ -323,7 +323,6 @@ class GamificationService:
             "lessons_completed": len(completed),
             "perfect_quizzes": user.get("perfect_quizzes_count", 0),
             "trades_count": user.get("trades_count", 0),
-            "total_profit": user.get("total_profit", 0),
             "streak_days": user.get("streak_days", 0),
             "certificates": len(user.get("certificates", [])),
             "level": self.calculate_level(user.get("xp_points", 0)),

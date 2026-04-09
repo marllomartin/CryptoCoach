@@ -14,6 +14,7 @@ from engine.gamification import (
     STORY_CHAPTERS, SKILL_TREE, GUILD_RANKS, RARITY_COLORS,
     calculate_level, get_random_daily_quests, get_weekly_challenge, calculate_streak_bonus
 )
+from services.gamification_service import ACHIEVEMENT_XP
 from engine.trading_arena import (
     get_trading_arena, SUPPORTED_CRYPTOS, LEAGUES, STARTING_BALANCE,
     TournamentManager
@@ -768,10 +769,8 @@ def create_ecosystem_routes(db, get_current_user):
         )
         
         # Check profit achievements
-        if new_total_profit >= 100:
-            await grant_achievement(db, current_user["id"], "profit_100")
         if new_total_profit >= 1000:
-            await grant_achievement(db, current_user["id"], "profit_1000")
+            await grant_achievement(db, current_user["id"], "profit_hunter")
         
         return {
             "closed": True,
@@ -977,37 +976,38 @@ def create_ecosystem_routes(db, get_current_user):
 
 async def grant_achievement(db, user_id: str, achievement_id: str):
     """Grant an achievement to a user"""
-    
+
     if achievement_id not in ACHIEVEMENTS:
         return None
-    
+
     achievement = ACHIEVEMENTS[achievement_id]
-    
+    xp_reward = ACHIEVEMENT_XP.get(achievement["level"], achievement["xp_reward"])
+
     # Check if already has achievement
-    profile = await db.user_profiles.find_one({"user_id": user_id})
-    if profile and achievement_id in profile.get("achievements", []):
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "achievements": 1})
+    if user and achievement_id in user.get("achievements", []):
         return None
-    
-    # Grant achievement
-    await db.user_profiles.update_one(
-        {"user_id": user_id},
+
+    # Grant achievement — XP goes to users.xp_points (canonical XP field)
+    await db.users.update_one(
+        {"id": user_id},
         {
-            "$push": {"achievements": achievement_id},
-            "$inc": {"xp": achievement["xp_reward"]}
+            "$addToSet": {"achievements": achievement_id},
+            "$inc": {"xp_points": xp_reward}
         }
     )
-    
+
     # Log activity
     await db.activity_log.insert_one({
         "user_id": user_id,
         "type": "achievement",
         "achievement_id": achievement_id,
         "achievement_name": achievement["name"],
-        "xp_reward": achievement["xp_reward"],
+        "xp_reward": xp_reward,
         "timestamp": datetime.now(timezone.utc).isoformat()
     })
-    
-    return achievement
+
+    return {**achievement, "xp_reward": xp_reward}
 
 
 async def update_streak(db, profile: dict) -> dict:
