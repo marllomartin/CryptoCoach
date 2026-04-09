@@ -478,7 +478,7 @@ function CourseForm({ initial, onSave, onCancel, saving }) {
 }
 
 /** Multi-language tabs form for a lesson */
-function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
+function LessonForm({ courseId, initial, onSave, onCancel, saving, token }) {
   const [order, setOrder] = useState((initial?.order ?? 0) + 1);
   const [translations, setTranslations] = useState(() => {
     const base = EMPTY_LESSON_TRANSLATIONS();
@@ -539,6 +539,39 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
   });
 
   const [activeLang, setActiveLang] = useState('en');
+
+  // Header image upload state (only for existing lessons)
+  const [headerImage, setHeaderImage] = useState(initial?.hero_image || null);
+  const [uploadingHeader, setUploadingHeader] = useState(false);
+
+  const handleHeaderImageChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error('Image must be smaller than 10 MB'); return; }
+    setUploadingHeader(true);
+    try {
+      const { data: urlData } = await axios.get(`${API}/admin/lessons/${initial.id}/header-image/upload-url`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const form = new FormData();
+      form.append('file', file);
+      const cfResp = await fetch(urlData.upload_url, { method: 'POST', body: form });
+      if (!cfResp.ok) throw new Error('Upload failed');
+      const { data } = await axios.post(
+        `${API}/admin/lessons/${initial.id}/header-image`,
+        { image_id: urlData.image_id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setHeaderImage(data.header_image);
+      toast.success('Header image updated');
+    } catch {
+      toast.error('Upload failed. Please try again.');
+    } finally {
+      setUploadingHeader(false);
+      e.target.value = '';
+    }
+  };
 
   const updateTrans = (lang, field, value) =>
     setTranslations(prev => ({ ...prev, [lang]: { ...prev[lang], [field]: value } }));
@@ -772,6 +805,38 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
             </div>
           )}
         </div>
+
+        {/* Header Image Upload — only available when editing an existing lesson */}
+        {initial?.id && (
+          <div className="border border-border rounded-lg p-4 space-y-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Lesson Header Image</p>
+            {headerImage && (
+              <img
+                src={headerImage}
+                alt="Header preview"
+                className="w-full h-40 object-cover rounded-lg border border-border"
+              />
+            )}
+            <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors ${
+              uploadingHeader
+                ? 'bg-muted text-muted-foreground pointer-events-none'
+                : 'bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30'
+            }`}>
+              {uploadingHeader
+                ? <><Loader2 className="w-4 h-4 animate-spin" /> Uploading…</>
+                : <>{headerImage ? 'Replace Image' : 'Upload Image'}</>
+              }
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleHeaderImageChange}
+                disabled={uploadingHeader}
+              />
+            </label>
+            <p className="text-xs text-slate-500">JPG, PNG or WebP. Max 10 MB. Displayed at the top of the lesson page.</p>
+          </div>
+        )}
 
         <div className="flex gap-2 justify-end">
           <Button variant="outline" onClick={onCancel} disabled={saving}>Cancel</Button>
@@ -1381,6 +1446,7 @@ function CoursesTab({ token, currentUser }) {
             onSave={saveLesson}
             onCancel={() => { setShowLessonForm(false); setEditingLesson(null); }}
             saving={saving}
+            token={token}
           />
         </div>
       )}

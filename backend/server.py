@@ -887,7 +887,7 @@ async def get_course_lessons(course_id: str, lang: str = "en"):
         if not localized:
             continue
         images = get_lesson_images(localized.get("id", ""))
-        localized["hero_image"] = images.get("hero_image")
+        localized["hero_image"] = lesson.get("header_image") or images.get("hero_image")
         localized["infographics"] = images.get("infographics", [])
         result.append(localized)
 
@@ -918,7 +918,9 @@ async def get_lesson(lesson_id: str, lang: str = "en"):
         static_lesson.setdefault("summary", "")
         static_lesson.setdefault("checkpoints", [])
         static_lesson.setdefault("infographics", [])
-        static_lesson.setdefault("hero_image", None)
+        # Check if admin has uploaded a custom header image for this static lesson
+        db_override = await db.lessons.find_one({"id": lesson_id}, {"_id": 0, "header_image": 1})
+        static_lesson["hero_image"] = (db_override or {}).get("header_image") or None
         return static_lesson
 
     # DB is authoritative
@@ -931,7 +933,7 @@ async def get_lesson(lesson_id: str, lang: str = "en"):
         raise HTTPException(status_code=404, detail=f"Lesson not available in language '{lang}'")
 
     images = get_lesson_images(lesson_id)
-    localized["hero_image"] = images.get("hero_image")
+    localized["hero_image"] = lesson.get("header_image") or images.get("hero_image")
     localized["infographics"] = images.get("infographics", [])
 
     return localized
@@ -5067,6 +5069,52 @@ class AdminQuizQuestion(BaseModel):
 class AdminQuizRequest(BaseModel):
     title: Optional[str] = None
     questions: List[AdminQuizQuestion]
+
+@api_router.get("/admin/lessons/{lesson_id}/header-image/upload-url")
+async def get_lesson_header_upload_url(lesson_id: str, admin: dict = Depends(get_admin_user)):
+    """Request a Cloudflare Images direct upload URL for a lesson header image."""
+    import httpx
+    account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
+    api_token = os.environ.get("CLOUDFLARE_API_TOKEN")
+    if not account_id or not api_token:
+        raise HTTPException(status_code=503, detail="Image upload not configured")
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"https://api.cloudflare.com/client/v4/accounts/{account_id}/images/v2/direct_upload",
+            headers={"Authorization": f"Bearer {api_token}"},
+        )
+    if resp.status_code != 200:
+        print(f"[lesson-header] Cloudflare error {resp.status_code}: {resp.text}")
+        raise HTTPException(status_code=502, detail="Failed to create upload URL")
+    data = resp.json()
+    result = data.get("result", {})
+    return {"upload_url": result.get("uploadURL"), "image_id": result.get("id")}
+
+
+class LessonHeaderImageRequest(BaseModel):
+    image_id: str
+
+@api_router.post("/admin/lessons/{lesson_id}/header-image")
+async def confirm_lesson_header_image(
+    lesson_id: str,
+    request: LessonHeaderImageRequest,
+    admin: dict = Depends(get_admin_user)
+):
+    """Save the uploaded Cloudflare image as the lesson's header image."""
+    account_hash = os.environ.get("CLOUDFLARE_IMAGES_HASH")
+    if not account_hash:
+        raise HTTPException(status_code=503, detail="Image delivery not configured")
+    image_id = InputSanitizer.sanitize_string(request.image_id, max_length=200)
+    if not image_id:
+        raise HTTPException(status_code=400, detail="Invalid image ID")
+    header_image = f"https://imagedelivery.net/{account_hash}/{image_id}/public"
+    await db.lessons.update_one(
+        {"id": lesson_id},
+        {"$set": {"header_image": header_image}},
+        upsert=True
+    )
+    return {"header_image": header_image}
+
 
 @api_router.get("/admin/lessons/{lesson_id}/quiz")
 async def get_admin_lesson_quiz(lesson_id: str, admin: dict = Depends(get_admin_user)):
