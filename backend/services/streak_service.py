@@ -105,10 +105,6 @@ class StreakService:
         else:
             new_streak = 1
         
-        # Calculate daily streak XP
-        daily_xp = min(5 + (new_streak * 2), 50)  # 5 base + 2 per day, max 50
-        result["xp_earned"] += daily_xp
-        
         # Check for milestones
         for milestone_days, rewards in STREAK_MILESTONES.items():
             if new_streak >= milestone_days and str(milestone_days) not in claimed_milestones:
