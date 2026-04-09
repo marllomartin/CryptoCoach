@@ -783,12 +783,8 @@ async def get_avatar_upload_url(current_user: dict = Depends(get_current_user)):
             headers={"Authorization": f"Bearer {api_token}"},
         )
     if resp.status_code != 200:
-        try:
-            cf_errors = resp.json().get("errors", [])
-            detail = cf_errors[0].get("message") if cf_errors else f"Cloudflare error {resp.status_code}"
-        except Exception:
-            detail = f"Cloudflare error {resp.status_code}"
-        raise HTTPException(status_code=502, detail=detail)
+        print(f"[avatar] Cloudflare error {resp.status_code}: {resp.text}")
+        raise HTTPException(status_code=502, detail="Failed to create upload URL")
     data = resp.json()
     result = data.get("result", {})
     return {"upload_url": result.get("uploadURL"), "image_id": result.get("id")}
