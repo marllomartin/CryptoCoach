@@ -297,6 +297,7 @@ class GamificationService:
             "streak_days": user.get("streak_days", 0),
             "achievements": user_achievements,
             "achievements_count": len(user_achievements),
+            "achievement_dates": user.get("achievement_dates", {}),
             "stats": {
                 "lessons_completed": len(user.get("completed_lessons", [])),
                 "quizzes_completed": len(user.get("completed_quizzes", [])),
