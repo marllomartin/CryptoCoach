@@ -7,6 +7,7 @@ import { API, useAuth } from '../App';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import Layout from '../components/Layout';
+import { MarkdownContentEditor } from '../components/MarkdownContentEditor';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
@@ -682,14 +683,11 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving, token }) {
                 onChange={e => updateTrans(activeLang, 'subtitle', e.target.value)}
               />
             </div>
-            <div>
-              <label className="text-xs text-slate-400 mb-1 block">Content — Markdown</label>
-              <Textarea
-                rows={8}
-                value={translations[activeLang]?.content ?? ''}
-                onChange={e => updateTrans(activeLang, 'content', e.target.value)}
-              />
-            </div>
+            <MarkdownContentEditor
+              value={translations[activeLang]?.content ?? ''}
+              onChange={val => updateTrans(activeLang, 'content', val ?? '')}
+              token={token}
+            />
             <div>
               <label className="text-xs text-slate-400 mb-1 block">Learning objectives — one per line</label>
               <Textarea

@@ -5070,6 +5070,34 @@ class AdminQuizRequest(BaseModel):
     title: Optional[str] = None
     questions: List[AdminQuizQuestion]
 
+@api_router.get("/admin/image/upload-url")
+async def get_admin_content_image_upload_url(admin: dict = Depends(get_admin_user)):
+    """Request a Cloudflare Images direct upload URL for lesson content images.
+    Returns upload_url (POST target), image_id, and the final public_url."""
+    import httpx
+    account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
+    api_token = os.environ.get("CLOUDFLARE_API_TOKEN")
+    account_hash = os.environ.get("CLOUDFLARE_IMAGES_HASH")
+    if not account_id or not api_token or not account_hash:
+        raise HTTPException(status_code=503, detail="Image upload not configured")
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"https://api.cloudflare.com/client/v4/accounts/{account_id}/images/v2/direct_upload",
+            headers={"Authorization": f"Bearer {api_token}"},
+        )
+    if resp.status_code != 200:
+        print(f"[admin-image] Cloudflare error {resp.status_code}: {resp.text}")
+        raise HTTPException(status_code=502, detail="Failed to create upload URL")
+    data = resp.json()
+    result = data.get("result", {})
+    image_id = result.get("id")
+    return {
+        "upload_url": result.get("uploadURL"),
+        "image_id": image_id,
+        "public_url": f"https://imagedelivery.net/{account_hash}/{image_id}/public",
+    }
+
+
 @api_router.get("/admin/lessons/{lesson_id}/header-image/upload-url")
 async def get_lesson_header_upload_url(lesson_id: str, admin: dict = Depends(get_admin_user)):
     """Request a Cloudflare Images direct upload URL for a lesson header image."""
