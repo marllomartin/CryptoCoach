@@ -541,7 +541,7 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving, token }) {
   const [activeLang, setActiveLang] = useState('en');
 
   // Header image upload state (only for existing lessons)
-  const [headerImage, setHeaderImage] = useState(initial?.hero_image || null);
+  const [headerImage, setHeaderImage] = useState(initial?.header_image || null);
   const [uploadingHeader, setUploadingHeader] = useState(false);
 
   const handleHeaderImageChange = async (e) => {
@@ -1605,7 +1605,7 @@ function CoursesTab({ token, currentUser }) {
                             {lesson.audio_full ? `🔊 ${t('admin.media.audio')}` : `⚪ ${t('admin.courses.noAudio')}`}
                           </span>
                           <span className="text-xs text-slate-400">
-                            {lesson.hero_image ? `🖼️ Image` : `⚪ ${t('admin.courses.noImage')}`}
+                            {lesson.header_image ? `🖼️ Image` : `⚪ ${t('admin.courses.noImage')}`}
                           </span>
                           <LangBadges translations={lesson.translations} />
                         </div>
@@ -1656,11 +1656,11 @@ function CoursesTab({ token, currentUser }) {
                     </div>
 
                     {/* Media preview */}
-                    {(lesson.audio_full || lesson.hero_image) && (
+                    {(lesson.audio_full || lesson.header_image) && (
                       <div className="mt-3 flex gap-4">
-                        {lesson.hero_image && (
+                        {lesson.header_image && (
                           <img
-                            src={lesson.hero_image}
+                            src={lesson.header_image}
                             alt="hero"
                             className="w-24 h-16 object-cover rounded"
                           />
