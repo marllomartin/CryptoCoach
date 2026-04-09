@@ -79,6 +79,7 @@ async def get_user_achievements(user_id: str):
     
     all_achievements = ACHIEVEMENTS
     user_achievements = set(profile.get("achievements", []))
+    achievement_dates = profile.get("achievement_dates", {})
 
     result = []
     hidden_count = 0
@@ -88,7 +89,10 @@ async def get_user_achievements(user_id: str):
         if is_hidden and not earned:
             hidden_count += 1
         else:
-            result.append({**achievement, "earned": earned})
+            entry = {**achievement, "earned": earned}
+            if earned and ach_id in achievement_dates:
+                entry["earned_at"] = achievement_dates[ach_id]
+            result.append(entry)
 
     return {"achievements": result, "hidden_count": hidden_count}
 

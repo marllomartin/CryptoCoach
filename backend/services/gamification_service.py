@@ -423,11 +423,13 @@ class GamificationService:
             if earned:
                 xp_reward = ACHIEVEMENT_XP.get(achievement["level"], achievement["xp_reward"])
                 new_achievements.append({**achievement, "xp_reward": xp_reward})
+                earned_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
                 await self.db.users.update_one(
                     {"id": user_id},
                     {
                         "$addToSet": {"achievements": ach_id},
-                        "$inc": {"xp_points": xp_reward}
+                        "$inc": {"xp_points": xp_reward},
+                        "$set": {f"achievement_dates.{ach_id}": earned_date}
                     }
                 )
         
@@ -442,11 +444,13 @@ class GamificationService:
         if user and achievement_id in user.get("achievements", []):
             return None  # Already earned
         xp_reward = ACHIEVEMENT_XP.get(achievement["level"], achievement["xp_reward"])
+        earned_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         await self.db.users.update_one(
             {"id": user_id},
             {
                 "$addToSet": {"achievements": achievement_id},
-                "$inc": {"xp_points": xp_reward}
+                "$inc": {"xp_points": xp_reward},
+                "$set": {f"achievement_dates.{achievement_id}": earned_date}
             }
         )
         return {**achievement, "xp_reward": xp_reward}

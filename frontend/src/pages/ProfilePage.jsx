@@ -318,8 +318,8 @@ const LEVEL_STYLES = {
 };
 
 const AchievementCard = ({ achievement }) => {
-  const { t } = useTranslation();
-  const { earned, id, name, description, icon, level, xp_reward } = achievement;
+  const { t, i18n } = useTranslation();
+  const { earned, id, name, description, icon, level, xp_reward, earned_at } = achievement;
   const IconComponent = ACHIEVEMENT_ICONS[icon] || Trophy;
   const styles = LEVEL_STYLES[level] || LEVEL_STYLES[1];
   const displayName = t(`achievements.${id}.name`, { defaultValue: name });
@@ -382,7 +382,14 @@ const AchievementCard = ({ achievement }) => {
           <p className={`text-sm font-bold leading-tight ${earned ? 'text-white' : 'text-gray-500'}`}>{displayName}</p>
           <p className="text-xs text-gray-500 mt-0.5 leading-snug">{displayDesc}</p>
         </div>
-        <p className={`text-xs font-medium ${earned ? 'text-primary' : 'text-gray-600'}`}>+{xp_reward} XP</p>
+        <div className="flex items-end justify-between gap-1">
+          <p className={`text-xs font-medium ${earned ? 'text-primary' : 'text-gray-600'}`}>+{xp_reward} XP</p>
+          {earned && earned_at && (
+            <p className="text-[10px] text-gray-500 leading-none">
+              {new Date(earned_at).toLocaleDateString(i18n.language, { year: 'numeric', month: 'short', day: 'numeric' })}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
