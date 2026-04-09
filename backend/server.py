@@ -1013,17 +1013,31 @@ async def submit_quiz(submission: QuizSubmission, current_user: dict = Depends(g
         })
     
     score = round((correct_count / total) * 100, 1)
-    xp_earned = int(score / 10) * 10
-    
+
+    # Determine which questions the user got right for the first time
+    already_correct = set(
+        current_user.get("quiz_correct_questions", {}).get(submission.quiz_id, [])
+    )
+    newly_correct = [
+        r["question_id"] for r in results
+        if r["correct"] and r["question_id"] not in already_correct
+    ]
+    xp_earned = len(newly_correct) * 10
+
     new_achievements = []
-    if submission.quiz_id not in current_user.get("completed_quizzes", []):
-        await db.users.update_one(
-            {"id": current_user["id"]},
-            {
-                "$addToSet": {"completed_quizzes": submission.quiz_id},
-                "$inc": {"xp_points": xp_earned}
-            }
-        )
+    first_attempt = submission.quiz_id not in current_user.get("completed_quizzes", [])
+
+    if newly_correct or first_attempt:
+        update: dict = {}
+        if xp_earned > 0:
+            update["$inc"] = {"xp_points": xp_earned}
+        if first_attempt:
+            update.setdefault("$addToSet", {})["completed_quizzes"] = submission.quiz_id
+        if newly_correct:
+            update.setdefault("$addToSet", {})[f"quiz_correct_questions.{submission.quiz_id}"] = {"$each": newly_correct}
+        await db.users.update_one({"id": current_user["id"]}, update)
+
+    if first_attempt:
         gamification_service = GamificationService(db)
         awarded = await gamification_service.check_and_award_achievements(current_user["id"], trigger="quiz")
         for a in awarded:
