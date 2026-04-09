@@ -814,7 +814,8 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving, token }) {
               <img
                 src={headerImage}
                 alt="Header preview"
-                className="w-full h-40 object-cover rounded-lg border border-border"
+                className="w-full object-cover rounded-lg border border-border"
+                style={{ height: '128px', aspectRatio: '896 / 256' }}
               />
             )}
             <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors ${
@@ -834,7 +835,7 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving, token }) {
                 disabled={uploadingHeader}
               />
             </label>
-            <p className="text-xs text-slate-500">JPG, PNG or WebP. Max 10 MB. Displayed at the top of the lesson page.</p>
+            <p className="text-xs text-slate-500">JPG, PNG or WebP. Max 10 MB. Recommended size: 896 × 256 px (7:2 ratio). Displayed at the top of the lesson page.</p>
           </div>
         )}
 
