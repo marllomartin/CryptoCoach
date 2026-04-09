@@ -9,7 +9,7 @@ import {
   Target, TrendingUp, Award,
   BookOpen, Star, Crown, HelpCircle,
   Footprints, GraduationCap, BarChart2, Gem, Lock, Settings,
-  Moon, RefreshCw, Shield, Eye
+  Moon, RefreshCw, Shield, Eye, Gamepad2
 } from 'lucide-react';
 import { StreakInfoModal } from '../components/StreakInfoModal';
 import { Progress } from '../components/ui/progress';
@@ -282,6 +282,7 @@ const ACHIEVEMENT_ICONS = {
   'moon': Moon,
   'refresh-cw': RefreshCw,
   'shield': Shield,
+  'gamepad-2': Gamepad2,
 };
 
 const LEVEL_STYLES = {
