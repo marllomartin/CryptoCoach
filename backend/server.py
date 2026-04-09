@@ -1053,22 +1053,38 @@ async def submit_quiz(submission: QuizSubmission, current_user: dict = Depends(g
             update.setdefault("$addToSet", {})[f"quiz_correct_questions.{submission.quiz_id}"] = {"$each": newly_correct}
         await db.users.update_one({"id": current_user["id"]}, update)
 
-    # Track perfect quiz count for Sharp Mind / Quiz Master achievements
-    if is_perfect:
-        await db.users.update_one({"id": current_user["id"]}, {"$inc": {"perfect_quizzes_count": 1}})
+    # Determine if this is the first time the user gets 100% on this quiz
+    previously_perfected = submission.quiz_id in current_user.get("perfect_quiz_ids", [])
+    newly_perfected = is_perfect and not previously_perfected
 
-    # Grant Perfectionist hidden achievement when retaking a completed quiz
-    if not first_attempt:
-        gamification_svc = GamificationService(db)
-        awarded_hidden = await gamification_svc.grant_achievement(current_user["id"], "perfectionist")
-        if awarded_hidden:
-            new_achievements.append({"id": awarded_hidden["id"], "name": awarded_hidden["name"], "xp": awarded_hidden["xp_reward"], "icon": awarded_hidden.get("icon", "trophy"), "level": awarded_hidden.get("level", 1)})
-
-    if first_attempt or is_perfect:
-        gamification_service = GamificationService(db)
-        awarded = await gamification_service.check_and_award_achievements(current_user["id"], trigger="quiz")
+    if newly_perfected:
+        # Record this quiz as perfected and increment the counter (used by Quiz Master)
+        await db.users.update_one(
+            {"id": current_user["id"]},
+            {
+                "$inc": {"perfect_quizzes_count": 1},
+                "$addToSet": {"perfect_quiz_ids": submission.quiz_id}
+            }
+        )
+        # Check Quiz Master (and any other quiz-trigger achievements)
+        quiz_svc = GamificationService(db)
+        awarded = await quiz_svc.check_and_award_achievements(current_user["id"], trigger="quiz")
         for a in awarded:
             new_achievements.append({"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)})
+
+    # Sharp Mind: first attempt + perfected for the first time
+    if first_attempt and newly_perfected:
+        sharp_svc = GamificationService(db)
+        awarded_sharp = await sharp_svc.grant_achievement(current_user["id"], "sharp_mind")
+        if awarded_sharp:
+            new_achievements.append({"id": awarded_sharp["id"], "name": awarded_sharp["name"], "xp": awarded_sharp["xp_reward"], "icon": awarded_sharp.get("icon", "trophy"), "level": awarded_sharp.get("level", 1)})
+
+    # Perfectionist: retake + perfect score (even if already perfected before)
+    if not first_attempt and is_perfect:
+        perf_svc = GamificationService(db)
+        awarded_perf = await perf_svc.grant_achievement(current_user["id"], "perfectionist")
+        if awarded_perf:
+            new_achievements.append({"id": awarded_perf["id"], "name": awarded_perf["name"], "xp": awarded_perf["xp_reward"], "icon": awarded_perf.get("icon", "trophy"), "level": awarded_perf.get("level", 1)})
 
     return {"score": score, "correct": correct_count, "total": total, "results": results, "xp_earned": xp_earned, "new_achievements": new_achievements}
 

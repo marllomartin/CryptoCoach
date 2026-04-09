@@ -73,8 +73,8 @@ ACHIEVEMENTS = {
         "icon": "zap",
         "level": 2,
         "xp_reward": 150,
-        "trigger": "quiz",
-        "condition": {"perfect_quizzes": 1}
+        "trigger": "grant_only",
+        "condition": {}
     },
     "knowledge_seeker": {
         "id": "knowledge_seeker",
