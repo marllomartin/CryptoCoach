@@ -4,18 +4,11 @@ import { Link } from 'react-router-dom';
 import { Award, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-const COURSE_LEVELS = {
-  'course-foundations': 1,
-  'course-investor': 2,
-  'course-strategist': 3,
-};
-
 // Progress to certificate bar
 export function CertificateProgress({ completedLessons = 0, totalLessons = 23, courseId }) {
   const { t } = useTranslation();
   const progress = (completedLessons / totalLessons) * 100;
-  const examLevel = courseId ? (COURSE_LEVELS[courseId] ?? 1) : 1;
-  const examLink = `/exam/${examLevel}`;
+  const examLink = `/exam/${courseId}`;
   const remaining = totalLessons - completedLessons;
   
   const isComplete = completedLessons >= totalLessons;
