@@ -14,6 +14,7 @@ import {
 import { StreakInfoModal } from '../components/StreakInfoModal';
 import { Progress } from '../components/ui/progress';
 import PrismaticBurst from '../components/PrismaticBurst';
+import Aurora from '../components/Aurora';
 
 
 const ProfilePage = () => {
@@ -349,6 +350,18 @@ const AchievementCard = ({ achievement }) => {
             fadeRadius={0.6}
             mixBlendMode="lighten"
             colors={['#a855f7', '#ec4899', '#06b6d4', '#e879f9', '#c084fc']}
+          />
+        </div>
+      )}
+
+      {/* Aurora — WebGL */}
+      {isHidden && (
+        <div className="pointer-events-none absolute inset-0 z-0 opacity-40" aria-hidden="true">
+          <Aurora
+            colorStops={['#0f766e', '#1d4ed8', '#0f766e']}
+            amplitude={1.2}
+            blend={0.6}
+            speed={0.6}
           />
         </div>
       )}
