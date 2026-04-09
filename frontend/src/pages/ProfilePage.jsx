@@ -221,7 +221,7 @@ const ProfilePage = () => {
               </h2>
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {achievements.map((ach) => (
+                {[...achievements].sort((a, b) => a.level - b.level).map((ach) => (
                   <AchievementCard key={ach.id} achievement={ach} />
                 ))}
                 {hiddenCount > 0 && (
