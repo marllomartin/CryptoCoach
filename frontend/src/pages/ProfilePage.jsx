@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import axios from 'axios';
 import {
-  Trophy, Flame, Zap,
+  Trophy, Flame, ArrowBigUp,
   Target, TrendingUp, Award,
   BookOpen, Star, Crown, HelpCircle,
   Footprints, GraduationCap, BarChart2, Gem, Lock, Settings,
@@ -109,7 +109,7 @@ const ProfilePage = () => {
                 </div>
 
                 <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                  <Zap className="w-5 h-5 text-yellow-500" />
+                  <ArrowBigUp className="w-5 h-5 text-green-500" />
                   <span className="text-white font-bold">{xp.toLocaleString()} XP</span>
                   <span className="text-gray-500">•</span>
                   <span className="text-gray-400">
@@ -151,8 +151,7 @@ const ProfilePage = () => {
               </h2>
               <div className="space-y-4">
                 <StatRow icon={BookOpen} label={t('profile.lessonsCompleted')} value={profile?.stats?.lessons_completed || 0} color="blue" />
-                <StatRow icon={Target} label={t('profile.quizzesPassed')} value={profile?.stats?.quizzes_completed || 0} color="green" />
-                <StatRow icon={Award} label={t('profile.examsPassed')} value={profile?.stats?.exams_passed || 0} color="purple" />
+                <StatRow icon={Target} label={t('profile.quizzesPassed')} value={profile?.stats?.quizzes_completed || 0} color="purple" />
                 <StatRow icon={TrendingUp} label={t('profile.tradesExecuted')} value={profile?.stats?.trades_count || 0} color="cyan" />
                 <StatRow icon={Award} label={t('profile.certificatesEarned')} value={profile?.stats?.certificates_earned || 0} color="yellow" />
               </div>
@@ -273,7 +272,7 @@ const ACHIEVEMENT_ICONS = {
   'graduation-cap': GraduationCap,
   'trophy': Trophy,
   'bar-chart-2': BarChart2,
-  'zap': Zap,
+  'zap': ArrowBigUp,
   'star': Star,
   'award': Award,
   'gem': Gem,

@@ -14,7 +14,7 @@ import {
   ChevronRight,
   Flame,
   Target,
-  Zap,
+  ArrowBigUp,
   HelpCircle
 } from 'lucide-react';
 import { StreakInfoModal } from '../components/StreakInfoModal';
@@ -65,7 +65,7 @@ export default function DashboardPage() {
     { icon: BookOpen, label: t('dashboard.lessonsCompleted'), value: totalLessonsCompleted, color: 'text-blue-500', bg: 'bg-blue-500/10' },
     { icon: Target, label: t('dashboard.quizzesPassed'), value: totalQuizzesCompleted, color: 'text-purple-500', bg: 'bg-purple-500/10' },
     { icon: Award, label: t('dashboard.certificatesEarned'), value: totalCertificates, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    { icon: Zap, label: t('dashboard.totalXp'), value: user?.xp_points || 0, color: 'text-green-500', bg: 'bg-green-500/10' }
+    { icon: ArrowBigUp, label: t('dashboard.totalXp'), value: user?.xp_points || 0, color: 'text-green-500', bg: 'bg-green-500/10' }
   ];
 
   const quickActions = [
