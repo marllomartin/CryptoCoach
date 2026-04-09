@@ -38,17 +38,19 @@ export function showAchievementToasts(newAchievements) {
     const IconComponent = ICONS[ach.icon] || Trophy;
 
     const displayName = i18n.t(`achievements.${ach.id}.name`, { defaultValue: ach.name });
+    const displayDesc = i18n.t(`achievements.${ach.id}.description`, { defaultValue: ach.description ?? '' });
 
     setTimeout(() => {
       toast.custom(() => (
-        <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xl ${config.bg} ${config.border} min-w-[260px]`}>
+        <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xl ${config.bg} ${config.border} min-w-[280px] max-w-[340px]`}>
           <div className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-black/30`}>
             <IconComponent className={`w-5 h-5 ${config.icon}`} />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">{i18n.t('achievements.unlocked', { defaultValue: 'Achievement Unlocked' })}</p>
-            <p className="text-sm font-bold text-white leading-tight truncate">{displayName}</p>
-            <p className={`text-[11px] font-medium ${config.labelClass}`}>{config.label} · +{ach.xp} XP</p>
+            <p className="text-sm font-bold text-white leading-tight">{displayName}</p>
+            {displayDesc && <p className="text-[11px] text-gray-400 leading-snug mt-0.5">{displayDesc}</p>}
+            <p className={`text-[11px] font-medium mt-0.5 ${config.labelClass}`}>{config.label} · +{ach.xp} XP</p>
           </div>
         </div>
       ), { duration: 5000 });

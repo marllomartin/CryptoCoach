@@ -935,7 +935,7 @@ async def complete_lesson(lesson_id: str, current_user: dict = Depends(get_curre
                 night_svc = GamificationService(db)
                 awarded_hidden = await night_svc.grant_achievement(current_user["id"], "night_owl")
                 if awarded_hidden:
-                    new_achievements.append({"id": awarded_hidden["id"], "name": awarded_hidden["name"], "xp": awarded_hidden["xp_reward"], "icon": awarded_hidden.get("icon", "trophy"), "level": awarded_hidden.get("level", 1)})
+                    new_achievements.append({"id": awarded_hidden["id"], "name": awarded_hidden["name"], "description": awarded_hidden.get("description", ""), "xp": awarded_hidden["xp_reward"], "icon": awarded_hidden.get("icon", "trophy"), "level": awarded_hidden.get("level", 1)})
                     xp_earned += awarded_hidden["xp_reward"]
 
         # Update quest progress for lesson completion
@@ -952,7 +952,7 @@ async def complete_lesson(lesson_id: str, current_user: dict = Depends(get_curre
         gamification_service = GamificationService(db)
         awarded = await gamification_service.check_and_award_achievements(current_user["id"], trigger="lesson")
         for a in awarded:
-            new_achievements.append({"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)})
+            new_achievements.append({"id": a["id"], "name": a["name"], "description": a.get("description", ""), "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)})
             xp_earned += a["xp_reward"]
 
     # Update streak (always, even if lesson was already completed — counts as daily activity)
@@ -964,7 +964,7 @@ async def complete_lesson(lesson_id: str, current_user: dict = Depends(get_curre
     streak_achievements = await gamification_service_streak.check_and_award_achievements(current_user["id"], trigger="lesson")
     for a in streak_achievements:
         if not any(x["id"] == a["id"] for x in new_achievements):
-            new_achievements.append({"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)})
+            new_achievements.append({"id": a["id"], "name": a["name"], "description": a.get("description", ""), "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)})
 
     return {
         "status": "completed",
@@ -1070,21 +1070,21 @@ async def submit_quiz(submission: QuizSubmission, current_user: dict = Depends(g
         quiz_svc = GamificationService(db)
         awarded = await quiz_svc.check_and_award_achievements(current_user["id"], trigger="quiz")
         for a in awarded:
-            new_achievements.append({"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)})
+            new_achievements.append({"id": a["id"], "name": a["name"], "description": a.get("description", ""), "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)})
 
     # Sharp Mind: first attempt + perfected for the first time
     if first_attempt and newly_perfected:
         sharp_svc = GamificationService(db)
         awarded_sharp = await sharp_svc.grant_achievement(current_user["id"], "sharp_mind")
         if awarded_sharp:
-            new_achievements.append({"id": awarded_sharp["id"], "name": awarded_sharp["name"], "xp": awarded_sharp["xp_reward"], "icon": awarded_sharp.get("icon", "trophy"), "level": awarded_sharp.get("level", 1)})
+            new_achievements.append({"id": awarded_sharp["id"], "name": awarded_sharp["name"], "description": awarded_sharp.get("description", ""), "xp": awarded_sharp["xp_reward"], "icon": awarded_sharp.get("icon", "trophy"), "level": awarded_sharp.get("level", 1)})
 
     # Perfectionist: retake + perfect score (even if already perfected before)
     if not first_attempt and is_perfect:
         perf_svc = GamificationService(db)
         awarded_perf = await perf_svc.grant_achievement(current_user["id"], "perfectionist")
         if awarded_perf:
-            new_achievements.append({"id": awarded_perf["id"], "name": awarded_perf["name"], "xp": awarded_perf["xp_reward"], "icon": awarded_perf.get("icon", "trophy"), "level": awarded_perf.get("level", 1)})
+            new_achievements.append({"id": awarded_perf["id"], "name": awarded_perf["name"], "description": awarded_perf.get("description", ""), "xp": awarded_perf["xp_reward"], "icon": awarded_perf.get("icon", "trophy"), "level": awarded_perf.get("level", 1)})
 
     return {"score": score, "correct": correct_count, "total": total, "results": results, "xp_earned": xp_earned, "new_achievements": new_achievements}
 
@@ -1202,7 +1202,7 @@ async def submit_exam(submission: ExamSubmission, current_user: dict = Depends(g
         gamification_service = GamificationService(db)
         awarded = await gamification_service.check_and_award_achievements(current_user["id"], trigger="exam")
         result["new_achievements"] = [
-            {"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)}
+            {"id": a["id"], "name": a["name"], "description": a.get("description", ""), "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)}
             for a in awarded
         ]
     else:
@@ -1416,7 +1416,7 @@ async def execute_trade(trade: Trade, current_user: dict = Depends(get_current_u
     trade_achievements = await gamification_service.check_and_award_achievements(current_user["id"], trigger="trade")
 
     return {"balance": new_balance, "portfolio": portfolio, "trade": trade.model_dump(), "new_achievements": [
-        {"id": a["id"], "name": a["name"], "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)}
+        {"id": a["id"], "name": a["name"], "description": a.get("description", ""), "xp": a["xp_reward"], "icon": a.get("icon", "trophy"), "level": a.get("level", 1)}
         for a in trade_achievements
     ]}
 
