@@ -156,7 +156,7 @@ const KonamiCode = () => {
       seq.push(e.key);
       if (seq.length > KONAMI.length) seq.shift();
       if (seq.join(',') === KONAMI.join(',') && token) {
-        axios.post(`${API}/ecosystem/achievements/konami`, {}, {
+        axios.post(`${API}/v2/gamification/achievements/konami`, {}, {
           headers: { Authorization: `Bearer ${token}` }
         }).then(res => {
           if (!res.data.already_unlocked) {

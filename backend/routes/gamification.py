@@ -1,7 +1,7 @@
 """
 Gamification API Routes for TheCryptoCoach 2.0
 """
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Header
 from pydantic import BaseModel
 from typing import Dict, List, Optional
 import os
@@ -68,6 +68,26 @@ async def award_xp(user_id: str, request: AwardXPRequest):
 async def get_all_achievements():
     """Get all available achievements"""
     return gamification_service.get_all_achievements()
+
+
+@router.post("/achievements/konami")
+async def unlock_konami_achievement(authorization: str = Header(...)):
+    """Grant the konami_code hidden achievement to the authenticated user"""
+    user_id = await get_current_user_id(authorization)
+    awarded = await gamification_service.grant_achievement(user_id, "konami_code")
+    if not awarded:
+        return {"already_unlocked": True}
+    return {
+        "already_unlocked": False,
+        "achievement": {
+            "id": awarded["id"],
+            "name": awarded["name"],
+            "description": awarded.get("description", ""),
+            "xp": awarded["xp_reward"],
+            "icon": awarded.get("icon", "trophy"),
+            "level": awarded.get("level", 1),
+        }
+    }
 
 
 @router.get("/achievements/{user_id}")

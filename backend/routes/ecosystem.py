@@ -295,25 +295,6 @@ def create_ecosystem_routes(db, get_current_user):
             "total_count": len(ACHIEVEMENTS)
         }
     
-    @ecosystem_router.post("/achievements/konami")
-    async def unlock_konami_achievement(current_user: dict = Depends(get_current_user)):
-        """Grant the konami_code hidden achievement"""
-        svc = GamificationService(db)
-        awarded = await svc.grant_achievement(current_user["id"], "konami_code")
-        if not awarded:
-            return {"already_unlocked": True}
-        return {
-            "already_unlocked": False,
-            "achievement": {
-                "id": awarded["id"],
-                "name": awarded["name"],
-                "description": awarded.get("description", ""),
-                "xp": awarded["xp_reward"],
-                "icon": awarded.get("icon", "trophy"),
-                "level": awarded.get("level", 1),
-            }
-        }
-
     @ecosystem_router.get("/achievements/recent")
     async def get_recent_achievements(
         limit: int = 10,
