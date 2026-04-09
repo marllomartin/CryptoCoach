@@ -84,11 +84,19 @@ const ProfilePage = () => {
               {/* Avatar */}
               <div className="relative">
                 <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-purple-600 p-1">
-                  <div className="w-full h-full rounded-full bg-gray-900 flex items-center justify-center">
-                    <span className="text-5xl font-bold text-white">
-                      {user?.full_name?.charAt(0) || 'U'}
-                    </span>
-                  </div>
+                  {user?.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt={user.full_name}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-gray-900 flex items-center justify-center">
+                      <span className="text-5xl font-bold text-white">
+                        {user?.full_name?.charAt(0) || 'U'}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:-right-2 bg-primary text-white text-sm font-bold px-4 py-1 rounded-full whitespace-nowrap">
                   {t('profile.levelBadge', { level })}

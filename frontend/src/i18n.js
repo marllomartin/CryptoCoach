@@ -233,6 +233,16 @@ const resources = {
           cancelFailed: 'Failed to cancel. Please try again.',
           noPaidSub: 'You are on the free plan.',
         },
+        avatar: {
+          title: 'Profile Picture',
+          hint: 'JPG, PNG or WebP. Max 10 MB.',
+          upload: 'Upload Photo',
+          uploading: 'Uploading…',
+          success: 'Profile picture updated',
+          failed: 'Upload failed. Please try again.',
+          invalidType: 'Please select an image file',
+          tooLarge: 'Image must be smaller than 10 MB',
+        },
       },
       achievements: {
         unlocked: 'Achievement Unlocked',
@@ -1651,6 +1661,16 @@ const resources = {
           cancelSuccess: 'Abonnement annulé. L\'accès continue jusqu\'au {{date}}.',
           cancelFailed: 'Échec de l\'annulation. Veuillez réessayer.',
           noPaidSub: 'Vous êtes sur le forfait gratuit.',
+        },
+        avatar: {
+          title: 'Photo de Profil',
+          hint: 'JPG, PNG ou WebP. Max 10 Mo.',
+          upload: 'Télécharger une photo',
+          uploading: 'Téléchargement…',
+          success: 'Photo de profil mise à jour',
+          failed: 'Échec du téléchargement. Veuillez réessayer.',
+          invalidType: 'Veuillez sélectionner une image',
+          tooLarge: 'L\'image doit être inférieure à 10 Mo',
         },
       },
       // Contact Page
@@ -3743,6 +3763,16 @@ const resources = {
           cancelFailed: 'فشل الإلغاء. يرجى المحاولة مرة أخرى.',
           noPaidSub: 'أنت على الخطة المجانية.',
         },
+        avatar: {
+          title: 'صورة الملف الشخصي',
+          hint: 'JPG أو PNG أو WebP. الحد الأقصى 10 ميغابايت.',
+          upload: 'رفع صورة',
+          uploading: 'جارٍ الرفع…',
+          success: 'تم تحديث صورة الملف الشخصي',
+          failed: 'فشل الرفع. يرجى المحاولة مرة أخرى.',
+          invalidType: 'يرجى اختيار ملف صورة',
+          tooLarge: 'يجب أن يكون حجم الصورة أقل من 10 ميغابايت',
+        },
       },
       // Contact Page
       contact: {
@@ -4441,6 +4471,16 @@ const resources = {
           cancelSuccess: 'Assinatura cancelada. O acesso continua até {{date}}.',
           cancelFailed: 'Falha ao cancelar. Tente novamente.',
           noPaidSub: 'Você está no plano gratuito.',
+        },
+        avatar: {
+          title: 'Foto de Perfil',
+          hint: 'JPG, PNG ou WebP. Máximo 10 MB.',
+          upload: 'Enviar Foto',
+          uploading: 'Enviando…',
+          success: 'Foto de perfil atualizada',
+          failed: 'Falha no envio. Tente novamente.',
+          invalidType: 'Por favor, selecione um arquivo de imagem',
+          tooLarge: 'A imagem deve ter menos de 10 MB',
         },
       },
       // Contact Page

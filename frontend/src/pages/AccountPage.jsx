@@ -10,7 +10,7 @@ import axios from 'axios';
 import {
   Lock, CreditCard, ArrowLeft, Shield, User,
   Crown, Rocket, Star, AlertTriangle, CheckCircle,
-  Calendar, RefreshCw, X, Save, LogOut
+  Calendar, RefreshCw, X, Save, LogOut, Camera
 } from 'lucide-react';
 
 const TIER_ICONS = { free: Star, pro: Rocket, elite: Crown };
@@ -24,6 +24,47 @@ const AccountPage = () => {
   const { user, token, refreshUser, logout } = useAuth();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+
+  // ── Avatar upload state ───────────────────────────────────────────────────
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error(t('account.avatar.invalidType', 'Please select an image file'));
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error(t('account.avatar.tooLarge', 'Image must be smaller than 10 MB'));
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      // 1. Get a direct upload URL from our backend
+      const { data: urlData } = await axios.get(`${API}/auth/avatar/upload-url`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // 2. Upload directly to Cloudflare
+      const form = new FormData();
+      form.append('file', file);
+      const cfResp = await fetch(urlData.upload_url, { method: 'POST', body: form });
+      if (!cfResp.ok) throw new Error('Upload failed');
+      // 3. Confirm image with our backend
+      await axios.post(
+        `${API}/auth/avatar`,
+        { image_id: urlData.image_id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(t('account.avatar.success', 'Profile picture updated'));
+      refreshUser?.();
+    } catch {
+      toast.error(t('account.avatar.failed', 'Upload failed. Please try again.'));
+    } finally {
+      setUploadingAvatar(false);
+      e.target.value = '';
+    }
+  };
 
   // ── Name edit state ────────────────────────────────────────────────────────
   const [editName, setEditName]           = useState(user?.full_name || '');
@@ -156,6 +197,58 @@ const AccountPage = () => {
             </button>
             <div>
               <h1 className="text-2xl font-bold text-white">{t('account.title')}</h1>
+            </div>
+          </div>
+
+          {/* ── Avatar Card ──────────────────────────────────────────────── */}
+          <div className="bg-gray-900/60 backdrop-blur border border-gray-800 rounded-xl p-6 mb-6">
+            <h2 className="font-bold text-white mb-5 flex items-center gap-2">
+              <Camera className="w-5 h-5 text-primary" />
+              {t('account.avatar.title', 'Profile Picture')}
+            </h2>
+            <div className="flex items-center gap-5">
+              {/* Current avatar preview */}
+              <div className="relative shrink-0">
+                {user?.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt={user.full_name}
+                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-700"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border-2 border-primary/30 flex items-center justify-center text-2xl font-bold text-primary">
+                    {user?.full_name?.[0]?.toUpperCase() || '?'}
+                  </div>
+                )}
+                {uploadingAvatar && (
+                  <div className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+              </div>
+              {/* Upload button */}
+              <div>
+                <p className="text-sm text-gray-400 mb-3">
+                  {t('account.avatar.hint', 'JPG, PNG or WebP. Max 10 MB.')}
+                </p>
+                <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors ${
+                  uploadingAvatar
+                    ? 'bg-gray-700 text-gray-500 pointer-events-none'
+                    : 'bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30'
+                }`}>
+                  <Camera className="w-4 h-4" />
+                  {uploadingAvatar
+                    ? t('account.avatar.uploading', 'Uploading…')
+                    : t('account.avatar.upload', 'Upload Photo')}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                    disabled={uploadingAvatar}
+                  />
+                </label>
+              </div>
             </div>
           </div>
 

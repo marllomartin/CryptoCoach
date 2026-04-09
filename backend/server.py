@@ -204,6 +204,7 @@ class UserResponse(BaseModel):
     role: str = "none"  # none, editor, moderator, admin
     achievements: List[str] = []
     certificate_name: Optional[str] = None
+    avatar_url: Optional[str] = None
 
 class TokenResponse(BaseModel):
     access_token: str
@@ -673,7 +674,8 @@ async def login(request: Request, credentials: UserLogin):
         subscription_tier=user.get("subscription_tier", "free"),
         subscription_expires=user.get("subscription_expires"),
         role=role,
-        achievements=user.get("achievements", [])
+        achievements=user.get("achievements", []),
+        avatar_url=user.get("avatar_url")
     )
     return TokenResponse(access_token=token, user=user_response)
 
@@ -729,7 +731,8 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         subscription_expires=fresh_user.get("subscription_expires"),
         role=role,
         achievements=fresh_user.get("achievements", []),
-        certificate_name=fresh_user.get("certificate_name")
+        certificate_name=fresh_user.get("certificate_name"),
+        avatar_url=fresh_user.get("avatar_url")
     )
 
 @api_router.put("/auth/profile")
@@ -762,6 +765,44 @@ async def change_password(data: ChangePasswordRequest, current_user: dict = Depe
         {"$set": {"password_hash": new_hash}}
     )
     return {"message": "Password updated"}
+
+class AvatarConfirmRequest(BaseModel):
+    image_id: str
+
+@api_router.get("/auth/avatar/upload-url")
+async def get_avatar_upload_url(current_user: dict = Depends(get_current_user)):
+    """Request a Cloudflare Images direct upload URL for the authenticated user."""
+    import httpx
+    account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
+    api_token = os.environ.get("CLOUDFLARE_API_TOKEN")
+    if not account_id or not api_token:
+        raise HTTPException(status_code=503, detail="Image upload not configured")
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"https://api.cloudflare.com/client/v4/accounts/{account_id}/images/v2/direct_upload",
+            headers={"Authorization": f"Bearer {api_token}"},
+        )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=502, detail="Failed to create upload URL")
+    data = resp.json()
+    result = data.get("result", {})
+    return {"upload_url": result.get("uploadURL"), "image_id": result.get("id")}
+
+@api_router.post("/auth/avatar")
+async def confirm_avatar(request: AvatarConfirmRequest, current_user: dict = Depends(get_current_user)):
+    """Save the uploaded Cloudflare image ID as the user's avatar URL."""
+    account_hash = os.environ.get("CLOUDFLARE_IMAGES_HASH")
+    if not account_hash:
+        raise HTTPException(status_code=503, detail="Image delivery not configured")
+    image_id = InputSanitizer.sanitize_string(request.image_id, max_length=200)
+    if not image_id:
+        raise HTTPException(status_code=400, detail="Invalid image ID")
+    avatar_url = f"https://imagedelivery.net/{account_hash}/{image_id}/public"
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {"avatar_url": avatar_url}}
+    )
+    return {"avatar_url": avatar_url}
 
 @api_router.post("/subscription/cancel")
 async def cancel_subscription(current_user: dict = Depends(get_current_user)):
