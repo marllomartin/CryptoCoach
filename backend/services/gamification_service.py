@@ -89,12 +89,12 @@ ACHIEVEMENTS = {
     "crypto_scholar": {
         "id": "crypto_scholar",
         "name": "Crypto Scholar",
-        "description": "Complete three courses",
+        "description": "Complete your first course",
         "icon": "graduation-cap",
         "level": 2,
         "xp_reward": 150,
         "trigger": "lesson",
-        "condition": {"courses_completed": 3}
+        "condition": {"courses_completed": 1}
     },
     "quiz_master": {
         "id": "quiz_master",
