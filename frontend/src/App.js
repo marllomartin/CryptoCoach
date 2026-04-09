@@ -13,6 +13,7 @@ import { Toaster } from 'sonner';
 import { DiscountPopup } from './components/DiscountPopup';
 import { ExitIntentPopup } from './components/ExitIntentPopup';
 import { useTranslation } from 'react-i18next';
+import { showAchievementToasts } from './utils/achievementToast';
 import './i18n';
 
 // Pages
@@ -144,6 +145,33 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+
+const KonamiCode = () => {
+  const { token } = useAuth();
+  const seq = [];
+
+  useEffect(() => {
+    const handleKey = (e) => {
+      seq.push(e.key);
+      if (seq.length > KONAMI.length) seq.shift();
+      if (seq.join(',') === KONAMI.join(',') && token) {
+        axios.post(`${API}/ecosystem/achievements/konami`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).then(res => {
+          if (!res.data.already_unlocked) {
+            showAchievementToasts([res.data.achievement]);
+          }
+        }).catch(() => {});
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [token]);
+
+  return null;
+};
+
 // Wrapper components for popups with i18n language
 const DiscountPopupWithLanguage = () => {
   const { i18n } = useTranslation();
@@ -172,6 +200,7 @@ function App() {
             },
           }}
         />
+        <KonamiCode />
         {/* Discount Popup - Shows once after 30s or 50% scroll */}
         <DiscountPopupWithLanguage />
         {/* Exit Intent Popup - Shows when user tries to leave */}

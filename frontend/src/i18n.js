@@ -256,6 +256,7 @@ const resources = {
         night_owl: { name: 'Night Owl', description: 'Study in the dead of night' },
         perfectionist: { name: 'Perfectionist', description: 'Revisit a completed quiz and ace it again' },
         resilient: { name: 'Resilient', description: 'Pass an exam you previously failed' },
+        konami_code: { name: 'Gamer Brain', description: 'You know the ancient cheat code' },
       },
       // Contact Page
       contact: {
@@ -1606,6 +1607,7 @@ const resources = {
         night_owl: { name: 'Oiseau de Nuit', description: 'Étudiez au cœur de la nuit' },
         perfectionist: { name: 'Perfectionniste', description: 'Refaites un quiz terminé et obtenez encore 100%' },
         resilient: { name: 'Résilient', description: 'Réussissez un examen que vous aviez échoué' },
+        konami_code: { name: 'Cerveau de Gamer', description: 'Vous connaissez l\'ancien code de triche' },
       },
       account: {
         title: 'Paramètres du compte',
@@ -3696,6 +3698,7 @@ const resources = {
         night_owl: { name: 'بومة الليل', description: 'ادرس في منتصف الليل' },
         perfectionist: { name: 'مثالي', description: 'أعد اختباراً منتهياً واحصل على 100% مجدداً' },
         resilient: { name: 'صامد', description: 'اجتز امتحاناً أخفقت فيه سابقاً' },
+        konami_code: { name: 'عقل اللاعب', description: 'أنت تعرف الرمز القديم' },
       },
       account: {
         title: 'إعدادات الحساب',
@@ -4394,6 +4397,7 @@ const resources = {
         night_owl: { name: 'Coruja Noturna', description: 'Estude no meio da madrugada' },
         perfectionist: { name: 'Perfeccionista', description: 'Refaça um quiz concluído e acerte 100% novamente' },
         resilient: { name: 'Resiliente', description: 'Passe num exame que você havia reprovado' },
+        konami_code: { name: 'Mente Gamer', description: 'Você conhece o código ancestral' },
       },
       account: {
         title: 'Configurações da Conta',

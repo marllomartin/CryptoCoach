@@ -231,6 +231,17 @@ ACHIEVEMENTS = {
         "xp_reward": 475,
         "trigger": "grant_only",
         "condition": {}
+    },
+    "konami_code": {
+        "id": "konami_code",
+        "name": "Gamer Brain",
+        "description": "You know the ancient cheat code",
+        "icon": "gamepad-2",
+        "level": 5,
+        "hidden": True,
+        "xp_reward": 475,
+        "trigger": "grant_only",
+        "condition": {}
     }
 }
 
