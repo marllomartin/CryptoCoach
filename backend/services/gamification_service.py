@@ -29,7 +29,7 @@ XP_REWARDS = {
 }
 
 # XP per achievement tier
-ACHIEVEMENT_XP = {1: 75, 2: 150, 3: 300, 4: 600}
+ACHIEVEMENT_XP = {1: 75, 2: 150, 3: 300, 4: 600, 5: 375}
 
 # Achievement definitions
 # level: 1=Bronze(easy), 2=Silver(medium), 3=Gold(hard), 4=Prismatic(extreme)
@@ -66,6 +66,16 @@ ACHIEVEMENTS = {
         "condition": {"trades_count": 1}
     },
     # ── Level 2 (Silver) ─────────────────────────────────────────────────────
+    "sharp_mind": {
+        "id": "sharp_mind",
+        "name": "Sharp Mind",
+        "description": "Get 100% on your first quiz",
+        "icon": "zap",
+        "level": 2,
+        "xp_reward": 150,
+        "trigger": "quiz",
+        "condition": {"perfect_quizzes": 1}
+    },
     "knowledge_seeker": {
         "id": "knowledge_seeker",
         "name": "Knowledge Seeker",
@@ -167,6 +177,60 @@ ACHIEVEMENTS = {
         "xp_reward": 600,
         "trigger": "any",
         "condition": {"level": 20}
+    },
+    "streak_unstoppable": {
+        "id": "streak_unstoppable",
+        "name": "Streak Unstoppable",
+        "description": "Maintain a 60-day streak",
+        "icon": "flame",
+        "level": 4,
+        "xp_reward": 600,
+        "trigger": "lesson",
+        "condition": {"streak_days": 60}
+    },
+    "fully_certified": {
+        "id": "fully_certified",
+        "name": "Fully Certified",
+        "description": "Earn all 3 certifications",
+        "icon": "award",
+        "level": 4,
+        "xp_reward": 600,
+        "trigger": "exam",
+        "condition": {"certificates": 3}
+    },
+    # ── Level 5 (Hidden) ─────────────────────────────────────────────────────
+    "night_owl": {
+        "id": "night_owl",
+        "name": "Night Owl",
+        "description": "Complete 5 lessons between midnight and 5am",
+        "icon": "moon",
+        "level": 5,
+        "hidden": True,
+        "xp_reward": 375,
+        "trigger": "grant_only",
+        "condition": {}
+    },
+    "perfectionist": {
+        "id": "perfectionist",
+        "name": "Perfectionist",
+        "description": "Retake a quiz you've already completed",
+        "icon": "refresh-cw",
+        "level": 5,
+        "hidden": True,
+        "xp_reward": 375,
+        "trigger": "grant_only",
+        "condition": {}
+    },
+    "resilient": {
+        "id": "resilient",
+        "name": "Resilient",
+        "description": "Fail an exam, then pass it on your next attempt",
+        "icon": "shield",
+        "level": 5,
+        "hidden": True,
+        "xp_reward": 375,
+        "trigger": "grant_only",
+        "condition": {}
     }
 }
 
@@ -333,8 +397,13 @@ class GamificationService:
             if ach_id in current_achievements:
                 continue
 
-            # Only evaluate achievements that match the current trigger context
             ach_trigger = achievement.get("trigger", "any")
+
+            # Hidden/grant_only achievements are never evaluated here — granted explicitly
+            if ach_trigger == "grant_only":
+                continue
+
+            # Only evaluate achievements that match the current trigger context
             if trigger != "any" and ach_trigger != "any" and ach_trigger != trigger:
                 continue
 
@@ -364,6 +433,24 @@ class GamificationService:
         
         return new_achievements
     
+    async def grant_achievement(self, user_id: str, achievement_id: str) -> Optional[Dict]:
+        """Directly grant a specific achievement (used for grant_only / hidden achievements)."""
+        if achievement_id not in ACHIEVEMENTS:
+            return None
+        achievement = ACHIEVEMENTS[achievement_id]
+        user = await self.db.users.find_one({"id": user_id}, {"_id": 0, "achievements": 1})
+        if user and achievement_id in user.get("achievements", []):
+            return None  # Already earned
+        xp_reward = ACHIEVEMENT_XP.get(achievement["level"], achievement["xp_reward"])
+        await self.db.users.update_one(
+            {"id": user_id},
+            {
+                "$addToSet": {"achievements": achievement_id},
+                "$inc": {"xp_points": xp_reward}
+            }
+        )
+        return {**achievement, "xp_reward": xp_reward}
+
     async def get_streak_info(self, user_id: str) -> Dict:
         """Get streak information for a user"""
         user = await self.db.users.find_one({"id": user_id}, {"_id": 0})

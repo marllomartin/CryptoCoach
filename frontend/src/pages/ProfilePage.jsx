@@ -8,7 +8,8 @@ import {
   Trophy, Flame, Zap,
   Target, TrendingUp, Award,
   BookOpen, Star, Crown, HelpCircle,
-  Footprints, GraduationCap, BarChart2, Gem, Lock, Settings
+  Footprints, GraduationCap, BarChart2, Gem, Lock, Settings,
+  Moon, RefreshCw, Shield, Eye
 } from 'lucide-react';
 import { StreakInfoModal } from '../components/StreakInfoModal';
 import { Progress } from '../components/ui/progress';
@@ -22,6 +23,7 @@ const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
   const [streakInfo, setStreakInfo] = useState(null);
   const [achievements, setAchievements] = useState([]);
+  const [hiddenCount, setHiddenCount] = useState(0);
   const [streakModalOpen, setStreakModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +45,8 @@ const ProfilePage = () => {
 
       setProfile(profileRes.data);
       setStreakInfo(streakRes.data);
-      setAchievements(achRes.data);
+      setAchievements(achRes.data.achievements ?? achRes.data);
+      setHiddenCount(achRes.data.hidden_count ?? 0);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -220,7 +223,14 @@ const ProfilePage = () => {
                 {achievements.map((ach) => (
                   <AchievementCard key={ach.id} achievement={ach} />
                 ))}
-                {achievements.length === 0 && (
+                {hiddenCount > 0 && (
+                  <div className="relative p-4 rounded-xl border bg-gradient-to-br from-emerald-950/40 to-blue-950/40 border-teal-800/30 overflow-hidden flex flex-col items-center justify-center gap-2 min-h-[110px]">
+                    <Eye className="w-6 h-6 text-teal-600" />
+                    <p className="text-sm font-bold text-teal-400">+{hiddenCount} {t('achievements.tiers.hidden')}</p>
+                    <p className="text-xs text-gray-500 text-center leading-snug">{t('profile.hiddenAchievementsHint', { defaultValue: 'Keep playing to unlock secret achievements' })}</p>
+                  </div>
+                )}
+                {achievements.length === 0 && hiddenCount === 0 && (
                   <p className="col-span-3 text-center text-gray-500 py-8">{t('profile.noAchievements')}</p>
                 )}
               </div>
@@ -268,6 +278,9 @@ const ACHIEVEMENT_ICONS = {
   'gem': Gem,
   'crown': Crown,
   'target': Target,
+  'moon': Moon,
+  'refresh-cw': RefreshCw,
+  'shield': Shield,
 };
 
 const LEVEL_STYLES = {
@@ -295,6 +308,12 @@ const LEVEL_STYLES = {
     badge: 'bg-purple-500/20 text-purple-300',
     labelKey: 'achievements.tiers.prismatic',
   },
+  5: {
+    card: 'from-emerald-950/60 to-blue-950/60 border-teal-800/40',
+    icon: 'text-teal-400',
+    badge: 'bg-teal-950/70 text-teal-300',
+    labelKey: 'achievements.tiers.hidden',
+  },
 };
 
 const AchievementCard = ({ achievement }) => {
@@ -307,6 +326,7 @@ const AchievementCard = ({ achievement }) => {
 
   const isGold      = earned && level === 3;
   const isPrismatic = earned && level === 4;
+  const isHidden    = earned && level === 5;
 
   return (
     <div className={`relative p-4 rounded-xl border bg-gradient-to-br transition-all overflow-hidden ${
@@ -314,7 +334,8 @@ const AchievementCard = ({ achievement }) => {
         ? `${styles.card} opacity-100`
         : 'from-gray-800/40 to-gray-800/20 border-gray-700/50 opacity-50 grayscale'
     } ${isGold ? 'shadow-[0_0_12px_2px_rgba(234,179,8,0.18)]' : ''
-      } ${isPrismatic ? 'shadow-[0_0_18px_4px_rgba(168,85,247,0.28)]' : ''}`}>
+      } ${isPrismatic ? 'shadow-[0_0_18px_4px_rgba(168,85,247,0.28)]' : ''
+      } ${isHidden ? 'shadow-[0_0_14px_2px_rgba(20,184,166,0.18)]' : ''}`}>
 
       {/* Prismatic burst — WebGL */}
       {isPrismatic && (

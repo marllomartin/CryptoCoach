@@ -922,7 +922,22 @@ async def complete_lesson(lesson_id: str, current_user: dict = Depends(get_curre
         }
         
         await db.users.update_one({"id": current_user["id"]}, update_data)
-        
+
+        # Track Night Owl hidden achievement (lessons completed between midnight and 5am UTC)
+        hour = datetime.now(timezone.utc).hour
+        if 0 <= hour < 5:
+            updated_user = await db.users.find_one_and_update(
+                {"id": current_user["id"]},
+                {"$inc": {"night_lessons_count": 1}},
+                return_document=True
+            )
+            if updated_user and updated_user.get("night_lessons_count", 0) >= 5:
+                night_svc = GamificationService(db)
+                awarded_hidden = await night_svc.grant_achievement(current_user["id"], "night_owl")
+                if awarded_hidden:
+                    new_achievements.append({"id": awarded_hidden["id"], "name": awarded_hidden["name"], "xp": awarded_hidden["xp_reward"], "icon": awarded_hidden.get("icon", "trophy"), "level": awarded_hidden.get("level", 1)})
+                    xp_earned += awarded_hidden["xp_reward"]
+
         # Update quest progress for lesson completion
         await db.user_quests.update_many(
             {
@@ -1026,6 +1041,7 @@ async def submit_quiz(submission: QuizSubmission, current_user: dict = Depends(g
 
     new_achievements = []
     first_attempt = submission.quiz_id not in current_user.get("completed_quizzes", [])
+    is_perfect = score == 100.0
 
     if newly_correct or first_attempt:
         update: dict = {}
@@ -1037,7 +1053,18 @@ async def submit_quiz(submission: QuizSubmission, current_user: dict = Depends(g
             update.setdefault("$addToSet", {})[f"quiz_correct_questions.{submission.quiz_id}"] = {"$each": newly_correct}
         await db.users.update_one({"id": current_user["id"]}, update)
 
-    if first_attempt:
+    # Track perfect quiz count for Sharp Mind / Quiz Master achievements
+    if is_perfect:
+        await db.users.update_one({"id": current_user["id"]}, {"$inc": {"perfect_quizzes_count": 1}})
+
+    # Grant Perfectionist hidden achievement when retaking a completed quiz
+    if not first_attempt:
+        gamification_svc = GamificationService(db)
+        awarded_hidden = await gamification_svc.grant_achievement(current_user["id"], "perfectionist")
+        if awarded_hidden:
+            new_achievements.append({"id": awarded_hidden["id"], "name": awarded_hidden["name"], "xp": awarded_hidden["xp_reward"], "icon": awarded_hidden.get("icon", "trophy"), "level": awarded_hidden.get("level", 1)})
+
+    if first_attempt or is_perfect:
         gamification_service = GamificationService(db)
         awarded = await gamification_service.check_and_award_achievements(current_user["id"], trigger="quiz")
         for a in awarded:
@@ -1109,6 +1136,22 @@ async def submit_exam(submission: ExamSubmission, current_user: dict = Depends(g
         "completed_at": datetime.now(timezone.utc).isoformat()
     }
     
+    # Track failed exams for Resilient achievement
+    if not passed:
+        await db.users.update_one(
+            {"id": current_user["id"]},
+            {"$addToSet": {"failed_exams": submission.exam_id}}
+        )
+
+    # Grant Resilient if passing an exam they previously failed
+    if passed and submission.exam_id in current_user.get("failed_exams", []):
+        resilient_svc = GamificationService(db)
+        awarded_resilient = await resilient_svc.grant_achievement(current_user["id"], "resilient")
+        if awarded_resilient:
+            result.setdefault("new_achievements", []).append(
+                {"id": awarded_resilient["id"], "name": awarded_resilient["name"], "xp": awarded_resilient["xp_reward"], "icon": awarded_resilient.get("icon", "trophy"), "level": awarded_resilient.get("level", 1)}
+            )
+
     if passed and submission.exam_id not in current_user.get("completed_exams", []):
         cert_id = str(uuid.uuid4())
         # Resolve cert name from course, falling back to level-based names
