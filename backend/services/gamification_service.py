@@ -91,8 +91,8 @@ ACHIEVEMENTS = {
         "name": "Crypto Scholar",
         "description": "Complete your first course",
         "icon": "graduation-cap",
-        "level": 2,
-        "xp_reward": 150,
+        "level": 1,
+        "xp_reward": 75,
         "trigger": "lesson",
         "condition": {"courses_completed": 1}
     },
