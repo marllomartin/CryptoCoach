@@ -378,11 +378,16 @@ class GamificationService:
         completed = set(user.get("completed_lessons", []))
 
         # Count completed courses (all lessons in a course must be completed)
-        all_courses = await self.db.courses.find({}, {"_id": 0, "lesson_ids": 1}).to_list(100)
-        courses_completed = sum(
-            1 for c in all_courses
-            if c.get("lesson_ids") and set(c["lesson_ids"]).issubset(completed)
-        )
+        # lesson_ids is not stored on the course document — query lessons collection instead
+        all_courses = await self.db.courses.find({}, {"_id": 0, "id": 1}).to_list(100)
+        courses_completed = 0
+        for c in all_courses:
+            course_id = c.get("id")
+            if not course_id:
+                continue
+            lesson_ids = await self.db.lessons.distinct("id", {"course_id": course_id})
+            if lesson_ids and set(lesson_ids).issubset(completed):
+                courses_completed += 1
 
         stats = {
             "lessons_completed": len(completed),

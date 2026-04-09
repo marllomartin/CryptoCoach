@@ -223,7 +223,7 @@ export default function CoursePage() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-1">
-                              <span className="text-sm text-slate-500">{t('course.lessonNumber', { n: lesson.order })}</span>
+                              <span className="text-sm text-slate-500">{t('course.lessonNumber', { n: lesson.order + 1 })}</span>
                               {lesson.duration_minutes && (
                                 <>
                                   <span className="text-sm text-slate-500">•</span>
@@ -248,7 +248,7 @@ export default function CoursePage() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-1">
-                              <span className="text-sm text-slate-500">{t('course.lessonNumber', { n: lesson.order })}</span>
+                              <span className="text-sm text-slate-500">{t('course.lessonNumber', { n: lesson.order + 1 })}</span>
                               <span className="text-sm text-slate-500">•</span>
                               <span className="text-sm text-slate-500">{lesson.duration_minutes} min</span>
                             </div>

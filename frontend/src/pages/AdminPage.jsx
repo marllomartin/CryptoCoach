@@ -479,7 +479,7 @@ function CourseForm({ initial, onSave, onCancel, saving }) {
 
 /** Multi-language tabs form for a lesson */
 function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
-  const [order, setOrder] = useState(initial?.order ?? 0);
+  const [order, setOrder] = useState((initial?.order ?? 0) + 1);
   const [translations, setTranslations] = useState(() => {
     const base = EMPTY_LESSON_TRANSLATIONS();
     if (initial?.translations) {
@@ -599,7 +599,7 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
         answer: Number(cp.answer),
         explanation: Object.fromEntries(Object.entries(cp.explanation).filter(([, v]) => v.trim())),
       }));
-    onSave({ course_id: courseId, order: Number(order), translations: payload, checkpoints: checkpointPayload });
+    onSave({ course_id: courseId, order: Number(order) - 1, translations: payload, checkpoints: checkpointPayload });
   };
 
   return (
@@ -608,7 +608,7 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving }) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-xs text-slate-400 mb-1 block">Order (position in course)</label>
-            <Input type="number" min={0} value={order} onChange={e => setOrder(e.target.value)} />
+            <Input type="number" min={1} value={order} onChange={e => setOrder(e.target.value)} />
           </div>
         </div>
 
