@@ -713,8 +713,7 @@ export default function LessonPage() {
 
             {/* Coach's Tip */}
             <CoachTip
-              lessonId={lessonId}
-              tip={lesson.coach_tip ?? undefined}
+              tip={lesson.coach_tip || ''}
               language={appLanguage?.split('-')[0] || 'en'}
             />
 
