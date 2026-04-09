@@ -743,7 +743,7 @@ export default function LessonPage() {
                 <Button
                   onClick={completeLesson}
                   disabled={completing}
-                  className="flex-1 min-w-[140px] h-10 bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2 whitespace-nowrap"
+                  className="flex-1 min-w-[140px] h-auto py-2 bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2 text-center"
                 >
                   {completing ? (
                     <>
