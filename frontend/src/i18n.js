@@ -1096,7 +1096,22 @@ const resources = {
         toastDownloaded: 'Certificate downloaded!',
         toastError: 'Failed to download certificate',
         searchPlaceholder: 'Search certificates...',
-        noSearchResults: 'No certificates match your search.'
+        noSearchResults: 'No certificates match your search.',
+        share: 'Share',
+        public: {
+          certOfCompletion: 'Certificate of Completion',
+          awardedTo: 'This certifies that',
+          verified: 'Verified certificate',
+          verifyLink: 'Verify authenticity',
+          shareLinkedIn: 'Share on LinkedIn',
+          copyLink: 'Copy link',
+          linkCopied: 'Link copied to clipboard!',
+          notFound: 'Certificate not found',
+          notFoundDesc: 'This certificate may have been removed or the link is incorrect.',
+          goHome: 'Go to Homepage',
+          ctaText: 'Earn your own certificates by completing courses on TheCryptoCoach.',
+          ctaButton: 'Explore Courses'
+        }
       },
       // Video Player
       videoPlayer: {
@@ -2475,7 +2490,22 @@ const resources = {
         toastDownloaded: 'Certificat téléchargé !',
         toastError: 'Échec du téléchargement du certificat',
         searchPlaceholder: 'Rechercher des certificats...',
-        noSearchResults: 'Aucun certificat ne correspond à votre recherche.'
+        noSearchResults: 'Aucun certificat ne correspond à votre recherche.',
+        share: 'Partager',
+        public: {
+          certOfCompletion: 'Certificat de Complétion',
+          awardedTo: 'Ceci certifie que',
+          verified: 'Certificat vérifié',
+          verifyLink: "Vérifier l'authenticité",
+          shareLinkedIn: 'Partager sur LinkedIn',
+          copyLink: 'Copier le lien',
+          linkCopied: 'Lien copié dans le presse-papier !',
+          notFound: 'Certificat introuvable',
+          notFoundDesc: 'Ce certificat a peut-être été supprimé ou le lien est incorrect.',
+          goHome: "Aller à l'accueil",
+          ctaText: 'Gagnez vos propres certificats en complétant des cours sur TheCryptoCoach.',
+          ctaButton: 'Explorer les cours'
+        }
       },
       // Video Player
       videoPlayer: {
@@ -3603,7 +3633,22 @@ const resources = {
         toastDownloaded: 'تم تحميل الشهادة!',
         toastError: 'فشل تحميل الشهادة',
         searchPlaceholder: 'ابحث عن الشهادات...',
-        noSearchResults: 'لا توجد شهادات تطابق بحثك.'
+        noSearchResults: 'لا توجد شهادات تطابق بحثك.',
+        share: 'مشاركة',
+        public: {
+          certOfCompletion: 'شهادة إتمام',
+          awardedTo: 'يشهد بأن',
+          verified: 'شهادة موثقة',
+          verifyLink: 'التحقق من الأصالة',
+          shareLinkedIn: 'مشاركة على LinkedIn',
+          copyLink: 'نسخ الرابط',
+          linkCopied: 'تم نسخ الرابط!',
+          notFound: 'الشهادة غير موجودة',
+          notFoundDesc: 'ربما تم حذف هذه الشهادة أو الرابط غير صحيح.',
+          goHome: 'الذهاب إلى الرئيسية',
+          ctaText: 'اكسب شهاداتك الخاصة بإتمام الدورات على TheCryptoCoach.',
+          ctaButton: 'استكشف الدورات'
+        }
       },
       // Profile Page
       profile: {
@@ -5233,7 +5278,22 @@ const resources = {
         toastDownloaded: 'Certificado baixado!',
         toastError: 'Falha ao baixar o certificado',
         searchPlaceholder: 'Pesquisar certificados...',
-        noSearchResults: 'Nenhum certificado corresponde à sua pesquisa.'
+        noSearchResults: 'Nenhum certificado corresponde à sua pesquisa.',
+        share: 'Compartilhar',
+        public: {
+          certOfCompletion: 'Certificado de Conclusão',
+          awardedTo: 'Isso certifica que',
+          verified: 'Certificado verificado',
+          verifyLink: 'Verificar autenticidade',
+          shareLinkedIn: 'Compartilhar no LinkedIn',
+          copyLink: 'Copiar link',
+          linkCopied: 'Link copiado para a área de transferência!',
+          notFound: 'Certificado não encontrado',
+          notFoundDesc: 'Este certificado pode ter sido removido ou o link está incorreto.',
+          goHome: 'Ir para a página inicial',
+          ctaText: 'Ganhe seus próprios certificados concluindo cursos no TheCryptoCoach.',
+          ctaButton: 'Explorar cursos'
+        }
       },
       // Video Player
       videoPlayer: {

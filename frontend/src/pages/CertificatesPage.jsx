@@ -11,7 +11,8 @@ import {
   Download,
   Calendar,
   CheckCircle,
-  Search
+  Search,
+  Share2
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -283,7 +284,13 @@ function CertCardInner({ cert, iconColorClass, iconColor, borderClass, formatted
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
+        <Link to={`/certificate/${cert.id}`}>
+          <Button variant="outline" className="border-slate-600 gap-2">
+            <Share2 className="w-4 h-4" />
+            {t('certificates.share')}
+          </Button>
+        </Link>
         <Button
           variant="outline"
           className="border-slate-600"

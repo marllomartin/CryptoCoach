@@ -32,6 +32,7 @@ import ContactPage from './pages/ContactPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CertificatesPage from './pages/CertificatesPage';
+import PublicCertificatePage from './pages/PublicCertificatePage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import DisclaimerPage from './pages/DisclaimerPage';
@@ -202,7 +203,8 @@ function App() {
           <Route path="/simulator" element={<Navigate to="/trading-arena" replace />} />
           <Route path="/mentor" element={<ProtectedRoute><MentorPage /></ProtectedRoute>} />
           <Route path="/certificates" element={<ProtectedRoute><CertificatesPage /></ProtectedRoute>} />
-          
+          <Route path="/certificate/:certId" element={<PublicCertificatePage />} />
+
           {/* Admin Routes */}
           <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
           
