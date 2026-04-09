@@ -29,7 +29,7 @@ XP_REWARDS = {
 }
 
 # XP per achievement tier
-ACHIEVEMENT_XP = {1: 75, 2: 150, 3: 300, 4: 600, 5: 375}
+ACHIEVEMENT_XP = {1: 75, 2: 150, 3: 300, 4: 600, 5: 475}
 
 # Achievement definitions
 # level: 1=Bronze(easy), 2=Silver(medium), 3=Gold(hard), 4=Prismatic(extreme)
@@ -206,7 +206,7 @@ ACHIEVEMENTS = {
         "icon": "moon",
         "level": 5,
         "hidden": True,
-        "xp_reward": 375,
+        "xp_reward": 475,
         "trigger": "grant_only",
         "condition": {}
     },
@@ -217,7 +217,7 @@ ACHIEVEMENTS = {
         "icon": "refresh-cw",
         "level": 5,
         "hidden": True,
-        "xp_reward": 375,
+        "xp_reward": 475,
         "trigger": "grant_only",
         "condition": {}
     },
@@ -228,7 +228,7 @@ ACHIEVEMENTS = {
         "icon": "shield",
         "level": 5,
         "hidden": True,
-        "xp_reward": 375,
+        "xp_reward": 475,
         "trigger": "grant_only",
         "condition": {}
     }

@@ -330,7 +330,7 @@ const AchievementCard = ({ achievement }) => {
   const isHidden    = earned && level === 5;
 
   return (
-    <div className={`relative p-4 rounded-xl border bg-gradient-to-br transition-all overflow-hidden ${
+    <div className={`relative p-4 rounded-xl border bg-gradient-to-br transition-all overflow-hidden flex flex-col ${
       earned
         ? `${styles.card} opacity-100`
         : 'from-gray-800/40 to-gray-800/20 border-gray-700/50 opacity-50 grayscale'
@@ -371,7 +371,7 @@ const AchievementCard = ({ achievement }) => {
           <Lock className="w-3.5 h-3.5 text-gray-500" />
         </div>
       )}
-      <div className="relative z-10 flex flex-col gap-2">
+      <div className="relative z-10 flex flex-col flex-1 gap-2">
         <div className="flex items-center gap-2">
           <IconComponent className={`w-6 h-6 shrink-0 ${earned ? styles.icon : 'text-gray-600'}`} />
           <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${earned ? styles.badge : 'bg-gray-700 text-gray-500'}`}>
@@ -382,7 +382,7 @@ const AchievementCard = ({ achievement }) => {
           <p className={`text-sm font-bold leading-tight ${earned ? 'text-white' : 'text-gray-500'}`}>{displayName}</p>
           <p className="text-xs text-gray-500 mt-0.5 leading-snug">{displayDesc}</p>
         </div>
-        <div className="flex items-end justify-between gap-1">
+        <div className="mt-auto flex items-end justify-between gap-1">
           <p className={`text-xs font-medium ${earned ? 'text-primary' : 'text-gray-600'}`}>+{xp_reward} XP</p>
           {earned && earned_at && (
             <p className="text-[10px] text-gray-500 leading-none">
