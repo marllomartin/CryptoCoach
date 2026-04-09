@@ -911,7 +911,7 @@ async def complete_lesson(lesson_id: str, current_user: dict = Depends(get_curre
         old_level = calculate_level(old_xp)
         
         # Award XP
-        xp_earned = 50
+        xp_earned = 100
         new_xp = old_xp + xp_earned
         new_level = calculate_level(new_xp)
         level_up = new_level > old_level

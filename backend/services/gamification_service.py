@@ -18,7 +18,7 @@ LEVEL_THRESHOLDS = [
 
 # XP rewards for different actions
 XP_REWARDS = {
-    "lesson_complete": 50,
+    "lesson_complete": 100,
     "quiz_perfect": 100,
     "quiz_pass": 50,
     "exam_pass": 500,
@@ -26,9 +26,10 @@ XP_REWARDS = {
     "profitable_trade": 10,
     "daily_login": 15,
     "streak_bonus": lambda streak: min(streak * 5, 100),
-    "quest_complete": lambda difficulty: {"easy": 30, "medium": 75, "hard": 150, "legendary": 300}.get(difficulty, 50),
-    "achievement_unlock": 200,
 }
+
+# XP per achievement tier
+ACHIEVEMENT_XP = {1: 75, 2: 150, 3: 300, 4: 600}
 
 # Achievement definitions
 # level: 1=Bronze(easy), 2=Silver(medium), 3=Gold(hard), 4=Prismatic(extreme)
@@ -40,7 +41,7 @@ ACHIEVEMENTS = {
         "description": "Complete your first lesson",
         "icon": "footprints",
         "level": 1,
-        "xp_reward": 50,
+        "xp_reward": 75,
         "trigger": "lesson",
         "condition": {"lessons_completed": 1}
     },
@@ -50,7 +51,7 @@ ACHIEVEMENTS = {
         "description": "Start a streak for the first time",
         "icon": "flame",
         "level": 1,
-        "xp_reward": 50,
+        "xp_reward": 75,
         "trigger": "lesson",
         "condition": {"streak_days": 1}
     },
@@ -60,7 +61,7 @@ ACHIEVEMENTS = {
         "description": "Execute your first trade in the Trading Arena",
         "icon": "trending-up",
         "level": 1,
-        "xp_reward": 100,
+        "xp_reward": 75,
         "trigger": "trade",
         "condition": {"trades_count": 1}
     },
@@ -71,7 +72,7 @@ ACHIEVEMENTS = {
         "description": "Complete 10 lessons",
         "icon": "book-open",
         "level": 2,
-        "xp_reward": 200,
+        "xp_reward": 150,
         "trigger": "lesson",
         "condition": {"lessons_completed": 10}
     },
@@ -81,7 +82,7 @@ ACHIEVEMENTS = {
         "description": "Complete three courses",
         "icon": "graduation-cap",
         "level": 2,
-        "xp_reward": 300,
+        "xp_reward": 150,
         "trigger": "lesson",
         "condition": {"courses_completed": 3}
     },
@@ -91,7 +92,7 @@ ACHIEVEMENTS = {
         "description": "Get 100% on 5 quizzes",
         "icon": "target",
         "level": 2,
-        "xp_reward": 250,
+        "xp_reward": 150,
         "trigger": "quiz",
         "condition": {"perfect_quizzes": 5}
     },
@@ -101,7 +102,7 @@ ACHIEVEMENTS = {
         "description": "Execute 50 trades",
         "icon": "trending-up",
         "level": 2,
-        "xp_reward": 200,
+        "xp_reward": 150,
         "trigger": "trade",
         "condition": {"trades_count": 50}
     },
@@ -111,7 +112,7 @@ ACHIEVEMENTS = {
         "description": "Maintain a 7-day streak",
         "icon": "flame",
         "level": 2,
-        "xp_reward": 175,
+        "xp_reward": 150,
         "trigger": "lesson",
         "condition": {"streak_days": 7}
     },
@@ -122,7 +123,7 @@ ACHIEVEMENTS = {
         "description": "Complete 25 lessons",
         "icon": "star",
         "level": 3,
-        "xp_reward": 350,
+        "xp_reward": 300,
         "trigger": "lesson",
         "condition": {"lessons_completed": 25}
     },
@@ -142,7 +143,7 @@ ACHIEVEMENTS = {
         "description": "Maintain a 30-day streak",
         "icon": "fire",
         "level": 3,
-        "xp_reward": 500,
+        "xp_reward": 300,
         "trigger": "lesson",
         "condition": {"streak_days": 30}
     },
@@ -152,7 +153,7 @@ ACHIEVEMENTS = {
         "description": "Earn your first certification",
         "icon": "award",
         "level": 3,
-        "xp_reward": 400,
+        "xp_reward": 300,
         "trigger": "exam",
         "condition": {"certificates": 1}
     },
@@ -163,7 +164,7 @@ ACHIEVEMENTS = {
         "description": "Reach level 20",
         "icon": "crown",
         "level": 4,
-        "xp_reward": 1000,
+        "xp_reward": 600,
         "trigger": "any",
         "condition": {"level": 20}
     }
@@ -352,12 +353,13 @@ class GamificationService:
                         break
             
             if earned:
-                new_achievements.append(achievement)
+                xp_reward = ACHIEVEMENT_XP.get(achievement["level"], achievement["xp_reward"])
+                new_achievements.append({**achievement, "xp_reward": xp_reward})
                 await self.db.users.update_one(
                     {"id": user_id},
                     {
                         "$addToSet": {"achievements": ach_id},
-                        "$inc": {"xp_points": achievement["xp_reward"]}
+                        "$inc": {"xp_points": xp_reward}
                     }
                 )
         

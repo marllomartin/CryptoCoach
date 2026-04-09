@@ -8,17 +8,11 @@ from datetime import datetime, timezone
 import uuid
 import hashlib
 
-# Referral rewards
+# Referral rewards (XP removed — discounts managed by admins)
 REFERRAL_REWARDS = {
-    "referrer": {"xp": 200, "coins": 50},  # Person who refers
-    "referee": {"xp": 100, "coins": 25},   # Person who signs up
-    "milestones": {
-        5: {"xp": 500, "coins": 100, "title": "Social Starter"},
-        10: {"xp": 1000, "coins": 250, "title": "Network Builder"},
-        25: {"xp": 2500, "coins": 500, "title": "Community Champion"},
-        50: {"xp": 5000, "coins": 1000, "title": "Influencer"},
-        100: {"xp": 10000, "coins": 2500, "title": "Ambassador"}
-    }
+    "referrer": {"xp": 0, "coins": 0},
+    "referee": {"xp": 0, "coins": 0},
+    "milestones": {}
 }
 
 

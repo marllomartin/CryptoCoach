@@ -370,16 +370,6 @@ def create_ecosystem_routes(db, get_current_user):
         now_completed = new_progress >= quest["target"]
         
         xp_earned = 0
-        if now_completed and not was_completed:
-            # Quest just completed!
-            xp_earned = quest["xp_reward"]
-            streak_bonus = calculate_streak_bonus(profile.get("streak_days", 0))
-            xp_earned = int(xp_earned * streak_bonus)
-            
-            await db.user_profiles.update_one(
-                {"user_id": current_user["id"]},
-                {"$inc": {"xp": xp_earned}}
-            )
         
         await db.user_profiles.update_one(
             {"user_id": current_user["id"]},
