@@ -12,6 +12,7 @@ import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/tooltip';
 import {
   Users,
   BookOpen,
@@ -20,8 +21,6 @@ import {
   Plus,
   Edit,
   Trash2,
-  Volume2,
-  Image,
   Loader2,
   Search,
   Crown,
@@ -1340,36 +1339,6 @@ function CoursesTab({ token, currentUser }) {
     }
   };
 
-  const generateAudio = async (lessonId) => {
-    try {
-      toast.info(t('admin.media.audioStarted'));
-      const response = await axios.post(`${API}/admin/generate-audio/${lessonId}`, {}, { headers: authHeaders });
-      if (response.data.status === 'success') {
-        toast.success(t('admin.media.audioSuccess'));
-        fetchLessons(selectedCourse);
-      } else {
-        toast.error('Error: ' + response.data.error);
-      }
-    } catch (error) {
-      toast.error(t('admin.errors.audioGeneration'));
-    }
-  };
-
-  const generateImage = async (lessonId) => {
-    try {
-      toast.info(t('admin.media.imageStarted'));
-      const response = await axios.post(`${API}/admin/generate-image/${lessonId}`, {}, { headers: authHeaders });
-      if (response.data.status === 'success') {
-        toast.success(t('admin.media.imageSuccess'));
-        fetchLessons(selectedCourse);
-      } else {
-        toast.error('Error: ' + response.data.error);
-      }
-    } catch (error) {
-      toast.error(t('admin.errors.imageGeneration'));
-    }
-  };
-
   /** Derive a display title — checks translations first (prefer EN), falls back to top-level title field */
   const getDisplayTitle = (item) => {
     const t = item?.translations;
@@ -1478,36 +1447,52 @@ function CoursesTab({ token, currentUser }) {
                     <LangBadges translations={course.translations} />
                   </div>
                   <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      title="Manage certification exam"
-                      onClick={() => {
-                        setSelectedCourseForExam(course);
-                        setShowExamForm(true);
-                        setShowCourseForm(false);
-                        setShowLessonForm(false);
-                        setShowQuizForm(false);
-                      }}
-                    >
-                      <Award className="w-3.5 h-3.5 text-amber-400" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => { setEditingCourse(course); setShowCourseForm(true); setShowLessonForm(false); setShowExamForm(false); }}
-                    >
-                      <Edit className="w-3.5 h-3.5" />
-                    </Button>
-                    {canDelete && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => deleteCourse(course.id)}
-                      >
-                        <Trash2 className="w-3.5 h-3.5 text-red-500" />
-                      </Button>
-                    )}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setSelectedCourseForExam(course);
+                              setShowExamForm(true);
+                              setShowCourseForm(false);
+                              setShowLessonForm(false);
+                              setShowQuizForm(false);
+                            }}
+                          >
+                            <Award className="w-3.5 h-3.5 text-amber-400" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Manage certification exam</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => { setEditingCourse(course); setShowCourseForm(true); setShowLessonForm(false); setShowExamForm(false); }}
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Edit course</TooltipContent>
+                      </Tooltip>
+                      {canDelete && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => deleteCourse(course.id)}
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Delete course</TooltipContent>
+                        </Tooltip>
+                      )}
+                    </TooltipProvider>
                   </div>
                 </div>
               </div>
@@ -1559,39 +1544,47 @@ function CoursesTab({ token, currentUser }) {
                         </div>
                       </div>
                       <div className="flex items-center gap-1 shrink-0 mt-1 sm:mt-0">
-                        <Button size="sm" variant="ghost" onClick={() => generateAudio(lesson.id)} title="Generate audio">
-                          <Volume2 className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => generateImage(lesson.id)} title="Generate image">
-                          <Image className="w-4 h-4" />
-                        </Button>
-                        <>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            title="Manage quiz"
-                            onClick={() => {
-                              setSelectedLessonForQuiz(lesson);
-                              setShowQuizForm(true);
-                              setShowLessonForm(false);
-                              setShowCourseForm(false);
-                            }}
-                          >
-                            <HelpCircle className="w-4 h-4 text-primary" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => { setEditingLesson(lesson); setShowLessonForm(true); setShowCourseForm(false); setShowQuizForm(false); }}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setSelectedLessonForQuiz(lesson);
+                                  setShowQuizForm(true);
+                                  setShowLessonForm(false);
+                                  setShowCourseForm(false);
+                                }}
+                              >
+                                <HelpCircle className="w-4 h-4 text-primary" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Manage quiz</TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => { setEditingLesson(lesson); setShowLessonForm(true); setShowCourseForm(false); setShowQuizForm(false); }}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Edit lesson</TooltipContent>
+                          </Tooltip>
                           {canDelete && (
-                            <Button size="sm" variant="ghost" onClick={() => deleteLesson(lesson.id)}>
-                              <Trash2 className="w-4 h-4 text-red-500" />
-                            </Button>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button size="sm" variant="ghost" onClick={() => deleteLesson(lesson.id)}>
+                                  <Trash2 className="w-4 h-4 text-red-500" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Delete lesson</TooltipContent>
+                            </Tooltip>
                           )}
-                        </>
+                        </TooltipProvider>
                       </div>
                     </div>
 
