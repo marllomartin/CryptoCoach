@@ -224,10 +224,10 @@ const ProfilePage = () => {
                   <AchievementCard key={ach.id} achievement={ach} />
                 ))}
                 {hiddenCount > 0 && (
-                  <div className="relative p-4 rounded-xl border bg-gradient-to-br from-emerald-950/40 to-blue-950/40 border-teal-800/30 overflow-hidden flex flex-col items-center justify-center gap-2 min-h-[110px]">
-                    <Eye className="w-6 h-6 text-teal-600" />
-                    <p className="text-sm font-bold text-teal-400">+{hiddenCount} {t('achievements.tiers.hidden')}</p>
-                    <p className="text-xs text-gray-500 text-center leading-snug">{t('profile.hiddenAchievementsHint', { defaultValue: 'Keep playing to unlock secret achievements' })}</p>
+                  <div className="relative p-4 rounded-xl border bg-gradient-to-br from-gray-800/40 to-blue-950/30 border-blue-900/40 overflow-hidden flex flex-col items-center justify-center gap-2 min-h-[110px]">
+                    <Eye className="w-6 h-6 text-blue-400/60" />
+                    <p className="text-sm font-bold text-blue-300/80">+{hiddenCount} {t('achievements.tiers.hidden')}</p>
+                    <p className="text-xs text-gray-500 text-center leading-snug">{t('profile.hiddenAchievementsHint')}</p>
                   </div>
                 )}
                 {achievements.length === 0 && hiddenCount === 0 && (

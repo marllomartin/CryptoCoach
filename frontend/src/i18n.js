@@ -187,7 +187,8 @@ const resources = {
         days: 'days',
         longestStreak: 'Longest Streak',
         achievementsCount: 'Achievements ({{count}}/13)',
-        noAchievements: 'No achievements yet. Complete lessons, quizzes, and trades to earn them!'
+        noAchievements: 'No achievements yet. Complete lessons, quizzes, and trades to earn them!',
+        hiddenAchievementsHint: 'Keep studying to discover secret achievements'
       },
       account: {
         title: 'Account Settings',
@@ -235,7 +236,7 @@ const resources = {
       },
       achievements: {
         unlocked: 'Achievement Unlocked',
-        tiers: { bronze: 'Bronze', silver: 'Silver', gold: 'Gold', prismatic: 'Prismatic' },
+        tiers: { bronze: 'Bronze', silver: 'Silver', gold: 'Gold', prismatic: 'Prismatic', hidden: 'Hidden' },
         first_steps: { name: 'First Steps', description: 'Complete your first lesson' },
         streak_beginner: { name: 'Streak Beginner', description: 'Start a streak for the first time' },
         first_trade: { name: 'First Trade', description: 'Execute your first trade in the Trading Arena' },
@@ -1559,11 +1560,12 @@ const resources = {
         days: 'jours',
         longestStreak: 'Plus longue série',
         achievementsCount: 'Succès ({{count}}/13)',
-        noAchievements: 'Aucun succès pour l\'instant. Complétez des leçons, quiz et trades pour en gagner !'
+        noAchievements: 'Aucun succès pour l\'instant. Complétez des leçons, quiz et trades pour en gagner !',
+        hiddenAchievementsHint: 'Continuez à étudier pour découvrir des succès secrets'
       },
       achievements: {
         unlocked: 'Succès Débloqué',
-        tiers: { bronze: 'Bronze', silver: 'Argent', gold: 'Or', prismatic: 'Prismatique' },
+        tiers: { bronze: 'Bronze', silver: 'Argent', gold: 'Or', prismatic: 'Prismatique', hidden: 'Caché' },
         first_steps: { name: 'Premiers Pas', description: 'Complétez votre première leçon' },
         streak_beginner: { name: 'Débutant en Série', description: 'Démarrez une série pour la première fois' },
         first_trade: { name: 'Premier Trade', description: 'Effectuez votre premier trade dans le Trading Arena' },
@@ -3612,11 +3614,12 @@ const resources = {
         days: 'أيام',
         longestStreak: 'أطول سلسلة',
         achievementsCount: 'الإنجازات ({{count}}/13)',
-        noAchievements: 'لا توجد إنجازات بعد. أكمل الدروس والاختبارات والصفقات لكسبها!'
+        noAchievements: 'لا توجد إنجازات بعد. أكمل الدروس والاختبارات والصفقات لكسبها!',
+        hiddenAchievementsHint: 'استمر في الدراسة لاكتشاف الإنجازات السرية'
       },
       achievements: {
         unlocked: 'إنجاز مفتوح',
-        tiers: { bronze: 'برونزي', silver: 'فضي', gold: 'ذهبي', prismatic: 'منشوري' },
+        tiers: { bronze: 'برونزي', silver: 'فضي', gold: 'ذهبي', prismatic: 'منشوري', hidden: 'مخفي' },
         first_steps: { name: 'الخطوات الأولى', description: 'أكمل درسك الأول' },
         streak_beginner: { name: 'مبتدئ السلسلة', description: 'ابدأ سلسلة لأول مرة' },
         first_trade: { name: 'أول صفقة', description: 'نفّذ صفقتك الأولى في Trading Arena' },
@@ -4303,11 +4306,12 @@ const resources = {
         days: 'dias',
         longestStreak: 'Maior Sequência',
         achievementsCount: 'Conquistas ({{count}}/13)',
-        noAchievements: 'Nenhuma conquista ainda. Complete lições, questionários e trades para ganhar!'
+        noAchievements: 'Nenhuma conquista ainda. Complete lições, questionários e trades para ganhar!',
+        hiddenAchievementsHint: 'Continue estudando para descobrir conquistas secretas'
       },
       achievements: {
         unlocked: 'Conquista Desbloqueada',
-        tiers: { bronze: 'Bronze', silver: 'Prata', gold: 'Ouro', prismatic: 'Prismático' },
+        tiers: { bronze: 'Bronze', silver: 'Prata', gold: 'Ouro', prismatic: 'Prismático', hidden: 'Oculto' },
         first_steps: { name: 'Primeiros Passos', description: 'Conclua sua primeira lição' },
         streak_beginner: { name: 'Iniciante em Sequência', description: 'Inicie uma sequência pela primeira vez' },
         first_trade: { name: 'Primeiro Trade', description: 'Execute seu primeiro trade no Trading Arena' },
