@@ -791,13 +791,31 @@ async def get_avatar_upload_url(current_user: dict = Depends(get_current_user)):
 
 @api_router.post("/auth/avatar")
 async def confirm_avatar(request: AvatarConfirmRequest, current_user: dict = Depends(get_current_user)):
-    """Save the uploaded Cloudflare image ID as the user's avatar URL."""
+    """Save the uploaded Cloudflare image ID as the user's avatar URL, deleting the previous one."""
+    import httpx
     account_hash = os.environ.get("CLOUDFLARE_IMAGES_HASH")
+    account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
+    api_token = os.environ.get("CLOUDFLARE_API_TOKEN")
     if not account_hash:
         raise HTTPException(status_code=503, detail="Image delivery not configured")
     image_id = InputSanitizer.sanitize_string(request.image_id, max_length=200)
     if not image_id:
         raise HTTPException(status_code=400, detail="Invalid image ID")
+
+    # Delete previous avatar from Cloudflare if one exists
+    old_url = current_user.get("avatar_url", "")
+    if old_url and account_id and api_token:
+        try:
+            # URL format: https://imagedelivery.net/{hash}/{image_id}/public
+            old_image_id = old_url.rstrip("/").split("/")[-2]
+            async with httpx.AsyncClient() as client:
+                await client.delete(
+                    f"https://api.cloudflare.com/client/v4/accounts/{account_id}/images/v1/{old_image_id}",
+                    headers={"Authorization": f"Bearer {api_token}"},
+                )
+        except Exception as e:
+            print(f"[avatar] Failed to delete old image: {e}")
+
     avatar_url = f"https://imagedelivery.net/{account_hash}/{image_id}/public"
     await db.users.update_one(
         {"id": current_user["id"]},
