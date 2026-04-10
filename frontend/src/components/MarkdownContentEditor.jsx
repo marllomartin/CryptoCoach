@@ -64,10 +64,10 @@ function HelpModal({ onClose }) {
 
         <ol className="space-y-3 mb-6">
           {[
-            'Click "Upload Image" to upload your file — it is inserted at your cursor automatically.',
-            'To move it, cut the image line (Ctrl+X) and paste it where you want it (Ctrl+V).',
+            'Click "Upload Image" to upload your file.',
+            'Copy the image\'s markdown from the Image Library and paste it wherever you want it in the editor.',
+            'To reposition it, cut the image line (Ctrl+X) and paste it (Ctrl+V) at the desired location.',
             'Use the Preview tab to see exactly how it will look in the lesson.',
-            'To remove it from the lesson body, delete the ![...](url) line. Use the Image Library below to fully delete it from storage.',
           ].map((step, i) => (
             <li key={i} className="flex gap-3 text-sm text-slate-300">
               <span className="shrink-0 w-5 h-5 rounded-full bg-primary/20 text-primary text-xs font-bold flex items-center justify-center mt-0.5">
@@ -77,6 +77,24 @@ function HelpModal({ onClose }) {
             </li>
           ))}
         </ol>
+
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Image Library</p>
+        <div className="bg-gray-800/60 rounded-lg p-3 border border-gray-700/50 mb-6 space-y-2 text-sm text-slate-300">
+          <p>All images uploaded to this lesson are saved in the <span className="text-primary font-medium">Image Library</span>, found below the editor.</p>
+          <p>From there you can:</p>
+          <ul className="space-y-1 ml-2">
+            {[
+              'Hover an image thumbnail and click the copy icon to get its markdown snippet.',
+              'Click the trash icon to permanently delete it from Cloudflare and the database.',
+              'Deleting an image here does not remove it from the lesson body — you must also delete the ![...](url) line from the editor manually.',
+            ].map((item, i) => (
+              <li key={i} className="flex gap-2 text-slate-400 text-xs">
+                <span className="shrink-0 text-primary mt-0.5">•</span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Common patterns</p>
         <div className="space-y-4">
