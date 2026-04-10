@@ -5098,6 +5098,67 @@ async def get_admin_content_image_upload_url(admin: dict = Depends(get_admin_use
     }
 
 
+class SaveContentImageRequest(BaseModel):
+    image_id: str
+    public_url: str
+    filename: str = ""
+
+@api_router.post("/admin/lessons/{lesson_id}/content-images")
+async def save_content_image(
+    lesson_id: str,
+    request: SaveContentImageRequest,
+    admin: dict = Depends(get_admin_user)
+):
+    """Record a content image that was uploaded to Cloudflare for a lesson."""
+    image_id = InputSanitizer.sanitize_string(request.image_id, max_length=200)
+    if not image_id:
+        raise HTTPException(status_code=400, detail="Invalid image ID")
+    from datetime import datetime, timezone
+    record = {
+        "lesson_id": lesson_id,
+        "image_id": image_id,
+        "public_url": request.public_url,
+        "filename": InputSanitizer.sanitize_string(request.filename, max_length=200),
+        "uploaded_at": datetime.now(timezone.utc).isoformat(),
+        "uploaded_by": admin.get("id", ""),
+    }
+    await db.content_images.insert_one(record)
+    return {"ok": True}
+
+
+@api_router.get("/admin/lessons/{lesson_id}/content-images")
+async def list_content_images(lesson_id: str, admin: dict = Depends(get_admin_user)):
+    """List all content images uploaded for a lesson."""
+    images = await db.content_images.find(
+        {"lesson_id": lesson_id}, {"_id": 0}
+    ).sort("uploaded_at", -1).to_list(200)
+    return {"images": images}
+
+
+@api_router.delete("/admin/lessons/{lesson_id}/content-images/{image_id}")
+async def delete_content_image(
+    lesson_id: str,
+    image_id: str,
+    admin: dict = Depends(require_moderator_or_above)
+):
+    """Delete a content image from Cloudflare and remove its record."""
+    import httpx
+    account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
+    api_token = os.environ.get("CLOUDFLARE_API_TOKEN")
+    if not account_id or not api_token:
+        raise HTTPException(status_code=503, detail="Image deletion not configured")
+    async with httpx.AsyncClient() as client:
+        resp = await client.delete(
+            f"https://api.cloudflare.com/client/v4/accounts/{account_id}/images/v1/{image_id}",
+            headers={"Authorization": f"Bearer {api_token}"},
+        )
+    if resp.status_code not in (200, 404):
+        print(f"[delete-image] Cloudflare error {resp.status_code}: {resp.text}")
+        raise HTTPException(status_code=502, detail="Failed to delete image from Cloudflare")
+    await db.content_images.delete_one({"lesson_id": lesson_id, "image_id": image_id})
+    return {"ok": True}
+
+
 @api_router.get("/admin/lessons/{lesson_id}/header-image/upload-url")
 async def get_lesson_header_upload_url(lesson_id: str, admin: dict = Depends(get_admin_user)):
     """Request a Cloudflare Images direct upload URL for a lesson header image."""

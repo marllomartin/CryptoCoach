@@ -687,6 +687,7 @@ function LessonForm({ courseId, initial, onSave, onCancel, saving, token }) {
               value={translations[activeLang]?.content ?? ''}
               onChange={val => updateTrans(activeLang, 'content', val ?? '')}
               token={token}
+              lessonId={initial?.id}
             />
             <div>
               <label className="text-xs text-slate-400 mb-1 block">Learning objectives — one per line</label>
